@@ -12,3 +12,4 @@ dependencies:
   - openpyxl
   - pdfminer
   - tqdm
+  - requests
