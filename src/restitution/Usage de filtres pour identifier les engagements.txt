@@ -1,0 +1,30 @@
+
+
+INPUT: dossier des DPEF préprocessé
+OUTPUT: csv, une ligne par engagement avec format siren x denomination x le score d'engagement permettan de trier les engagements.
+
+- Aller à la maille de la phrase et non du paragraphe
+- Exclure: 
+  - Les questions (se terminent par ?) cf. https://github.com/neuml/cord19q/blob/ff71f39cae149a4c5423f85a63c92f46b6046609/src/python/cord19q/etl/grammar.py#L82
+  - Les fragments de phrases cf. https://github.com/neuml/cord19q/blob/ff71f39cae149a4c5423f85a63c92f46b6046609/src/python/cord19q/etl/grammar.py#L96
+- Faire un scoring basé sur la présence de sous-éléments comme:
+  - présence d'une année supérieure à 2018
+  - présence d'un chiffre qui n'est pas une année ni un numéro de chapitre (de la forme 1.1.7 p.ex.)
+  - présence du signe %
+  - Nbre de match parmi des mots comme "engager", "objectif", "atteindre", etc.
+
+
+Exemple d'engagement clair - différents niveaux d'engagements: 
+TOP:
+- En 2012, VINCI s’est engagé pour la croissance verte, en fixant un objectif de réduction des émissions de GES de 30 % d’ici 2020
++ le paragraphe donne bcp d'info.
+
+
+MEDIUM: 
+- De plus, le Groupe s’est engagé en février 2018 dans la démarche dite Science-Based Targets, démarche à l’initiative du CDP, du United Nations Global Compact, du World Resources Institute et du WWF, et qui vise à ce que les entreprises alignent leurs émissions de gaz à effet de serre sur l’objectif du scénario 2 °C.',
+-  '34 755 m2 SDP est engagé dans le processus de labellisation BiodiverCity® Ready en tant que projet pilote d’élaboration du référentiel. Sur l’exercice, les projets d’Annemasse et de Divonne-les-Bains ont également intégré cette expérimentation, ce qui porte la surface concernée à 239 755 m2.
+
+
+LOW:
+- La Fondation est particulièrement engagée dans la prévention des risques liés à la somnolence et l’inattention au volant.
+- Signataire du Global Compact dès 2003, VINCI s’est engagé à soutenir et promouvoir le respect des droits humains dans sa sphère d’influence et à veiller à ce que les sociétés du Groupe ne se rendent pas complices de violations de ces droits
