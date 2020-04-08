@@ -2,3 +2,5 @@ desktop.ini
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 data/input/Entreprises/INSEE/*
+.idea
+*__pycache*
