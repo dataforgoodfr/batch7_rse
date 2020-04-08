@@ -65,16 +65,12 @@ class Scoring(object):
         """
 
         # Calculate word frequency, total tokens and total documents
-        for _, tokens, tags in documents:
+        for tokens in documents:
             # Total number of times token appears, count all tokens
             self.wordfreq.update(tokens)
 
             # Total number of documents a token is in, count unique tokens
             self.docfreq.update(set(tokens))
-
-            # Get list of unique tags
-            if tags:
-                self.tags.update(tags.split())
 
             # Total document count
             self.total += 1
@@ -95,10 +91,7 @@ class Scoring(object):
         # Average IDF score per token
         self.avgidf = sum(self.idf.values()) / len(self.idf)
 
-        # Filter for tags that appear in at least 1% of the documents
-        self.tags = {tag:number for tag, number in self.tags.items() if number >= self.total * 0.005}
-
-    def weights(self, document):
+    def weights(self, tokens):
         """
         Builds weight vector for each token in the input token.
 
@@ -111,9 +104,6 @@ class Scoring(object):
 
         # Weights array
         weights = []
-
-        # Unpack document
-        _, tokens, _ = document
 
         # Document length
         length = len(tokens)
