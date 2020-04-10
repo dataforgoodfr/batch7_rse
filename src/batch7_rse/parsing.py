@@ -138,23 +138,34 @@ def raw_content_to_paragraphs(device, idx_first_page, wiggle_room = 1):
                  "y_max": x_groups_data[0][1],
                  "paragraph": x_groups_data[0][2]}
             previous_height = p["y_max"] - p["y_min"]
+            previous_y_min = p["y_min"]
             for y_min, y_max, paragraph in x_groups_data[1:]:
                 current_height = y_max - y_min
+                current_y_min = y_min
                 min_height = max(previous_height, current_height)
-                relative_var_in_height = abs(current_height-previous_height)/float(min_height)
-                # or (p["y_min"] - y_max) > min_height*wiggle_room
-                if relative_var_in_height > 0.08:
-                    # break paragraph, start new one
-                    x_groups_data_paragraphs.append(p)
-                    p = {"y_min": y_min,
-                         "y_max": y_max,
-                         "paragraph": paragraph}
-                else:
-                    # paragraph continues
-                    p["y_min"] = y_min
-                    p["paragraph"] = p["paragraph"] + " " + paragraph
 
-                previous_height = current_height
+                relative_var_in_height = (current_height-previous_height)/float(min_height)  # only positive considered.
+                relative_var_in_y_min = abs(current_y_min-previous_y_min)/float(min_height)
+
+                change_in_font_size = (relative_var_in_height > 0.05)
+                different_row = (relative_var_in_y_min > 0.7)
+                large_gap = (relative_var_in_y_min > 1.2)
+                artefact_to_ignore = (len(paragraph)<=2)  # single "P" broke row parsing in auchan dpef
+                if not artefact_to_ignore:
+                    if (change_in_font_size and different_row) or large_gap: # always break
+                        # break paragraph, start new one
+                        # print("break",relative_var_in_height, relative_var_in_y_min, paragraph)
+                        x_groups_data_paragraphs.append(p)
+                        p = {"y_min": y_min,
+                             "y_max": y_max,
+                             "paragraph": paragraph}
+                    else:
+                        # paragraph continues
+                        p["y_min"] = y_min
+                        p["paragraph"] = p["paragraph"] + " " + paragraph
+
+                    previous_height = current_height
+                    previous_y_min = current_y_min
             # add the last paragraph of column
             x_groups_data_paragraphs.append(p)
             # structure the output
@@ -263,7 +274,7 @@ def get_unlabeled_pages(input_file):
     print("\n End for {} [{}] - took {} seconds".format(
         project_denomination,
         input_file.name,
-        t-time())
+        round(t-time()))
     )
     return pages_df
 
@@ -354,7 +365,7 @@ def create_unlabeled_dataset(annotations_filename="../../data/input/Entreprises/
 # TODO: change annotation to the final annotation file !
 # TODO : create a unique, stable ID for all paragraps
 def create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
-                         input_path="../../data/input/DPEFs/",
+                         input_path="../../data/input/DPEFs/Grande Distribution/",
                          output_filename="../../data/processed/DPEFs/dpef_paragraphs.csv"):
     """
     Create structured paragraphs from dpef, using only rse sections.
