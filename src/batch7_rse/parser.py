@@ -394,7 +394,7 @@ def create_labeled_data(annotations_filename="../../data/input/Entreprises/entre
     all_input_files = get_list_of_pdfs_filenames(input_path, only_pdfs=True)
     all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] in dict_annotations.keys()]
     input_data = list(zip(all_input_files, [dict_annotations]*len(all_input_files)))
-    n_cores = mp.cpu_count()-1 or 1
+    n_cores = mp.cpu_count()-2 or 1
     pool = mp.Pool(n_cores) # use all
     print("Multiprocessing with {} cores".format(n_cores))
     annotated_dfs = list(tqdm(pool.imap(get_annotated_pages, input_data), total=len(all_input_files)))
@@ -426,7 +426,7 @@ def create_unlabeled_dataset(annotations_filename="../../data/input/Entreprises/
     all_input_files = all_input_files[-3:]
     # all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] not in dict_annotations.keys()]
 
-    n_cores = mp.cpu_count()-1 or 1  # use all cores except one
+    n_cores = mp.cpu_count()-2 or 1  # use all cores except one
     pool = mp.Pool(n_cores)
     print("Multiprocessing with {} cores".format(n_cores))
     annotated_dfs = list(tqdm(pool.imap(get_unlabeled_pages, all_input_files), total=len(all_input_files)))
@@ -453,7 +453,7 @@ def create_final_dataset(annotations_filename="../../data/input/Entreprises/entr
     all_input_files = get_list_of_pdfs_filenames(input_path, only_pdfs=True)
     all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] in dict_annotations.keys()]
     input_data = list(zip(all_input_files, [dict_annotations]*len(all_input_files))) # TODO change
-    n_cores = mp.cpu_count()-1 or 1
+    n_cores = mp.cpu_count()-2 or 1
     pool = mp.Pool(n_cores) # use all
     print("Multiprocessing with {} cores".format(n_cores))
     paragraphs_df = list(tqdm(pool.imap(get_final_paragraphs, input_data), total=len(all_input_files)))
