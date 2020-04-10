@@ -18,7 +18,7 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextLine
-# from difflib import SequenceMatcher
+from difflib import SequenceMatcher
 
 N_PROCESSES = -1
 
@@ -147,12 +147,13 @@ def raw_content_to_paragraphs(device, idx_first_page, wiggle_room = 1):
                 relative_var_in_height = (current_height-previous_height)/float(min_height)  # only positive considered.
                 relative_var_in_y_min = abs(current_y_min-previous_y_min)/float(min_height)
 
-                change_in_font_size = (relative_var_in_height > 0.05)
+                positive_change_in_font_size = (relative_var_in_height > 0.05)
+                change_in_font_size = abs(relative_var_in_height) > 0.05
                 different_row = (relative_var_in_y_min > 0.7)
                 large_gap = (relative_var_in_y_min > 1.2)
                 artefact_to_ignore = (len(paragraph)<=2)  # single "P" broke row parsing in auchan dpef
                 if not artefact_to_ignore:
-                    if (change_in_font_size and different_row) or large_gap: # always break
+                    if (positive_change_in_font_size and different_row) or large_gap: # always break
                         # break paragraph, start new one
                         # print("break",relative_var_in_height, relative_var_in_y_min, paragraph)
                         x_groups_data_paragraphs.append(p)
@@ -160,6 +161,8 @@ def raw_content_to_paragraphs(device, idx_first_page, wiggle_room = 1):
                              "y_max": y_max,
                              "paragraph": paragraph}
                     else:
+                        if change_in_font_size:  # to separate titles
+                            paragraph = paragraph + ".\n"
                         # paragraph continues
                         p["y_min"] = y_min
                         p["paragraph"] = p["paragraph"] + " " + paragraph
@@ -177,14 +180,14 @@ def raw_content_to_paragraphs(device, idx_first_page, wiggle_room = 1):
                                            "y_max_paragraph": round(p["y_max"]),
                                            "paragraph": p["paragraph"]})
                 paragraph_index += 1
-    df_paragraphs = pd.DataFrame(data=pararaphs_list,
+    df_pages = pd.DataFrame(data=pararaphs_list,
                                   columns=["paragraph_id",
                                            "page_nb",
                                            "paragraph",
                                            "x_group",
                                            "y_min_paragraph",
                                            "y_max_paragraph"])
-    return df_paragraphs
+    return df_pages
 
 def paragraphs_to_pages(df_paragraphs):
     """
@@ -193,11 +196,11 @@ def paragraphs_to_pages(df_paragraphs):
     :return: df with one text by page
     """
     # TODO: be sure that the text is cleaned before using ?
-    df_by_page = df_paragraphs.sort_values(["page_nb", "paragraph_id"])
-    df_by_page = df_by_page.groupby("page_nb")["paragraph"].apply(lambda x: "\n".join(x))
-    df_by_page = df_by_page.reset_index()
-    df_by_page = df_by_page.rename(columns={"paragraph":"page_text"})
-    return df_by_page
+    df_pages = df_paragraphs.sort_values(["page_nb", "paragraph_id"])
+    df_pages = df_pages.groupby("page_nb")["paragraph"].apply(lambda x: "\n".join(x))
+    df_pages = df_pages.reset_index()
+    df_pages = df_pages.rename(columns={"paragraph":"page_text"})
+    return df_pages
 
 
 def pdf_to_pages(input_file):
@@ -208,9 +211,9 @@ def pdf_to_pages(input_file):
     :return: df[[page_nb, page_text]] dataframe
     """
     raw_content, idx_first_page = pdf_to_raw_content(input_file, rse_range=None) # ALWAYS NONE for pages
-    df_paragraphs = raw_content_to_paragraphs(raw_content, idx_first_page)
-    df_by_page = paragraphs_to_pages(df_paragraphs)
-    return df_by_page
+    df_par = raw_content_to_paragraphs(raw_content, idx_first_page)
+    df_pages = paragraphs_to_pages(df_par)
+    return df_pages
 
 
 def pdf_to_paragraphs(input_file, rse_ranges=None):
@@ -224,10 +227,78 @@ def pdf_to_paragraphs(input_file, rse_ranges=None):
     df_paragraphs_list = []
     for rse_range in rse_ranges_list:
         raw_content, idx_first_page = pdf_to_raw_content(input_file, rse_range=rse_range)
-        df_paragraphs = raw_content_to_paragraphs(raw_content, idx_first_page)
-        df_paragraphs_list.append(df_paragraphs)
-    df_paragraphs = pd.concat(df_paragraphs_list, axis=0, ignore_index=True)
-    return df_paragraphs
+        df_par = raw_content_to_paragraphs(raw_content, idx_first_page)
+        df_paragraphs_list.append(df_par)
+    df_par = pd.concat(df_paragraphs_list, axis=0, ignore_index=True)
+    return df_par
+
+
+def compute_string_similarity(a, b):
+    "Compares two strings and returns a similarity ratio between 0 and 1"
+    return SequenceMatcher(None, a, b).ratio()
+
+
+def cut_footer(df_par, p=0.8):
+    """
+    Cut the paragraph with lowest y_min if other paragraphs are similar. Inplace.
+    The similarity is measured with function similar
+    :param df_par: output of pdf_to_paragraphs
+    :param p: low threshold for similarity
+    :return: df_par without the footers
+    """
+
+    footers = []
+    isFooter = True
+
+    while isFooter:
+        y_footer = df_par['y_min_paragraph'].min()
+        if len(df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values) > 1:
+            footers.append(*df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values[:1])
+            for phrase_1 in df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values[1:]:
+                if compute_string_similarity(str(footers[-1]), str(phrase_1)) < p:
+                    footers.pop(-1)
+                    isFooter = False
+                    break
+            df_par = df_par[df_par['y_min_paragraph'] > y_footer]
+        else:
+            isFooter = False
+
+    # print("Denomination:",df_par.project_denomination.unique()[0])
+    # if footers != []:
+    #     print("Footer(s) --->", *footers)
+    # print("Not footer --->", \
+    #       df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values[:1][0][:50], \
+    #       " - Page", *df_par[df_par['y_min_paragraph'] == y_footer]['page_nb'].values[:1])
+    return df_par
+
+
+def cut_header(df_par, p=0.8):
+    """
+    CSame as function cut_footer() but for headers.
+    :param df_par: output of pdf_to_paragraphs
+    :param p: low threshold for similarity
+    :return: df_par without the headers
+    """
+    # try:
+    headers = []
+    isHeader = True
+    while isHeader:
+        y_header = df_par['y_max_paragraph'].max()
+        if len(df_par[df_par['y_max_paragraph'] == y_header]['paragraph'].values) > 1:
+            headers.append(*df_par[df_par['y_max_paragraph'] == y_header]['paragraph'].values[:1])
+            for phrase_1 in df_par[df_par['y_max_paragraph'] == y_header]['paragraph'].values[1:]:
+                if compute_string_similarity(str(headers[-1]), str(phrase_1)) < p:
+                    headers.pop(-1)
+                    isHeader = False
+                    break
+            # print("filtering headers", headers, phrase_1,phrase_1 )
+            # print(df_par.shape)
+            # df_par = df_par[df_par['y_max_paragraph'] < y_header]
+            # print(df_par.shape)
+        else:
+            isHeader = False
+
+    return df_par
 
 
 #### TRANSFORMATIONS
@@ -244,19 +315,19 @@ def get_annotated_pages(input_file_dict_annotations):
         rse_ranges
     )
 
-    annotated_pages_df = pdf_to_pages(input_file, rse_ranges=None) # none so all are taken
-    annotated_pages_df["project_denomination"] = project_denomination
-    annotated_pages_df["rse_label"] = 0
+    df_annot_pages = pdf_to_pages(input_file, rse_ranges=None) # none so all are taken
+    df_annot_pages["project_denomination"] = project_denomination
+    df_annot_pages["rse_label"] = 0
     rse_ranges_list = list(map(eval, rse_ranges.split("|")))
     for rse_ranges in rse_ranges_list:
-        annotated_pages_df.loc[annotated_pages_df["page_nb"].between(rse_ranges[0], rse_ranges[1]), "rse_label"] = 1
+        df_annot_pages.loc[df_annot_pages["page_nb"].between(rse_ranges[0], rse_ranges[1]), "rse_label"] = 1
 
     print("          End for {} [{}] - took {} seconds".format(
         project_denomination,
         input_file.name,
         round(t-time()))
     )
-    return annotated_pages_df
+    return df_annot_pages
 
 
 def get_unlabeled_pages(input_file):
@@ -267,16 +338,16 @@ def get_unlabeled_pages(input_file):
         project_denomination,
         input_file.name)
     )
-    pages_df = pdf_to_pages(input_file, rse_ranges=None)
-    pages_df["project_denomination"] = project_denomination
-    pages_df["rse_label"] = np.nan
+    df_pages = pdf_to_pages(input_file, rse_ranges=None)
+    df_pages["project_denomination"] = project_denomination
+    df_pages["rse_label"] = np.nan
 
     print("\n End for {} [{}] - took {} seconds".format(
         project_denomination,
         input_file.name,
         round(t-time()))
     )
-    return pages_df
+    return df_pages
 
 
 def get_final_paragraphs(input_file_dict_annotations):
@@ -293,15 +364,20 @@ def get_final_paragraphs(input_file_dict_annotations):
         input_file.name)
     )
     rse_ranges = dict_annotations[project_denomination]["rse_ranges"]
-    paragraphs_df = pdf_to_paragraphs(input_file, rse_ranges=rse_ranges)
-    paragraphs_df.insert(0, "project_denomination", project_denomination)
+    df_par = pdf_to_paragraphs(input_file, rse_ranges=rse_ranges)
+    df_par.insert(0, "project_denomination", project_denomination)
+
+    df_par = cut_footer(df_par)
+    df_par = cut_header(df_par)
+    # cheap alternative ?
+    # df_par = df_par.drop_duplicates(subset = ["paragraph"]) # not exact matching with page numbers....
 
     print("          End for {} [{}] - took {} seconds".format(
         project_denomination,
         input_file.name,
         t-time())
     )
-    return paragraphs_df
+    return df_par
 
 
 def create_labeled_data(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
@@ -365,7 +441,7 @@ def create_unlabeled_dataset(annotations_filename="../../data/input/Entreprises/
 # TODO: change annotation to the final annotation file !
 # TODO : create a unique, stable ID for all paragraps
 def create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
-                         input_path="../../data/input/DPEFs/Grande Distribution/",
+                         input_path="../../data/input/DPEFs/",
                          output_filename="../../data/processed/DPEFs/dpef_paragraphs.csv"):
     """
     Create structured paragraphs from dpef, using only rse sections.
