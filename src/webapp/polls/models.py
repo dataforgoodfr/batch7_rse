@@ -8,7 +8,7 @@ class Company(models.Model):
     class SectorActivity(models.TextChoices):
         TERTIAIRE = 'Tertiaire', _('Tertiaire')
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     pdf_name = models.CharField(max_length=20)
     sector = models.CharField(
         max_length=50,
@@ -16,6 +16,9 @@ class Company(models.Model):
         # default=SectorActivity.TERTIAIRE
     )
     introduction = models.TextField()
+
+    def __str__(self):
+        return self.name
 
 
 class File(models.Model):
@@ -27,14 +30,21 @@ class File(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
-    file = models.FileField()
+    file_object = models.FileField(unique=True)
 
-    year = models.DateField(default=date.today)
+    date = models.DateField(default=date.today)
     type = models.CharField(
         max_length=4,
         choices=FileType.choices,
         # default=FileType.DPEF
     )
+
+    def __str__(self):
+        return self.file_object.name  # file path
+
+    @property
+    def year(self):
+        return self.date.year
 
 
 class Sentence(models.Model):
@@ -43,3 +53,6 @@ class Sentence(models.Model):
     sentence = models.TextField()
     # ...
     # put metadata fields here !
+
+    def __str__(self):
+        return self.sentence
