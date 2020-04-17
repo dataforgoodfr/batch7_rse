@@ -1,0 +1,19 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>My test page</title>
+  </head>
+  <body>
+    {% if company_list %}
+        <ul>
+        {% for company in company_list %}
+            <li><a href="/polls/company/{{ company.id }}/">{{ company.name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No polls are available.</p>
+    {% endif %}
+  </body>
+</html>
