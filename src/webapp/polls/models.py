@@ -3,18 +3,26 @@ from django.db import models
 from datetime import date
 
 
-class Company(models.Model):
+class ActivitySector(models.Model):
 
-    class SectorActivity(models.TextChoices):
-        TERTIAIRE = 'Tertiaire', _('Tertiaire')
+    # class EnumerationSectorActivity(models.TextChoices):
+    #     TERTIAIRE = 'Tertiaire', _('Tertiaire')
+
+    name = models.CharField(
+        max_length=50,
+        # choices=EnumerationSectorActivity.choices,
+        # default=SectorActivity.TERTIAIRE
+    )
+
+    def __str__(self):
+        return self.name
+
+
+class Company(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
     pdf_name = models.CharField(max_length=20)
-    sector = models.CharField(
-        max_length=50,
-        choices=SectorActivity.choices,
-        # default=SectorActivity.TERTIAIRE
-    )
+    sectors = models.ManyToManyField(ActivitySector)
     introduction = models.TextField()
 
     def __str__(self):
