@@ -2,8 +2,10 @@ from .models import Company, File, Sentence
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
+from django.views.generic.edit import FormView
 from django.urls import reverse
 from django.views import generic
+from .forms import ImportRSEForm
 
 
 class IndexView(generic.ListView):
@@ -12,6 +14,18 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         return Company.objects.all()
+
+
+class ImportRSEView(FormView):
+    template_name = 'polls/company_forms.html'
+    form_class = ImportRSEForm
+    success_url = 'polls:importRSE'
+
+    def form_valid(self, form):
+        # This method is called when valid form data has been POSTed.
+        # It should return an HttpResponse.
+        # form.send_email()
+        return super().form_valid(form)
 
 
 def companies(request):

@@ -10,6 +10,7 @@ urlpatterns = [
     path('company/', views.companies, name='companies'),
     # ex: /polls/company/5/
     path('company/<int:pk>/', views.CompanyView.as_view(), name='company'),
-    path('company/<int:company_id>/set/', views.set_file, name='set_file')
+    path('company/<int:company_id>/set/', views.set_file, name='set_file'),
+    path('importRSE/', views.ImportRSEView.as_view(), name='importRSE'),
 ]
 

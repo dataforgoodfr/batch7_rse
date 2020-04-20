@@ -22,7 +22,7 @@ class ActivitySector(models.Model):
 class Company(models.Model):
 
     name = models.CharField(max_length=50, unique=True)
-    pdf_name = models.CharField(max_length=20)
+    # pdf_name = models.CharField(max_length=20)
     sectors = models.ManyToManyField(ActivitySector)
     introduction = models.TextField()
 
@@ -55,6 +55,7 @@ class File(models.Model):
         return self.date.year
 
     def clean(self):
+        super().clean()
         if self.start_rse_page > self.end_rse_page:
             raise ValidationError(_("start page must be before end page !"))
 
@@ -79,6 +80,7 @@ class Sentence(models.Model):
             self.is_RSE_sentence = False
 
     def clean(self):
+        super().clean()
         if self.startfilepage > self.endfilepage:
             raise ValidationError(_("start page must be before end page !"))
         self._set_rse()

@@ -1,15 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ company.name }}</h1>
-
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-<form action="{% url 'polls:set_file' company.id %}" method="post">
+<form action="polls:importRSE" method="post">
     {% csrf_token %}
-    {% for file in company.file_set.all %}
-        <input type="radio" name="file" id="file{{ forloop.counter }}" value="{{ file.id }}">
-        <label for="file{{ forloop.counter }}">{{ file.type }}</label><br>
-    {% endfor %}
-    <input type="submit" value="Vote">
+    {{ form }}
+    <input type="submit" value="Submit">
 </form>
 {% endblock content %}
