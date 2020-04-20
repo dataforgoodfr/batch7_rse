@@ -1,11 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>company</title>
-</head>
-<body>
-{{ company.id }} | {{ company.name }} | {{ company.pdf_name }} | {{ company.sector }} | {{ company.introduction }}
+{% extends "base.html" %}
+{% block content %}
 
-</body>
-</html>
+    {{ company.id }} | {{ company.name }} | {{ company.pdf_name }} | {{ company.sector }} | {{ company.introduction }}
+
+{% endblock content %}

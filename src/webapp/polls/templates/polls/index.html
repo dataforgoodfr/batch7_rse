@@ -1,11 +1,6 @@
 
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>My test page</title>
-  </head>
-  <body>
+{% extends "base.html" %}
+{% block content %}
     {% if company_list %}
         <ul>
         {% for company in company_list %}
@@ -15,5 +10,4 @@
     {% else %}
         <p>No polls are available.</p>
     {% endif %}
-  </body>
-</html>
+{% endblock content %}
