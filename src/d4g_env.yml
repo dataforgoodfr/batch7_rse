@@ -13,3 +13,4 @@ dependencies:
   - pdfminer
   - tqdm
   - requests
+  - Django
