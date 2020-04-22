@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic.edit import FormView
 from django.urls import reverse
 from django.views import generic
-from .forms import ImportRSEForm
+from .forms import ImportRSEForm, Sectors
 
 
 class IndexView(generic.ListView):
@@ -15,6 +15,10 @@ class IndexView(generic.ListView):
     def get_queryset(self):
         return Company.objects.all()
 
+
+# class CompanySectorView(FormView):
+#     template_name = 'polls/company_sector_form.html'
+#     form_class =
 
 class ImportRSEView(FormView):
     template_name = 'polls/company_forms.html'
