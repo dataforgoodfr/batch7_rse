@@ -239,63 +239,98 @@ def compute_string_similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
 
-def cut_footer(df_par, p=0.8):
-    """
-    Cut the paragraph with lowest y_min if other paragraphs are similar. Inplace.
-    The similarity is measured with function similar
-    :param df_par: output of pdf_to_paragraphs
-    :param p: low threshold for similarity
-    :return: df_par without the footers
-    """
-
-    footers = []
-    isFooter = True
-
-    while isFooter:
-        y_footer = df_par['y_min_paragraph'].min()
-        if len(df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values) > 1:
-            footers.append(*df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values[:1])
-            for phrase_1 in df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values[1:]:
-                if compute_string_similarity(str(footers[-1]), str(phrase_1)) < p:
-                    footers.pop(-1)
-                    isFooter = False
-                    break
-            df_par = df_par[df_par['y_min_paragraph'] > y_footer]
-        else:
-            isFooter = False
-
-    # print("Denomination:",df_par.project_denomination.unique()[0])
-    # if footers != []:
-    #     print("Footer(s) --->", *footers)
-    # print("Not footer --->", \
-    #       df_par[df_par['y_min_paragraph'] == y_footer]['paragraph'].values[:1][0][:50], \
-    #       " - Page", *df_par[df_par['y_min_paragraph'] == y_footer]['page_nb'].values[:1])
+def cut_footer(df_par, p=0.8, verbose=False):
+    "Cut the paragraph with lowest y_min if other paragraphs are similar"
+    "The similarity is measured with function compute_string_similarity"
+    len_first=len(df_par)
+    footers=[]
+    deno = df_par['project_denomination'].values[0]
+    c = 0
+    while True:
+        c += 1
+        len_start=len(df_par)
+        y_bottom = df_par['y_min_paragraph'].min()
+        y_top = df_par[df_par['y_min_paragraph']==y_bottom]['y_max_paragraph'].min()
+        DSmin = df_par[(df_par['y_max_paragraph']==y_top)&(df_par['y_min_paragraph']==y_bottom)].copy()
+        if len(DSmin)==1 and c==1:
+            if verbose==True:
+                print('\n',deno)
+            return df_par
+        if len(DSmin)==1:
+            break
+        for candidate in DSmin['paragraph'].values:
+            DSmin['is_foot']=DSmin['paragraph'].apply(lambda x: compute_string_similarity(str(x),candidate)>p)
+            count = len((DSmin[DSmin['is_foot']==True]))
+            if  count>1:
+                footers.append((candidate, count))
+                index_foot = DSmin[DSmin['is_foot']==True].index
+                break
+            else:
+                DSmin = DSmin.drop(DSmin.index[0])
+        if len(footers)==0:
+            if verbose==True:
+                print('\n',deno)
+            return df_par
+        len_end = (len(df_par[~df_par.index.isin(index_foot)]))
+        df_par = df_par[~df_par.index.isin(index_foot)]
+        if len_start==len_end:
+            break
+    #Below part is for human check that the function works properly
+    if verbose==True:
+        len_last = len(df_par)
+        S = sum([i for _,i in footers])
+        print('\n',deno)
+        print(f"Removed {len_first-len_last} lines. {len_first-len_last==S}")
+        if footers!=[]:
+            L = [foot+" x "+ str(count) for foot, count in footers]
+            print("Footers(s) --->\n",'\n '.join(L))
     return df_par
 
 
-def cut_header(df_par, p=0.8):
-    """
-    CSame as function cut_footer() but for headers.
-    :param df_par: output of pdf_to_paragraphs
-    :param p: low threshold for similarity
-    :return: df_par without the headers
-    """
-    # try:
-    headers = []
-    isHeader = True
-    while isHeader:
-        y_header = df_par['y_max_paragraph'].max()
-        if len(df_par[df_par['y_max_paragraph'] == y_header]['paragraph'].values) > 1:
-            headers.append(*df_par[df_par['y_max_paragraph'] == y_header]['paragraph'].values[:1])
-            for phrase_1 in df_par[df_par['y_max_paragraph'] == y_header]['paragraph'].values[1:]:
-                if compute_string_similarity(str(headers[-1]), str(phrase_1)) < p:
-                    headers.pop(-1)
-                    isHeader = False
-                    break
-            df_par = df_par[df_par['y_max_paragraph'] < y_header]
-        else:
-            isHeader = False
-
+def cut_header(df_par, p=0.8, verbose=False):
+    "Same as function cut_footer() but for headers"
+    len_first=len(df_par)
+    headers=[]
+    deno = df_par['project_denomination'].values[0]
+    c=0
+    while True:
+        c +=1
+        len_start=len(df_par)
+        y_top = df_par['y_max_paragraph'].max()
+        y_bottom = df_par[df_par['y_max_paragraph']==y_top]['y_min_paragraph'].max()
+        DSmax = df_par[(df_par['y_max_paragraph']==y_top)&(df_par['y_min_paragraph']==y_bottom)].copy()
+        if len(DSmax)==1 and c==1:
+            if verbose==True:
+                print('\n',deno)
+            return df_par
+        if len(DSmax)==1:
+            break
+        for candidate in DSmax['paragraph'].values:
+            DSmax['is_head']=DSmax['paragraph'].apply(lambda x: compute_string_similarity(str(x),candidate)>p)
+            count = len((DSmax[DSmax['is_head']==True]))
+            if  count>1:
+                headers.append((candidate, count))
+                index_head = DSmax[DSmax['is_head']==True].index
+                break
+            else:
+                DSmax = DSmax.drop(DSmax.index[0])
+        if len(headers)==0:
+            if verbose==True:
+                print('\n',deno)
+            return df_par
+        len_end = (len(df_par[~df_par.index.isin(index_head)]))
+        df_par = df_par[~df_par.index.isin(index_head)]
+        if len_start==len_end:
+            break
+    #Below part is for human check that the function works properly
+    if verbose==True:
+        len_last = len(df_par)
+        S = sum([i for _,i in headers])
+        print('\n',deno)
+        print(f"Removed {len_first-len_last} lines. {len_first-len_last==S}")
+        if headers!=[]:
+            L = [head+" x "+ str(count) for head, count in headers]
+            print("Header(s) --->\n",'\n '.join(L))
     return df_par
 
 
@@ -364,9 +399,9 @@ def get_final_paragraphs(input_file_dict_annotations):
     rse_ranges = dict_annotations[project_denomination]["rse_ranges"]
     df_par = pdf_to_paragraphs(input_file, rse_ranges=rse_ranges)
     df_par.insert(0, "project_denomination", project_denomination)
-
-    df_par = cut_footer(df_par)
-    df_par = cut_header(df_par)
+    df_par = df_par.drop_duplicates(['paragraph'])
+    df_par = cut_footer(df_par, verbose=True)
+    df_par = cut_header(df_par, verbose=True)
 
     print("          End for {} [{}] - took {} seconds".format(
         project_denomination,
@@ -488,7 +523,7 @@ if __name__ == "__main__":
 
     elif args.task == "final":
 
-        # use function with similar structure as make_train, but keep paragraphs this time.
+        # use function with compute_string_similarity structure as make_train, but keep paragraphs this time.
         # Split into sentences can be separated in another script
         print("Create final data structured as paragraphs from rse sections in DPEF.")
         create_final_dataset()
