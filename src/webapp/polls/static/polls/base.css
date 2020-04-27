@@ -1,0 +1,31 @@
+.container {
+    width: 100%;
+}
+
+.row {
+    width: 100%;
+}
+
+#sidebar {
+    background-color: #e7a61a;
+    border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+    border: 0px solid #000000;
+}
+
+#sidebar ul {
+    list-style: none;
+}
+
+#sidebar li {
+    /*border-radius: 35px 35px 35px 35px;*/
+    /*-moz-border-radius: 35px 35px 35px 35px;*/
+    /*-webkit-border-radius: 35px 35px 35px 35px;*/
+    /*border: 1px dashed #0a010a;*/
+}
+
+
+#content {
+    /*width: 80%*/
+}
