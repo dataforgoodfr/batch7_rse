@@ -7,9 +7,9 @@ import multiprocessing as mp
 
 # processing imports
 import pandas as pd
-import numpy as np
 from tqdm import tqdm
 from collections import OrderedDict
+from difflib import SequenceMatcher
 
 # pdfminer imports
 from pdfminer.pdfdocument import PDFDocument
@@ -18,19 +18,16 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.pdfpage import PDFPage
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextLine
-from difflib import SequenceMatcher
-
-N_PROCESSES = -1
 
 
-def get_list_of_pdfs_filenames(dirName, only_pdfs = True):
-    '''
+def get_list_of_pdfs_filenames(dirName):
+    """
         For the given path, get the List of all files in the directory tree
-    '''
+    """
     paths = []
     for path, subdirs, files in os.walk(dirName):
         for name in files:
-            if (name.lower().endswith(".pdf")) or not only_pdfs:
+            if (name.lower().endswith(".pdf")):
                 paths.append((Path(path+"/"+name)))
     return paths
 
@@ -103,7 +100,7 @@ def pdf_to_raw_content(input_file, rse_range=None):
     return device, first_page_nb
 
 
-def raw_content_to_paragraphs(device, idx_first_page, wiggle_room = 1):
+def raw_content_to_paragraphs(device, idx_first_page):
     """
     From parsed data with positional information, aggregate into paragraphs using simple rationale
     :param device:
@@ -189,32 +186,6 @@ def raw_content_to_paragraphs(device, idx_first_page, wiggle_room = 1):
                                            "y_min_paragraph",
                                            "y_max_paragraph"])
     return df_par
-
-def paragraphs_to_pages(df_paragraphs):
-    """
-
-    :param df_paragraphs: df with paragraphs sorted by paragraph id
-    :return: df with one text by page
-    """
-    # TODO: be sure that the text is cleaned before using ?
-    df_pages = df_paragraphs.sort_values(["page_nb", "paragraph_id"])
-    df_pages = df_pages.groupby("page_nb")["paragraph"].apply(lambda x: "\n".join(x))
-    df_pages = df_pages.reset_index()
-    df_pages = df_pages.rename(columns={"paragraph":"page_text"})
-    return df_pages
-
-
-def pdf_to_pages(input_file):
-    """
-    From filename, parse pdf and output structured text. possible filter on rse_ranges
-    :param input_file: filename ending  with ".pdf" or ".PDF".
-    :param rse_ranges: "(start, end)|(start, end)"
-    :return: df[[page_nb, page_text]] dataframe
-    """
-    raw_content, idx_first_page = pdf_to_raw_content(input_file, rse_range=None) # ALWAYS NONE for pages
-    df_par = raw_content_to_paragraphs(raw_content, idx_first_page)
-    df_pages = paragraphs_to_pages(df_par)
-    return df_pages
 
 
 def pdf_to_paragraphs(input_file, rse_ranges=None):
@@ -334,54 +305,7 @@ def cut_header(df_par, p=0.8, verbose=False):
     return df_par
 
 
-#### TRANSFORMATIONS
-
-
-def get_annotated_pages(input_file_dict_annotations):
-    input_file, dict_annotations = input_file_dict_annotations
-    project_denomination = input_file.name.split("_")[0]
-    rse_ranges = dict_annotations[project_denomination]["rse_ranges"]
-    t = time()
-    print("Start for {} [{}] - RSE pages are {}".format(
-        project_denomination,
-        input_file.name),
-        rse_ranges
-    )
-
-    df_annot_pages = pdf_to_pages(input_file, rse_ranges=None) # none so all are taken
-    df_annot_pages["project_denomination"] = project_denomination
-    df_annot_pages["rse_label"] = 0
-    rse_ranges_list = list(map(eval, rse_ranges.split("|")))
-    for rse_ranges in rse_ranges_list:
-        df_annot_pages.loc[df_annot_pages["page_nb"].between(rse_ranges[0], rse_ranges[1]), "rse_label"] = 1
-
-    print("          End for {} [{}] - took {} seconds".format(
-        project_denomination,
-        input_file.name,
-        round(t-time()))
-    )
-    return df_annot_pages
-
-
-def get_unlabeled_pages(input_file):
-
-    project_denomination = input_file.name.split("_")[0]
-    t = time()
-    print("\n Start for {} [{}]".format(
-        project_denomination,
-        input_file.name)
-    )
-    df_pages = pdf_to_pages(input_file, rse_ranges=None)
-    df_pages["project_denomination"] = project_denomination
-    df_pages["rse_label"] = np.nan
-
-    print("\n End for {} [{}] - took {} seconds".format(
-        project_denomination,
-        input_file.name,
-        round(t-time()))
-    )
-    return df_pages
-
+# TRANSFORMATIONS
 
 def get_final_paragraphs(input_file_dict_annotations):
     """
@@ -411,64 +335,6 @@ def get_final_paragraphs(input_file_dict_annotations):
     return df_par
 
 
-def create_labeled_data(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
-                        input_path="../../data/input/DPEFs/",
-                        output_filename="../../data/processed/DPEFs/dpef_rse_pages_train.csv"):
-    """
-    From a list of rse ranges of pages and the repo of all dpef, create a training dataset with all labelled pages.
-    :param annotations_filename:
-    :param input_path:
-    :param output_filename:
-    :return:
-    """
-    dict_annotations = pd.read_csv(annotations_filename, sep=";").set_index("project_denomination").T.to_dict()
-    all_input_files = get_list_of_pdfs_filenames(input_path, only_pdfs=True)
-    all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] in dict_annotations.keys()]
-    input_data = list(zip(all_input_files, [dict_annotations]*len(all_input_files)))
-    n_cores = mp.cpu_count()-2 or 1
-    pool = mp.Pool(n_cores) # use all
-    print("Multiprocessing with {} cores".format(n_cores))
-    annotated_dfs = list(tqdm(pool.imap(get_annotated_pages, input_data), total=len(all_input_files)))
-    # TO DEBUG USE:
-    # annotated_dfs = [get_annotated_df(input_data[0])]
-
-    # concat
-    annotated_dfs = pd.concat(annotated_dfs, axis=0, ignore_index=True)
-    annotated_dfs = annotated_dfs[["project_denomination", "page_nb", "page_text", "rse_label"]]
-    annotated_dfs.to_csv(output_filename, sep=";", index=False)
-    return annotated_dfs
-
-
-def create_unlabeled_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
-                            input_path="../../data/input/DPEFs/",
-                            output_filename="../../data/processed/DPEFs/dpef_unlabeld_pages.csv"):
-    """
-    From a list of rse ranges of pages and the repo of all dpef, create a training dataset with all labelled pages.
-    :param annotations_filename:
-    :param input_path:
-    :param output_filename:
-    :return:
-    """
-    dict_annotations = pd.read_csv(annotations_filename, sep=";").set_index("project_denomination").T.to_dict()
-    all_input_files = get_list_of_pdfs_filenames(input_path, only_pdfs=True)
-    # here the "not" is key to get unlabeled elements only
-
-    # TODO: uncomment when more data available
-    all_input_files = all_input_files[-3:]
-    # all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] not in dict_annotations.keys()]
-
-    n_cores = mp.cpu_count()-2 or 1  # use all cores except one
-    pool = mp.Pool(n_cores)
-    print("Multiprocessing with {} cores".format(n_cores))
-    annotated_dfs = list(tqdm(pool.imap(get_unlabeled_pages, all_input_files), total=len(all_input_files)))
-
-    # concat
-    annotated_dfs = pd.concat(annotated_dfs, axis=0, ignore_index=True)
-    annotated_dfs = annotated_dfs[["project_denomination", "page_nb", "page_text", "rse_label"]]
-    annotated_dfs.to_csv(output_filename, sep=";", index=False)
-    return annotated_dfs
-
-
 # TODO: change annotation to the final annotation file !
 # TODO : create a unique, stable ID for all paragraphs
 def create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
@@ -481,7 +347,7 @@ def create_final_dataset(annotations_filename="../../data/input/Entreprises/entr
     :param output_filename: path to output csv
     """
     dict_annotations = pd.read_csv(annotations_filename, sep=";").set_index("project_denomination").T.to_dict()
-    all_input_files = get_list_of_pdfs_filenames(input_path, only_pdfs=True)
+    all_input_files = get_list_of_pdfs_filenames(input_path)
     all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] in dict_annotations.keys()]
     input_data = list(zip(all_input_files, [dict_annotations]*len(all_input_files)))  # TODO change (?)
     n_cores = mp.cpu_count()-1 or 1   # use all except one if more than one available
@@ -501,30 +367,18 @@ if __name__ == "__main__":
     # execute only if run as a script
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--task',
-                        default="train",
-                        choices=["train","unlabeled","final"],
-                        help='Create labeled pages, parse all unlabeled pages, or do final paragraph/sentence parsing')
+    parser.add_argument('--mode',
+                        default="final",
+                        choices=["final", "debug"],
+                        help="Wether to parse all dpefs only a subset.")
 
     args = parser.parse_args()
-    if args.task == "train":
-
-        # a conf file could be read, else use default filenames
-        # Took 11 minutes.
-        print("Create training data for recognizing rse pages in DPEF.")
-        create_labeled_data()
-        print("Over")
-
-    elif args.task == "unlabeled":
-
-        print("Create unlabeled data for recognizing rse pages in DPEF.")
-        create_unlabeled_dataset()
-        print("Over")
-
-    elif args.task == "final":
-
-        # use function with compute_string_similarity structure as make_train, but keep paragraphs this time.
-        # Split into sentences can be separated in another script
+    print(args.echo)
+    if args.mode == "final":
         print("Create final data structured as paragraphs from rse sections in DPEF.")
         create_final_dataset()
-        print("Over")
+    elif args.mode == "debug":
+        create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
+                         input_path="../../data/input/DPEFs/Energéticien/",
+                         output_filename="../../data/processed/DPEFs/dpef_paragraphs_debug.csv")
+    print("Over")
