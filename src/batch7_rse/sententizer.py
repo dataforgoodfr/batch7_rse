@@ -40,17 +40,28 @@ def load_nlp_sententizer_object():
     return nlp
 
 
+def sententize_df(df):
+    nlp = load_nlp_sententizer_object()
+    df["paragraph_sentences"] = df["paragraph"].apply(
+        lambda x: [sent.text for sent in nlp(x).sents if sent._.nb_words > MIN_NB_OF_WORDS]
+    ).values
+    df = df[df["paragraph_sentences"].apply(lambda x: len(x) > 0)]  # keep if there was >0 valid sentences
+    return df
+
 # TODO: maybe use this in pdf_parser as well ?
-def parallelize_dataframe(df, func):
+def parallelize_dataframe_apply(df, func):
     n_cores = mp.cpu_count()-1 or 1   # use all except one if more than one available
     df_split = np.array_split(df, n_cores)
+    print("Parallel sententization with {} cores".format(n_cores))
     pool = mp.Pool(n_cores)
     df = pd.concat(pool.map(func, df_split))
     pool.close()
     pool.join()
     return df
 
+
 # TODO: optimize with parallelism or direct writing to sql database
+# TODO: parallelize the index as well ?
 # Takes > 20 sec for 4 (large) dpefs (Energéticien) so not really scalable...
 def run_sententizer(input_filename="../../data/processed/DPEFs/dpef_paragraphs.csv",
                     output_filename="../../data/processed/DPEFs/dpef_paragraphs_sentences.csv"):
@@ -60,16 +71,12 @@ def run_sententizer(input_filename="../../data/processed/DPEFs/dpef_paragraphs.c
     :param output_filename: relative path to output sentence level csv (; separaed)
     :return:
     """
+    print("Reading paragraph level data.")
     df = pd.read_csv(input_filename, sep=";")
     df = df[df.paragraph.notna()] # sanity check
-
-    nlp = load_nlp_sententizer_object()
-    df["paragraph_sentences"] = df["paragraph"].apply(
-        lambda x: [sent.text for sent in nlp(x).sents if sent._.nb_words > MIN_NB_OF_WORDS]
-    ).values
-    df = df[df["paragraph_sentences"].apply(lambda x: len(x) > 0)] # keep if there was >0 valid sentences
-
+    df = parallelize_dataframe_apply(df, sententize_df)
     # convert to 1 row / sentence format
+    print("Get sentence level structure")
     df = (df
            .set_index(df.columns[:-1].values.tolist())['paragraph_sentences']  # all except last colname as index
            .apply(pd.Series)
