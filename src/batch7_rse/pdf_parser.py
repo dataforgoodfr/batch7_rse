@@ -19,6 +19,7 @@ from pdfminer.pdfpage import PDFPage
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextLine
 
+import sententizer
 
 def get_list_of_pdfs_filenames(dirName):
     """
@@ -305,7 +306,7 @@ def cut_header(df_par, p=0.8, verbose=False):
     return df_par
 
 
-# TRANSFORMATIONS
+# TRANSFORMATIONS PDF to TEXT
 
 def get_final_paragraphs(input_file_dict_annotations):
     """
@@ -335,8 +336,6 @@ def get_final_paragraphs(input_file_dict_annotations):
     return df_par
 
 
-# TODO: change annotation to the final annotation file !
-# TODO : create a unique, stable ID for all paragraphs
 def create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
                          input_path="../../data/input/DPEFs/",
                          output_filename="../../data/processed/DPEFs/dpef_paragraphs.csv"):
@@ -371,14 +370,32 @@ if __name__ == "__main__":
                         default="final",
                         choices=["final", "debug"],
                         help="Wether to parse all dpefs only a subset.")
-
+    parser.add_argument("--task",
+                        default="both",
+                        choices=["parser", "sententizer","both"],
+                        help="Whether to parse pdfs, sententize the paragraphs, or do both.")
     args = parser.parse_args()
-    print(args.echo)
+
+    print(args)
     if args.mode == "final":
-        print("Create final data structured as paragraphs from rse sections in DPEF.")
-        create_final_dataset()
+        if args.task in ["parser", "both"]:
+            print("Parse paragraph level text from rse sections in DPEF.")
+            create_final_dataset()
+            print("Over")
+        if args.task in ["sententizer", "both"]:
+            print("Sententize sentences from paragraphs of rse sections in DPEF.")
+            sententizer.run_sententizer()
+            print("Over")
+
     elif args.mode == "debug":
-        create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
-                         input_path="../../data/input/DPEFs/Energéticien/",
-                         output_filename="../../data/processed/DPEFs/dpef_paragraphs_debug.csv")
-    print("Over")
+        if args.task in ["parser", "both"]:
+            print("Parse paragraph level text from rse sections in DPEF.")
+            create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
+                                 input_path="../../data/input/DPEFs/Energéticien/",
+                                 output_filename="../../data/processed/DPEFs/dpef_paragraphs_debug.csv")
+            print("Over")
+        if args.task in ["sententizer", "both"]:
+            print("Sententize sentences from paragraphs of rse sections in DPEF.")
+            sententizer.run_sententizer(input_filename="../../data/processed/DPEFs/dpef_paragraphs_debug.csv",
+                                        output_filename="../../data/processed/DPEFs/dpef_paragraphs_sentences_debug.csv")
+            print("Over")
