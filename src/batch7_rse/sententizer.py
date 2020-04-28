@@ -2,7 +2,8 @@ import spacy
 from spacy.tokens import Span
 from spacy.cli.download import download
 import pandas as pd
-
+import numpy as np
+import multiprocessing as mp
 MIN_NB_OF_WORDS = 3
 
 
@@ -37,6 +38,17 @@ def load_nlp_sententizer_object():
     nlp.add_pipe(custom_sentence_boundaries, before = "parser")  # add exception to sententizer
     nlp.add_pipe(nlp.create_pipe('sentencizer'))  # to add default sentencizer, AFTER custom rule
     return nlp
+
+
+# TODO: maybe use this in pdf_parser as well ?
+def parallelize_dataframe(df, func):
+    n_cores = mp.cpu_count()-1 or 1   # use all except one if more than one available
+    df_split = np.array_split(df, n_cores)
+    pool = mp.Pool(n_cores)
+    df = pd.concat(pool.map(func, df_split))
+    pool.close()
+    pool.join()
+    return df
 
 # TODO: optimize with parallelism or direct writing to sql database
 # Takes > 20 sec for 4 (large) dpefs (Energéticien) so not really scalable...
