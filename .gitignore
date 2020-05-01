@@ -1,9 +1,10 @@
 desktop.ini
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
-data/input/Entreprises/INSEE/*
+*src/webapp/data/input/Entreprises/INSEE/*
 .idea
 *__pycache*
 *debug*.ipynb
 *_debug.csv
-*data/model/*
+*model_debug/*
+src/webapp/data/model/*
