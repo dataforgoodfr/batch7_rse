@@ -12,6 +12,7 @@ SCORING_METHOD = "bm25"  # other options are: "sif", "tfidf"
 
 
 # TODO: use a conf file to have unique file paths
+# TODO: add kwargs when missing ; currently some links are missing everytwhere.
 def initialize_scorer(input_file="../../data/processed/DPEFs/dpef_paragraphs_sentences.csv",
                       pickle_file="../../data/model/vectorizer_component/words_scorer.pckl"):
     # load data
