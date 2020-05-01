@@ -259,7 +259,7 @@ class VectorizerComponent(object):
 
     def from_disk(self, path, **kwargs):
         data_path = path / "words_scorer.pckl"
-        print("Loading Spacy vectorizer component from folder {}.".format(data_path))
+        print("Loading scorer from folder {}.".format(data_path))
         with open(data_path, "rb") as f:
             self.data["scorer"] = pickle.load(f)
 
