@@ -1,6 +1,5 @@
 import spacy
 from spacy.tokens import Span
-from spacy.cli.download import download
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
@@ -32,7 +31,7 @@ def load_nlp_sententizer_object():
     Span.set_extension("nb_words", setter=get_nb_words, getter=get_nb_words, force=True)
     if not spacy.util.is_package("fr_core_news_sm"):
         print("Downloading fr_core_news_sm spacy model...")
-        download('fr_core_news_sm')
+        spacy.cli.download('fr_core_news_sm')
         print("done.")
     nlp = spacy.load('fr_core_news_sm')
     nlp.add_pipe(custom_sentence_boundaries, before = "parser")  # add exception to sententizer
