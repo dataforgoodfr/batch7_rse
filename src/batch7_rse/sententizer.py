@@ -27,14 +27,14 @@ def custom_sentence_boundaries(doc):
 
 
 def load_nlp_sententizer_object():
-    """ Load french mspacy model, customize it, add custom nb_words attributes to Span."""
+    """ Load french sm (small) pacy model, customize it, add custom nb_words attributes to Span."""
     Span.set_extension("nb_words", setter=get_nb_words, getter=get_nb_words, force=True)
     if not spacy.util.is_package("fr_core_news_sm"):
         print("Downloading fr_core_news_sm spacy model...")
         spacy.cli.download('fr_core_news_sm')
         print("done.")
     nlp = spacy.load('fr_core_news_sm')
-    nlp.add_pipe(custom_sentence_boundaries, before = "parser")  # add exception to sententizer
+    nlp.add_pipe(custom_sentence_boundaries, before="parser")  # add exception to sententizer
     nlp.add_pipe(nlp.create_pipe('sentencizer'))  # to add default sentencizer, AFTER custom rule
     return nlp
 
@@ -46,6 +46,7 @@ def sententize_df(df):
     ).values
     df = df[df["paragraph_sentences"].apply(lambda x: len(x) > 0)]  # keep if there was >0 valid sentences
     return df
+
 
 # TODO: maybe use this in pdf_parser as well ?
 def parallelize_dataframe_apply(df, func):
@@ -62,16 +63,14 @@ def parallelize_dataframe_apply(df, func):
 # TODO: optimize with parallelism or direct writing to sql database
 # TODO: parallelize the index as well ?
 # Takes > 20 sec for 4 (large) dpefs (Energéticien) so not really scalable...
-def run_sententizer(input_filename="../../data/processed/DPEFs/dpef_paragraphs.csv",
-                    output_filename="../../data/processed/DPEFs/dpef_paragraphs_sentences.csv"):
+def run_sententizer(conf):
     """
     Transform paragrph level text to sentence level text, keeping only sentences with more than N words
-    :param input_filename: relative path to input paragraph level csv (; separaed)
-    :param output_filename: relative path to output sentence level csv (; separaed)
+    :param conf: configuration class with paths to files and directories
     :return:
     """
     print("Reading paragraph level data.")
-    df = pd.read_csv(input_filename, sep=";")
+    df = pd.read_csv(conf.parsed_par_file, sep=";")
     df = df[df.paragraph.notna()] # sanity check
     df = parallelize_dataframe_apply(df, sententize_df)
     # convert to 1 row / sentence format
@@ -84,5 +83,5 @@ def run_sententizer(input_filename="../../data/processed/DPEFs/dpef_paragraphs.c
            .drop('level_{}'.format(len(df.columns) - 1), axis=1)
            .rename(columns={0: 'sentence'}))
     # save
-    df.to_csv(output_filename, sep=";")
+    df.to_csv(conf.parsed_sent_file, sep=";")
     return df

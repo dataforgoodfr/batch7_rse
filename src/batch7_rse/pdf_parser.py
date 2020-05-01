@@ -19,7 +19,9 @@ from pdfminer.pdfpage import PDFPage
 from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextLine
 
+# local imports
 import sententizer
+from conf import *
 
 def get_list_of_pdfs_filenames(dirName):
     """
@@ -294,7 +296,8 @@ def cut_header(df_par, p=0.8, verbose=False):
         df_par = df_par[~df_par.index.isin(index_head)]
         if len_start==len_end:
             break
-    #Below part is for human check that the function works properly
+
+    # Below part is for human check that the function works properly
     if verbose==True:
         len_last = len(df_par)
         S = sum([i for _,i in headers])
@@ -336,17 +339,15 @@ def get_final_paragraphs(input_file_dict_annotations):
     return df_par
 
 
-def create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
-                         input_path="../../data/input/DPEFs/",
-                         output_filename="../../data/processed/DPEFs/dpef_paragraphs.csv"):
+def create_final_dataset(conf):
     """
     Create structured paragraphs from dpef, using only rse sections.
     :param annotations_filename: path to denomination - rse_range mapping
     :param input_path: path to folder of DPEF pdfs
     :param output_filename: path to output csv
     """
-    dict_annotations = pd.read_csv(annotations_filename, sep=";").set_index("project_denomination").T.to_dict()
-    all_input_files = get_list_of_pdfs_filenames(input_path)
+    dict_annotations = pd.read_csv(conf.annotations_file, sep=";").set_index("project_denomination").T.to_dict()
+    all_input_files = get_list_of_pdfs_filenames(conf.dpef_dir)
     all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] in dict_annotations.keys()]
     input_data = list(zip(all_input_files, [dict_annotations]*len(all_input_files)))  # TODO change (?)
     n_cores = mp.cpu_count()-1 or 1   # use all except one if more than one available
@@ -357,7 +358,7 @@ def create_final_dataset(annotations_filename="../../data/input/Entreprises/entr
 
     # concat
     paragraphs_df = pd.concat(paragraphs_df, axis=0, ignore_index=True)
-    paragraphs_df.to_csv(output_filename, sep=";", index=False)
+    paragraphs_df.to_csv(conf.parsed_par_file, sep=";", index=False)
 
     return paragraphs_df
 
@@ -380,22 +381,19 @@ if __name__ == "__main__":
     if args.mode == "final":
         if args.task in ["parser", "both"]:
             print("Parse paragraph level text from rse sections in DPEF.")
-            create_final_dataset()
+            create_final_dataset(Config)
             print("Over")
         if args.task in ["sententizer", "both"]:
             print("Sententize sentences from paragraphs of rse sections in DPEF.")
-            sententizer.run_sententizer()
+            sententizer.run_sententizer(Config)
             print("Over")
 
     elif args.mode == "debug":
         if args.task in ["parser", "both"]:
             print("Parse paragraph level text from rse sections in DPEF.")
-            create_final_dataset(annotations_filename="../../data/input/Entreprises/entreprises_rse_annotations.csv",
-                                 input_path="../../data/input/DPEFs/Energéticien/",
-                                 output_filename="../../data/processed/DPEFs/dpef_paragraphs_debug.csv")
+            create_final_dataset(DebugConfig)
             print("Over")
         if args.task in ["sententizer", "both"]:
             print("Sententize sentences from paragraphs of rse sections in DPEF.")
-            sententizer.run_sententizer(input_filename="../../data/processed/DPEFs/dpef_paragraphs_debug.csv",
-                                        output_filename="../../data/processed/DPEFs/dpef_paragraphs_sentences_debug.csv")
+            sententizer.run_sententizer(DebugConfig)
             print("Over")
