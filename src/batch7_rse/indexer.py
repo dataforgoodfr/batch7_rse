@@ -99,8 +99,7 @@ def load_weighted_vectorizer(model_path="../../data/model/",
                                                 force_creation=force_creation)
     except Exception as e:
         print("An error occured while loading weighted vectorizer:")
-        print(e.__doc__)
-        print(e.message)
+        print(e)
         print("We recreate the model from scratch and save it.")
         nlp = initialize_weighted_vectorizer(model_path=model_path,
                                                 force_creation=force_creation)
@@ -108,7 +107,7 @@ def load_weighted_vectorizer(model_path="../../data/model/",
 
 
 nlp = load_weighted_vectorizer(model_path="../../data/model/",
-                               force_creation=True)
+                               force_creation=False)
 # Usage:
 # doc = nlp_wv("Une phrase simple avec des mots")
 # numpy_vector_of_the_sentence = doc.vector
