@@ -6,3 +6,4 @@ data/input/Entreprises/INSEE/*
 *__pycache*
 *debug*.ipynb
 *_debug.csv
+*data/model/*

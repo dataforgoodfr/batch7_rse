@@ -1,11 +1,22 @@
 """
 Scoring module
 """
-
+# imports
 import math
 import pickle
-
+import copy
+import numpy as np
 from collections import Counter
+from sklearn.metrics.pairwise import cosine_similarity
+
+import spacy
+from spacy.tokens import Doc
+
+# Global parameters
+# Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
+IGNORED_POS = ['PRON', 'AUX', 'DET', "PUNCT"]
+# TODO: add a list of stop words to ignore
+
 
 class Scoring(object):
     """
@@ -179,6 +190,7 @@ class Scoring(object):
 
         return idf
 
+
 class BM25(Scoring):
     """
     BM25 scoring. Scores using Apache Lucene's version of BM25 which adds 1 to prevent
@@ -194,12 +206,13 @@ class BM25(Scoring):
 
     def computeIDF(self, freq):
         # Calculate BM25 IDF score
-        return math.log(1 + (self.total - freq + 0.5)/(freq + 0.5))
+        return math.log(1 + (self.total - freq + 0.5) / (freq + 0.5))
 
     def score(self, freq, idf, length):
         # Calculate BM25 score
         k = self.k1 * ((1 - self.b) + self.b * length / self.avgdl)
         return idf * (freq * (self.k1 + 1)) / (freq + k)
+
 
 class SIF(Scoring):
     """
@@ -214,4 +227,59 @@ class SIF(Scoring):
 
     def score(self, freq, idf, length):
         # Calculate SIF score
-        return self.a / (self.a + freq/self.tokens)
+        return self.a / (self.a + freq / self.tokens)
+
+
+class VectorizerComponent(object):
+    """
+        Custom Spacy pipeline component that include scorer and overwrite calculation of Doc.vector.
+    """
+    name = "vectorizer_component"
+
+    def __init__(self):
+        self.data = {}
+        self.IGNORED_POS = IGNORED_POS
+
+    def add_scorer(self, scorer):
+        self.data["scorer"] = copy.deepcopy(scorer)
+
+    def __call__(self, doc):
+        " Score each non-punctuation token from spacy doc, and overwrite the vector representation using BM25 weights"
+        word_tokens = [token.text for token in doc if token.pos_ not in self.IGNORED_POS]
+        word_vectors = [token.vector for token in doc if token.pos_ not in self.IGNORED_POS]
+        weights = self.data["scorer"].weights(word_tokens)
+        doc.vector = np.average(word_vectors, weights=np.array(weights, dtype=np.float32), axis=0)
+        return doc
+
+    def to_disk(self, path, **kwargs):
+        data_path = path / "words_scorer.pckl"
+        print("Saving Spacy vectorizer component to folder {}.".format(data_path))
+        with open(data_path, "wb") as f:
+            pickle.dump(self.data["scorer"], f)
+
+    def from_disk(self, path, **kwargs):
+        data_path = path / "words_scorer.pckl"
+        print("Loading Spacy vectorizer component from folder {}.".format(data_path))
+        with open(data_path, "rb") as f:
+            self.data["scorer"] = pickle.load(f)
+
+
+# Add entry point to access the custom component and loading the model.
+spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent()
+
+
+def similarity_to_vector(doc, vector):
+    """
+    Extension method to Doc objects that return the cosine similarity.
+    :param doc: a doc obtained from a spacy model
+    :param vector: a vector of same dimension (numpy array).
+    :return: cosine similarity (float)
+    """
+    if vector is None:
+        raise ValueError("Forgotten 'vector' argument.")
+    vec1 = doc.vector
+    vec2 = vector
+    return cosine_similarity(vec1.reshape(1, -1), vec2.reshape(1, -1))[0][0]
+
+
+spacy.tokens.Doc.set_extension("similarity_to_vector", method=similarity_to_vector)

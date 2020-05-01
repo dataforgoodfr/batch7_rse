@@ -6,14 +6,7 @@ from datetime import date
 
 class ActivitySector(models.Model):
 
-    # class EnumerationSectorActivity(models.TextChoices):
-    #     TERTIAIRE = 'Tertiaire', _('Tertiaire')
-
-    name = models.CharField(
-        max_length=50,
-        # choices=EnumerationSectorActivity.choices,
-        # default=SectorActivity.TERTIAIRE
-    )
+    name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.name
