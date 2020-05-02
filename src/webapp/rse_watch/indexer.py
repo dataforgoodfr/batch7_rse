@@ -117,4 +117,3 @@ TEST_MODE = True
 if TEST_MODE:
     print(nlp("Ceci est un test pollution marine").vector.sum())
     print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
-
