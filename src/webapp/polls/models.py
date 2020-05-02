@@ -6,6 +6,7 @@ from datetime import date
 import os
 import numpy as np
 
+
 class ActivitySector(models.Model):
 
     name = models.CharField(max_length=50,
@@ -71,10 +72,10 @@ class Sentence(models.Model):
 
     class Vector(models.TextField):
 
-        # TODO: Finish transformation from string to numpy array
+        # TODO: Test transformation from string to numpy array
         @staticmethod
         def to_numpy(value: str):
-            return np.array([])
+            return np.array([float(val) for val in value.split(' ')])
 
         def to_python(self, value):
             if isinstance(value, np.ndarray):
@@ -85,11 +86,11 @@ class Sentence(models.Model):
 
             return self.to_numpy(value)
 
-        # TODO: finish construction of a true vector list as a string
+        # TODO: Test construction of a true vector list as a string
         @staticmethod
         def from_numpy(numpy_vector: np.ndarray):
             if isinstance(numpy_vector, np.ndarray):
-                return str(numpy_vector)
+                return ' '.join([val for val in numpy_vector])
             return None
 
     reference_file = models.ForeignKey(DPEF, on_delete=models.CASCADE,
@@ -99,8 +100,9 @@ class Sentence(models.Model):
                                        help_text=_("Page sur laquelle se situe la phrase. "
                                                    "Si la phrase est étalée sur plusieur pages, "
                                                    "mettre la page de départ."))
-    context = models.TextField(verbose_name=_("Contexte"), help_text=_("Paragraphe contenant la phrase. "
-                                                                    "Permet de redonner du contexte à la phrase."))
+    context = models.TextField(verbose_name=_("Contexte"),
+                               help_text=_("Paragraphe contenant la phrase. "
+                                           "Permet de redonner du contexte à la phrase."))
     vector = Vector
     # put filtres here like this one :
     # exacts_words = models.BooleanField(default=False)
