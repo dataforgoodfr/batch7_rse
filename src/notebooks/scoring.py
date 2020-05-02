@@ -7,6 +7,7 @@ import pickle
 
 from collections import Counter
 
+
 class Scoring(object):
     """
     Base scoring object. Default method scores documents using TF-IDF.
@@ -179,6 +180,7 @@ class Scoring(object):
 
         return idf
 
+
 class BM25(Scoring):
     """
     BM25 scoring. Scores using Apache Lucene's version of BM25 which adds 1 to prevent
@@ -200,6 +202,7 @@ class BM25(Scoring):
         # Calculate BM25 score
         k = self.k1 * ((1 - self.b) + self.b * length / self.avgdl)
         return idf * (freq * (self.k1 + 1)) / (freq + k)
+
 
 class SIF(Scoring):
     """

@@ -1,12 +1,14 @@
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.fields.files import FieldFile
 from datetime import date
 
 
 class ActivitySector(models.Model):
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50,
+                            help_text=_("Nom du secteur"))
 
     def __str__(self):
         return self.name
@@ -14,43 +16,52 @@ class ActivitySector(models.Model):
 
 class Company(models.Model):
 
-    name = models.CharField(max_length=50, unique=True)
-    # pdf_name = models.CharField(max_length=20)
-    sectors = models.ManyToManyField(ActivitySector)
-    introduction = models.TextField()
+    name = models.CharField(max_length=50, unique=True,
+                            verbose_name=_("Nom"), help_text=_("Nom de l'entreprise"))
+    pdf_name = models.CharField(max_length=20, unique=True,
+                                verbose_name=_("Nom PDF"),
+                                help_text=_("Nom de l'entreprise tel que trouvé dans le nom du fichier pdf. "
+                                            "Permet en outre de pouvoir automatiser la lecture des PDFs et de les "
+                                            "faire correspondre à la bonne entreprise."))
+    sectors = models.ManyToManyField(ActivitySector,
+                                     verbose_name=_("Secteurs"), help_text=_("Secteurs dans lesquels l'entreprise opére"))
+    introduction = models.TextField(default="",
+                                    verbose_name=_("Introduction"),
+                                    help_text=_("Quelques phrases permettant de décrire brièvement l'entreprise."))
 
     def __str__(self):
         return self.name
 
 
-class File(models.Model):
+class DPEF(models.Model):
 
-    class FileType(models.TextChoices):
-        DPEF = 'DPEF', _('dpef')
-        RSE = 'RSE', _('responsabilité sociale et environnementale')
+    @staticmethod
+    def _validate_file_extension(value: FieldFile):
+        import os
+        ext = os.path.splitext(value.name)[1]
+        valid_extensions = ['.pdf', '.doc', '.docx']
+        if not ext in valid_extensions:
+            raise ValidationError(u'File not supported!')
 
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    # class FileType(models.TextChoices):
+    #     DPEF = 'DPEF', _('dpef')
+    #     RSE = 'DDR', _('ddr')
+
+    company = models.ForeignKey(Company, on_delete=models.CASCADE,
+                                verbose_name=_("Entreprise"), help_text=_("L'entreprise référencée par le document."))
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
-    file_object = models.FileField(unique=True)
+    file_object = models.FileField(unique=True, validators=[_validate_file_extension],
+                                   verbose_name=_("Ficher PDF"), help_text=_("Document DPEF ou DDR au format PDF."))
 
-    date = models.DateField(default=date.today)
-    type = models.CharField(
-        max_length=4,
-        choices=FileType.choices,
-        # default=FileType.DPEF
-    )
-    start_rse_page = models.PositiveIntegerField()
-    end_rse_page = models.PositiveIntegerField()
+    year = models.IntegerField(choices=[(i, i) for i in range(1990, date.today().year + 1)],  # list of years since 1990
+                               verbose_name=_("Année"), help_text=_("Année de référence du document DPEF"))
 
-    @property
-    def year(self):
-        return self.date.year
-
-    def clean(self):
-        super().clean()
-        if self.start_rse_page > self.end_rse_page:
-            raise ValidationError(_("start page must be before end page !"))
+    # file_type = models.CharField(
+    #     max_length=4,
+    #     choices=FileType.choices,
+    #     # default=FileType.DPEF
+    # )
 
     def __str__(self):
         return self.file_object.name  # file path
@@ -58,25 +69,20 @@ class File(models.Model):
 
 class Sentence(models.Model):
 
-    file = models.ForeignKey(File, on_delete=models.CASCADE)
-    sentence = models.TextField()
-    startfilepage = models.PositiveIntegerField()
-    endfilepage = models.PositiveIntegerField()
-    is_RSE_sentence = models.BooleanField(default=False)
-    # ...
-    # put metadata fields here !
-
-    def _set_rse(self):
-        if self.startfilepage >= self.file.start_rse_page and self.endfilepage <= self.file.end_rse_page:
-            self.is_RSE_sentence = True
-        else:
-            self.is_RSE_sentence = False
+    reference_file = models.ForeignKey(DPEF, on_delete=models.CASCADE,
+                                       verbose_name=_("Fichier"), help_text=_("Document contenant la phrase"))
+    text = models.TextField(verbose_name=_("Texte"), help_text=_("Texte de la phrase"))
+    page = models.PositiveIntegerField(verbose_name=_("Page"),
+                                       help_text=_("Page sur laquelle se situe la phrase. "
+                                                   "Si la phrase est étalée sur plusieur pages, "
+                                                   "mettre la page de départ."))
+    context = models.TextField(verbose_name=_("Contexte"), help_text=_("Paragraphe contenant la phrase. "
+                                                                       "Permet de redonner du contexte à la phrase."))
+    # put filtres here like this one :
+    # exacts_words = models.BooleanField(default=False)
 
     def clean(self):
         super().clean()
-        if self.startfilepage > self.endfilepage:
-            raise ValidationError(_("start page must be before end page !"))
-        self._set_rse()
 
     def __str__(self):
-        return self.sentence
+        return self.text
