@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.fields.files import FieldFile
 from datetime import date
-
+import os
+import numpy as np
 
 class ActivitySector(models.Model):
 
@@ -37,10 +38,9 @@ class DPEF(models.Model):
 
     @staticmethod
     def _validate_file_extension(value: FieldFile):
-        import os
         ext = os.path.splitext(value.name)[1]
-        valid_extensions = ['.pdf', '.doc', '.docx']
-        if not ext in valid_extensions:
+        valid_extensions = ['.pdf']
+        if ext not in valid_extensions:
             raise ValidationError(u'File not supported!')
 
     # class FileType(models.TextChoices):
@@ -52,7 +52,7 @@ class DPEF(models.Model):
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
     file_object = models.FileField(unique=True, validators=[_validate_file_extension],
-                                   verbose_name=_("Ficher PDF"), help_text=_("Document DPEF ou DDR au format PDF."))
+                                   verbose_name=_("Fichier PDF"), help_text=_("Document DPEF ou DDR au format PDF."))
 
     year = models.IntegerField(choices=[(i, i) for i in range(1990, date.today().year + 1)],  # list of years since 1990
                                verbose_name=_("Année"), help_text=_("Année de référence du document DPEF"))
@@ -69,6 +69,29 @@ class DPEF(models.Model):
 
 class Sentence(models.Model):
 
+    class Vector(models.TextField):
+
+        # TODO: Finish transformation from string to numpy array
+        @staticmethod
+        def to_numpy(value: str):
+            return np.array([])
+
+        def to_python(self, value):
+            if isinstance(value, np.ndarray):
+                return value
+
+            if value is None:
+                return value
+
+            return self.to_numpy(value)
+
+        # TODO: finish construction of a true vector list as a string
+        @staticmethod
+        def from_numpy(numpy_vector: np.ndarray):
+            if isinstance(numpy_vector, np.ndarray):
+                return str(numpy_vector)
+            return None
+
     reference_file = models.ForeignKey(DPEF, on_delete=models.CASCADE,
                                        verbose_name=_("Fichier"), help_text=_("Document contenant la phrase"))
     text = models.TextField(verbose_name=_("Texte"), help_text=_("Texte de la phrase"))
@@ -77,7 +100,8 @@ class Sentence(models.Model):
                                                    "Si la phrase est étalée sur plusieur pages, "
                                                    "mettre la page de départ."))
     context = models.TextField(verbose_name=_("Contexte"), help_text=_("Paragraphe contenant la phrase. "
-                                                                       "Permet de redonner du contexte à la phrase."))
+                                                                    "Permet de redonner du contexte à la phrase."))
+    vector = Vector
     # put filtres here like this one :
     # exacts_words = models.BooleanField(default=False)
 
