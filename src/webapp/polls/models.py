@@ -35,14 +35,14 @@ class Company(models.Model):
         return self.name
 
 
-class DPEF(models.Model):
+def _validate_file_extension(value: FieldFile):
+    ext = os.path.splitext(value.name)[1]
+    valid_extensions = ['.pdf']
+    if ext not in valid_extensions:
+        raise ValidationError(u'File not supported!')
 
-    @staticmethod
-    def _validate_file_extension(value: FieldFile):
-        ext = os.path.splitext(value.name)[1]
-        valid_extensions = ['.pdf']
-        if ext not in valid_extensions:
-            raise ValidationError(u'File not supported!')
+
+class DPEF(models.Model):
 
     # class FileType(models.TextChoices):
     #     DPEF = 'DPEF', _('dpef')
@@ -103,7 +103,7 @@ class Sentence(models.Model):
     context = models.TextField(verbose_name=_("Contexte"),
                                help_text=_("Paragraphe contenant la phrase. "
                                            "Permet de redonner du contexte à la phrase."))
-    vector = Vector
+    vector = Vector()
     # put filtres here like this one :
     # exacts_words = models.BooleanField(default=False)
 
@@ -112,3 +112,4 @@ class Sentence(models.Model):
 
     def __str__(self):
         return self.text
+
