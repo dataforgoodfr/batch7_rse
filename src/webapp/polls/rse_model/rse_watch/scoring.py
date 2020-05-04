@@ -15,7 +15,7 @@ from spacy.tokens import Doc
 # Global parameters
 # Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
 IGNORED_POS = ['PRON', 'AUX', 'DET', "PUNCT"]
-# TODO: add a list of stop words to ignore
+# TODO: add a list of stop words to ignore -> il existe des dictionnaires tous faits !
 
 
 class Scoring(object):

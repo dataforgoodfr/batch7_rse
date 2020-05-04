@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 
-    {{ company.id }} | {{ company.name }} | {{ company.pdf_name }} | {{ company.sector }} | {{ company.introduction }}
+    <p>identifiant : {{ company.id }}</p>
+    <p>Nom complet : {{ company.name }}</p>
+    <p>Nom pdf : {{ company.pdf_name }}</p>
+    <p>Introduction : {{ company.introduction }}</p>
+    <p>Secteurs :
+        {% for sector in company.sectors %}
+            {{ sector.name }}
+        {% endfor %}
+    </p>
 
 {% endblock content %}

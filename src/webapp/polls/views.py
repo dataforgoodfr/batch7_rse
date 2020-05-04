@@ -1,4 +1,4 @@
-from .models import Company
+from .models import Company, DPEF
 from django.views.generic.edit import FormView
 from django.views import generic
 
@@ -12,7 +12,10 @@ class CompanyListView(generic.ListView):
     context_object_name = 'company_list'
 
     def get_queryset(self):
-        return Company.objects.all()
+        companies = Company.objects.all()
+        # for company in companies:
+        #     company.dpef_list = DPEF.objects.filter(company__id=company.id)
+        return companies
 
 
 class CompanyDetailView(generic.DetailView):

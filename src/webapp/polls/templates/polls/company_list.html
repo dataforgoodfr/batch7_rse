@@ -1,6 +1,22 @@
 {% extends "base.html" %}
 {% block content %}
 
-    Ceci est la page listant les entreprises.
+    <ul>
+        {% for company in company_list %}
+            <li>
+                {{ company.name }}
+                    (
+                    {% for sector in company.sectors %}
+                        {{ sector.name }}
+                    {% endfor %}
+                    )
+                <ul>
+                    {% for dpef in company.dpefs %}
+                        <li>{{ dpef.file_object }} ({{ dpef.year }})</li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
 
 {% endblock content %}
