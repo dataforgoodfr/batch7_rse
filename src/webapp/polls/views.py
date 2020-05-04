@@ -1,10 +1,16 @@
 from .models import Company, DPEF
 from django.views.generic.edit import FormView
 from django.views import generic
+from .forms import IndexForm
 
 
-class IndexView(generic.TemplateView):
+class IndexView(FormView):
     template_name = 'polls/index.html'
+    form_class = IndexForm
+    success_url = 'polls:search'
+
+    def form_valid(self, form):
+        return super().form_valid(form)
 
 
 class CompanyListView(generic.ListView):
@@ -13,8 +19,6 @@ class CompanyListView(generic.ListView):
 
     def get_queryset(self):
         companies = Company.objects.all()
-        # for company in companies:
-        #     company.dpef_list = DPEF.objects.filter(company__id=company.id)
         return companies
 
 
@@ -23,5 +27,10 @@ class CompanyDetailView(generic.DetailView):
     # template_name = 'polls/company_detail.html'
 
 
-# class SearchView(FormView):
+class SearchView(FormView):
+    template_name = 'polls/search.html'
+    form_class = IndexForm
+    success_url = 'polls:search'
 
+    def form_valid(self, form):
+        return super().form_valid(form)

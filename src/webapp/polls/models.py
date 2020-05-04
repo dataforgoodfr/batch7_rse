@@ -25,7 +25,8 @@ class Company(dm.Model):
                                         "Permet en outre de pouvoir automatiser la lecture des PDFs et de les "
                                         "faire correspondre à la bonne entreprise."))
     _activity_sectors = dm.ManyToManyField(ActivitySector,
-                                 verbose_name=_("Secteurs"), help_text=_("Secteurs dans lesquels l'entreprise opére"))
+                                           verbose_name=_("Secteurs"),
+                                           help_text=_("Secteurs dans lesquels l'entreprise opére"))
     introduction = dm.TextField(default="",
                                 verbose_name=_("Introduction"),
                                 help_text=_("Quelques phrases permettant de décrire brièvement l'entreprise."))
@@ -70,6 +71,9 @@ class DPEF(dm.Model):
     #     choices=FileType.choices,
     #     # default=FileType.DPEF
     # )
+
+    def sentences(self):
+        return Sentence.objects.filter(reference_file__id=self.id)
 
     def __str__(self):
         return self.file_object.name  # file path
