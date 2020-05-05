@@ -1,5 +1,5 @@
 from .models import Company, DPEF
-from django.views.generic.edit import View, FormView
+from django.views.generic.edit import View
 from django.views import generic
 from .forms import BasicSearchForm, SearchForm
 from django.shortcuts import render
