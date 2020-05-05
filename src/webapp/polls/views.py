@@ -1,16 +1,40 @@
 from .models import Company, DPEF
-from django.views.generic.edit import FormView
+from django.views.generic.edit import View, FormView
 from django.views import generic
 from .forms import IndexForm
+from django.shortcuts import render
 
 
-class IndexView(FormView):
+class IndexView(View):
     template_name = 'polls/index.html'
     form_class = IndexForm
-    success_url = 'polls:search'
 
-    def form_valid(self, form):
-        return super().form_valid(form)
+    @staticmethod
+    def get_context(form=None, response=None):
+        context = {'form': form}
+        if response is not None:
+            context['response'] = response
+        return context
+
+    def render(self, request, context: dict):
+        return render(request, self.template_name, context)
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class())
+        return self.render(request, context)
+
+
+class SearchView(IndexView):
+    template_name = 'polls/search.html'
+    form_class = IndexForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        response = None
+        if form.is_valid():
+            response = None  # TODO: Complete this to get a valid response.
+        context = self.get_context(form, response)
+        return self.render(request, context)
 
 
 class CompanyListView(generic.ListView):
@@ -25,12 +49,3 @@ class CompanyListView(generic.ListView):
 class CompanyDetailView(generic.DetailView):
     model = Company
     # template_name = 'polls/company_detail.html'
-
-
-class SearchView(FormView):
-    template_name = 'polls/search.html'
-    form_class = IndexForm
-    success_url = 'polls:search'
-
-    def form_valid(self, form):
-        return super().form_valid(form)
