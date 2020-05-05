@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <p>lolilol</p>
+    <p>Page de recherche</p>
     <form action="{% url 'polls:search' %}" method="post">
         {% csrf_token %}
         {{ form.as_p }}

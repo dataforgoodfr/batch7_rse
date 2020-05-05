@@ -1,16 +1,16 @@
 from .models import Company, DPEF
 from django.views.generic.edit import View, FormView
 from django.views import generic
-from .forms import IndexForm
+from .forms import BasicSearchForm, SearchForm
 from django.shortcuts import render
 
 
 class IndexView(View):
     template_name = 'polls/index.html'
-    form_class = IndexForm
+    form_class = BasicSearchForm
 
     @staticmethod
-    def get_context(form=None, response=None):
+    def get_context(form, response=None):
         context = {'form': form}
         if response is not None:
             context['response'] = response
@@ -26,7 +26,7 @@ class IndexView(View):
 
 class SearchView(IndexView):
     template_name = 'polls/search.html'
-    form_class = IndexForm
+    form_class = SearchForm
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)

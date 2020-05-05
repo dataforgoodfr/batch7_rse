@@ -4,7 +4,15 @@
     <p>Ceci est la page d'accueil, décrivant le site.</p>
     <form action="{% url 'polls:search' %}" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {% for field in form %}
+            <div class="fieldWrapper">
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+                {% if field.help_text %}
+                <p class="help">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
         <input type="submit" value="Rechercher">
     </form>
 {% endblock content %}

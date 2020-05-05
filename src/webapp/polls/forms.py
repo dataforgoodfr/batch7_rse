@@ -1,28 +1,28 @@
 from django.utils.translation import gettext_lazy as _
 from django import forms
-# from models import ActivitySector as Sectors, DPEF, Company
-# import datetime
+from polls.models import ActivitySector as Sectors
+from datetime import date
 
 
-class IndexForm(forms.Form):
+class BasicSearchForm(forms.Form):
     search_bar = forms.CharField(label=_("Rechercher"), max_length="100", required=True)
 
 
-# class RSEWatch(forms.Form):
-#
-#     company_name = forms.CharField(label=_("Company Name"), max_length=50, required=True)
-#     sector = forms.ChoiceField(label=_("Company sector"), choices=Sectors.objects.all())
-#     company_introduction = forms.Textarea()  # label="Introduce your company", required=False)
-#     company_files = forms.FileField(required=True)
-#     file_year = forms.DateField(initial=datetime.date(year=2018, month=1, day=1),
-#                                 required=False)
-#     file_type = forms.ChoiceField(label=_("File type"), choices=File.FileType.choices)
-#     start_rse_page = forms.IntegerField(label="Page where RSE part begins", required=True)
-#     end_rse_page = forms.IntegerField(label="Page where RSE part ends", required=False)
+class SearchForm(BasicSearchForm):
+    start_period = forms.IntegerField(label=_("De"), min_value=1990, max_value=date.today().year + 1, required=False)
+    end_period = forms.IntegerField(label=_("à"), min_value=1990, max_value=date.today().year + 1, required=False)
+    sectors = forms.MultipleChoiceField(choices=[(sector.id, sector.name) for sector in Sectors.objects.all()],
+                                        widget=forms.CheckboxSelectMultiple, required=False)
 
+    def _is_period_valid(self):
+        try:
+            if self.start_period and self.end_period:
+                if self.start_period > self.end_period:
+                    return False
+            return True
+        except AttributeError:
+            return True
 
-# class SectorForm(forms.ModelForm):
-#     class Meta:
-#         model = Sectors
-#         fields = '__all__'
+    def is_valid(self):
+        return self._is_period_valid()
 
