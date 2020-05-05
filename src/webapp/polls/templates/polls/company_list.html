@@ -4,7 +4,7 @@
     <ul>
         {% for company in company_list %}
             <li>
-                {{ company.name }}
+                <a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a>
                     (
                     {% for sector in company.sectors %}
                         {{ sector.name }}
