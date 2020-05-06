@@ -1,6 +1,7 @@
 # general imports
 from pathlib import Path
 import os
+import re
 import argparse
 from time import time
 import multiprocessing as mp
@@ -35,6 +36,16 @@ def get_list_of_pdfs_filenames(dirName):
     return paths
 
 
+def clean_child_str(child_str):
+    child_str = ' '.join(child_str.split()).strip()
+    # dealing with hyphens:
+    # 1. Replace words separators in row by a different char than hyphen (i.e. longer hyphen)
+    child_str = re.sub("[A-Za-z] - [A-Za-z]", lambda x:x.group(0).replace(' - ', ' – '), child_str)
+    # 2. Attach the negative term to the following number, # TODO: inutile ? Enlever ?
+    child_str = re.sub("(- )([0-9])", r"-\2", child_str)
+    return child_str
+
+
 class PDFPageDetailedAggregator(PDFPageAggregator):
     """
     Custom class to parse pdf and keep position of parsed text lines.
@@ -56,7 +67,7 @@ class PDFPageDetailedAggregator(PDFPageAggregator):
                 for child in item:
                     if isinstance(child, (LTChar, LTAnno)):
                         child_str += child.get_text()
-                child_str = ' '.join(child_str.split()).strip()
+                child_str = clean_child_str(child_str)
                 if child_str:
                     # bbox == (pagenb, x1, y1, x2, y2, text)
                     row = (page_number, item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3], child_str)
@@ -69,7 +80,6 @@ class PDFPageDetailedAggregator(PDFPageAggregator):
         self.page_number += 1
         self.rows = sorted(self.rows, key=lambda x: (x[0], -x[2]))
         self.result = ltpage
-
 
 def pdf_to_raw_content(input_file, rse_range=None):
     """
