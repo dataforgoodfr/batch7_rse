@@ -25,7 +25,7 @@ SECRET_KEY = 'ky4nwynj3yj9+job20xs%2vooskha#r#ah%vy!3$v^(z)fi_&='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', 'dataforgood.renauddha.ovh']
 
 
 # Application definition
@@ -119,3 +119,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_ROOT = './data/'

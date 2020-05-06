@@ -61,6 +61,7 @@ class DPEF(dm.Model):
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
     file_object = dm.FileField(unique=True, validators=[_validate_file_extension],
+                               upload_to='models/dpef/',
                                verbose_name=_("Fichier PDF"), help_text=_("Document DPEF ou DDR au format PDF."))
 
     year = dm.IntegerField(choices=[(i, i) for i in range(1990, date.today().year + 1)],  # list of years since 1990
