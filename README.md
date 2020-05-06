@@ -9,3 +9,20 @@ Approach:
 - Clean the text data for NLP algorithms
 - Scope what kind of information defines an engagement (basic feature creation & filters, labelling)
 - Train supervised model to identify such engagements 
+
+
+# Installation
+
+# Setting local development environment for python/Django.
+
+You will need:
+- python 3.6.8 (>3.1.0 might work, not tested)
+- virtualenv or virtualenvwrapper ([installation steps](https://virtualenvwrapper.readthedocs.io/en/latest/))
+
+To setup your local env using virtualenvwrapper use:
+
+    mkvirtualenv rse_watch -r requirements.txt
+
+If you want to go source your virtual env:
+
+    workon rse_watch
