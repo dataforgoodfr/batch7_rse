@@ -113,6 +113,18 @@ def pdf_to_raw_content(input_file, rse_range=None):
     return device, first_page_nb
 
 
+def clean_paragraph(p):
+    """ Curate paragraph object before save, in particular deal with hyphen and spaces """
+    # Attach together words (>= 2 char to avoid things like A minus, B minus...)
+    # that may have been split at end of row like géographie = "géo - graphie"
+    # real separator have been turned into longer hyphen during parsing to avoid confusion with those.
+    # TODO: need to accept accents !
+    p["paragraph"] = re.sub("[A-Za-z]{2,} - [A-Za-z]", lambda x: x.group(0).replace(' - ', ''), p["paragraph"])
+    # reattach words that were split, like Fort-Cros = "Fort- Cros"
+    p["paragraph"] = re.sub("[A-Za-z]{2,}- [A-Za-z]", lambda x: x.group(0).replace('- ', '-'), p["paragraph"])
+    return p
+
+
 def raw_content_to_paragraphs(device, idx_first_page):
     """
     From parsed data with positional information, aggregate into paragraphs using simple rationale
@@ -162,11 +174,12 @@ def raw_content_to_paragraphs(device, idx_first_page):
                 change_in_font_size = abs(relative_var_in_height) > 0.05
                 different_row = (relative_var_in_y_min > 0.7)
                 large_gap = (relative_var_in_y_min > 1.2)
-                artefact_to_ignore = (len(paragraph)<=2)  # single "P" broke row parsing in auchan dpef
+                artefact_to_ignore = (len(paragraph) <= 2)  # single "P" broke row parsing in auchan dpef
                 if not artefact_to_ignore:
                     if (positive_change_in_font_size and different_row) or large_gap:  # always break
                         # break paragraph, start new one
                         # print("break",relative_var_in_height, relative_var_in_y_min, paragraph)
+                        p = clean_paragraph(p)
                         x_groups_data_paragraphs.append(p)
                         p = {"y_min": y_min,
                              "y_max": y_max,
@@ -181,6 +194,7 @@ def raw_content_to_paragraphs(device, idx_first_page):
                     previous_height = current_height
                     previous_y_min = current_y_min
             # add the last paragraph of column
+            p = clean_paragraph(p)
             x_groups_data_paragraphs.append(p)
             # structure the output
             for p in x_groups_data_paragraphs:
