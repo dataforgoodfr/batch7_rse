@@ -8,3 +8,4 @@ desktop.ini
 *_debug.csv
 *model_debug/*
 src/webapp/data/model/*
+src/env/
