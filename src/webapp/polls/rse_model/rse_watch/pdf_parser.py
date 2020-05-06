@@ -1,6 +1,7 @@
 # general imports
 from pathlib import Path
 import os
+import re
 import argparse
 from time import time
 import multiprocessing as mp
@@ -35,6 +36,16 @@ def get_list_of_pdfs_filenames(dirName):
     return paths
 
 
+def clean_child_str(child_str):
+    child_str = ' '.join(child_str.split()).strip()
+    # dealing with hyphens:
+    # 1. Replace words separators in row by a different char than hyphen (i.e. longer hyphen)
+    child_str = re.sub("[A-Za-z] - [A-Za-z]", lambda x:x.group(0).replace(' - ', ' – '), child_str)
+    # 2. Attach the negative term to the following number, # TODO: inutile ? Enlever ?
+    child_str = re.sub("(- )([0-9])", r"-\2", child_str)
+    return child_str
+
+
 class PDFPageDetailedAggregator(PDFPageAggregator):
     """
     Custom class to parse pdf and keep position of parsed text lines.
@@ -56,7 +67,7 @@ class PDFPageDetailedAggregator(PDFPageAggregator):
                 for child in item:
                     if isinstance(child, (LTChar, LTAnno)):
                         child_str += child.get_text()
-                child_str = ' '.join(child_str.split()).strip()
+                child_str = clean_child_str(child_str)
                 if child_str:
                     # bbox == (pagenb, x1, y1, x2, y2, text)
                     row = (page_number, item.bbox[0], item.bbox[1], item.bbox[2], item.bbox[3], child_str)
@@ -69,7 +80,6 @@ class PDFPageDetailedAggregator(PDFPageAggregator):
         self.page_number += 1
         self.rows = sorted(self.rows, key=lambda x: (x[0], -x[2]))
         self.result = ltpage
-
 
 def pdf_to_raw_content(input_file, rse_range=None):
     """
@@ -101,6 +111,23 @@ def pdf_to_raw_content(input_file, rse_range=None):
             device.get_result()
 
     return device, first_page_nb
+
+
+def clean_paragraph(p):
+    """ Curate paragraph object before save, in particular deal with hyphen and spaces """
+    # Attach together words (>= 2 char to avoid things like A minus, B minus...)
+    # that may have been split at end of row like géographie = "géo - graphie"
+    # real separator have been turned into longer hyphen during parsing to avoid confusion with those.
+    # Accents accepted thks to https://stackoverflow.com/a/24676780/8086033
+    w_expr = "(?i)(?:(?![×Þß÷þø])[-'a-zÀ-ÿ]){2,}"
+    p["paragraph"] = re.sub("{} - {}".format(w_expr, w_expr),
+                            lambda x: x.group(0).replace(' - ', ''),
+                            p["paragraph"])
+    # reattach words that were split, like Fort-Cros = "Fort- Cros"
+    p["paragraph"] = re.sub("{}- {}".format(w_expr, w_expr),
+                            lambda x: x.group(0).replace('- ', '-'),
+                            p["paragraph"])
+    return p
 
 
 def raw_content_to_paragraphs(device, idx_first_page):
@@ -152,11 +179,12 @@ def raw_content_to_paragraphs(device, idx_first_page):
                 change_in_font_size = abs(relative_var_in_height) > 0.05
                 different_row = (relative_var_in_y_min > 0.7)
                 large_gap = (relative_var_in_y_min > 1.2)
-                artefact_to_ignore = (len(paragraph)<=2)  # single "P" broke row parsing in auchan dpef
+                artefact_to_ignore = (len(paragraph) <= 2)  # single "P" broke row parsing in auchan dpef
                 if not artefact_to_ignore:
                     if (positive_change_in_font_size and different_row) or large_gap:  # always break
                         # break paragraph, start new one
                         # print("break",relative_var_in_height, relative_var_in_y_min, paragraph)
+                        p = clean_paragraph(p)
                         x_groups_data_paragraphs.append(p)
                         p = {"y_min": y_min,
                              "y_max": y_max,
@@ -171,6 +199,7 @@ def raw_content_to_paragraphs(device, idx_first_page):
                     previous_height = current_height
                     previous_y_min = current_y_min
             # add the last paragraph of column
+            p = clean_paragraph(p)
             x_groups_data_paragraphs.append(p)
             # structure the output
             for p in x_groups_data_paragraphs:
