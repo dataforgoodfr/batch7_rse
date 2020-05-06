@@ -7,7 +7,7 @@ class Config:
     annotations_file = "../data/input/Entreprises/entreprises_rse_annotations.csv"
     parsed_par_file = "../data/processed/DPEFs/dpef_paragraphs.csv"
     parsed_sent_file = "../data/processed/DPEFs/dpef_paragraphs_sentences.csv"
-    model_dir = "../polls/rse_model/data/model/"
+    model_dir = "../data/model/"
     scorer_pickle_file = model_dir + "vectorizer_component/words_scorer.pckl"
 
 
