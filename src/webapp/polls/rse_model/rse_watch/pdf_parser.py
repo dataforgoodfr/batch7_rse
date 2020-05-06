@@ -118,10 +118,15 @@ def clean_paragraph(p):
     # Attach together words (>= 2 char to avoid things like A minus, B minus...)
     # that may have been split at end of row like géographie = "géo - graphie"
     # real separator have been turned into longer hyphen during parsing to avoid confusion with those.
-    # TODO: need to accept accents !
-    p["paragraph"] = re.sub("[A-Za-z]{2,} - [A-Za-z]", lambda x: x.group(0).replace(' - ', ''), p["paragraph"])
+    # Accents accepted thks to https://stackoverflow.com/a/24676780/8086033
+    w_expr = "(?i)(?:(?![×Þß÷þø])[-'a-zÀ-ÿ]){2,}"
+    p["paragraph"] = re.sub("{} - {}".format(w_expr, w_expr),
+                            lambda x: x.group(0).replace(' - ', ''),
+                            p["paragraph"])
     # reattach words that were split, like Fort-Cros = "Fort- Cros"
-    p["paragraph"] = re.sub("[A-Za-z]{2,}- [A-Za-z]", lambda x: x.group(0).replace('- ', '-'), p["paragraph"])
+    p["paragraph"] = re.sub("{}- {}".format(w_expr, w_expr),
+                            lambda x: x.group(0).replace('- ', '-'),
+                            p["paragraph"])
     return p
 
 
