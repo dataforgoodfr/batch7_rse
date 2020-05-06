@@ -84,7 +84,7 @@ def initialize_weighted_vectorizer(conf):
 
 
 def load_weighted_vectorizer(conf,
-                             create_from_scratch=True):
+                             create_from_scratch=False):
     """ Load custom spacy model, which should be created beforehand"""
     if create_from_scratch:
         print("Initialization from scratch. [force_creation is set to 'True']")
@@ -106,14 +106,16 @@ def load_weighted_vectorizer(conf,
     return nlp
 
 
-nlp = load_weighted_vectorizer(Config, create_from_scratch=True)
+TEST_MODE = True
+
+if TEST_MODE:
+    nlp = load_weighted_vectorizer(Config, create_from_scratch=True)  # TODO: delete when in production.
+    print(nlp("Ceci est un test pollution marine").vector.sum())
+    print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
+
+
+nlp = load_weighted_vectorizer(Config)
 # Usage:
 # doc = nlp_wv("Une phrase simple avec des mots")
 # numpy_vector_of_the_sentence = doc.vector
 # similarity = doc.similarity_to_vector(another_numpy_vector)
-
-TEST_MODE = True
-
-if TEST_MODE:
-    print(nlp("Ceci est un test pollution marine").vector.sum())
-    print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
