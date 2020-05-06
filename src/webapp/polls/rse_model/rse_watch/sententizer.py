@@ -63,7 +63,7 @@ def parallelize_dataframe_apply(df, func):
 # TODO: optimize with parallelism or direct writing to sql database
 # TODO: parallelize the index as well ?
 # Takes > 20 sec for 4 (large) dpefs (Energéticien) so not really scalable...
-def run_sententizer(conf):
+def turn_paragraphs_into_sentences(conf):
     """
     Transform paragrph level text to sentence level text, keeping only sentences with more than N words
     :param conf: configuration class with paths to files and directories

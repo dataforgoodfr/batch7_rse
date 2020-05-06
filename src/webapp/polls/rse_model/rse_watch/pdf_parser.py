@@ -319,6 +319,7 @@ def get_final_paragraphs(input_file_dict_annotations):
     """
     input_file, dict_annotations = input_file_dict_annotations
     project_denomination = input_file.name.split("_")[0]
+    project_sector = input_file.parent.name
     t = time()
     print("Start for {} [{}]".format(
         project_denomination,
@@ -327,6 +328,7 @@ def get_final_paragraphs(input_file_dict_annotations):
     rse_ranges = dict_annotations[project_denomination]["rse_ranges"]
     df_par = pdf_to_paragraphs(input_file, rse_ranges=rse_ranges)
     df_par.insert(0, "project_denomination", project_denomination)
+    df_par.insert(1, "project_sector", project_sector)
     df_par = df_par.drop_duplicates(['paragraph'])
     df_par = cut_footer(df_par, verbose=True)
     df_par = cut_header(df_par, verbose=True)
@@ -339,7 +341,7 @@ def get_final_paragraphs(input_file_dict_annotations):
     return df_par
 
 
-def create_final_dataset(conf):
+def parse_dpefs_paragraphs_into_a_dataset(conf):
     """
     Create structured paragraphs from dpef, using only rse sections.
     :param annotations_filename: path to denomination - rse_range mapping
@@ -381,19 +383,19 @@ if __name__ == "__main__":
     if args.mode == "final":
         if args.task in ["parser", "both"]:
             print("Parse paragraph level text from rse sections in DPEF.")
-            create_final_dataset(Config)
+            parse_dpefs_paragraphs_into_a_dataset(Config)
             print("Over")
         if args.task in ["sententizer", "both"]:
             print("Sententize sentences from paragraphs of rse sections in DPEF.")
-            sententizer.run_sententizer(Config)
+            sententizer.turn_paragraphs_into_sentences(Config)
             print("Over")
 
     elif args.mode == "debug":
         if args.task in ["parser", "both"]:
             print("Parse paragraph level text from rse sections in DPEF.")
-            create_final_dataset(DebugConfig)
+            parse_dpefs_paragraphs_into_a_dataset(DebugConfig)
             print("Over")
         if args.task in ["sententizer", "both"]:
             print("Sententize sentences from paragraphs of rse sections in DPEF.")
-            sententizer.run_sententizer(DebugConfig)
+            sententizer.turn_paragraphs_into_sentences(DebugConfig)
             print("Over")
