@@ -348,7 +348,8 @@ def get_final_paragraphs(input_file_dict_annotations):
     """
     input_file, dict_annotations = input_file_dict_annotations
     project_denomination = input_file.name.split("_")[0]
-    project_sector = input_file.parent.name
+    company_sector = input_file.parent.name
+    document_year = input_file.name.split("_")[1]
     t = time()
     print("Start for {} [{}]".format(
         project_denomination,
@@ -357,7 +358,8 @@ def get_final_paragraphs(input_file_dict_annotations):
     rse_ranges = dict_annotations[project_denomination]["rse_ranges"]
     df_par = pdf_to_paragraphs(input_file, rse_ranges=rse_ranges)
     df_par.insert(0, "project_denomination", project_denomination)
-    df_par.insert(1, "project_sector", project_sector)
+    df_par.insert(1, "company_sector", company_sector)
+    df_par.insert(2, "document_year", document_year)
     df_par = df_par.drop_duplicates(['paragraph'])
     df_par = cut_footer(df_par, verbose=True)
     df_par = cut_header(df_par, verbose=True)
