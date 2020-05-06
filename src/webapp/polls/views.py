@@ -1,66 +1,51 @@
-from .models import Company, File, Sentence
-from django.http import HttpResponse
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic.edit import FormView
-from django.urls import reverse
+from .models import Company, DPEF
+from django.views.generic.edit import View
 from django.views import generic
-from .forms import ImportRSEForm, Sectors
+from .forms import BasicSearchForm, SearchForm
+from django.shortcuts import render
 
 
-class IndexView(generic.ListView):
+class IndexView(View):
     template_name = 'polls/index.html'
+    form_class = BasicSearchForm
+
+    @staticmethod
+    def get_context(form, response=None):
+        context = {'form': form}
+        if response is not None:
+            context['response'] = response
+        return context
+
+    def render(self, request, context: dict):
+        return render(request, self.template_name, context)
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class())
+        return self.render(request, context)
+
+
+class SearchView(IndexView):
+    template_name = 'polls/search.html'
+    form_class = SearchForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        response = None
+        if form.is_valid():
+            response = None  # TODO: Complete this to get a valid response.
+        context = self.get_context(form, response)
+        return self.render(request, context)
+
+
+class CompanyListView(generic.ListView):
+    template_name = 'polls/company_list.html'
     context_object_name = 'company_list'
 
     def get_queryset(self):
-        return Company.objects.all()
+        companies = Company.objects.all()
+        return companies
 
 
-# class CompanySectorView(FormView):
-#     template_name = 'polls/company_sector_form.html'
-#     form_class =
-
-class ImportRSEView(FormView):
-    template_name = 'polls/company_forms.html'
-    form_class = ImportRSEForm
-    success_url = 'polls:importRSE'
-
-    def form_valid(self, form):
-        # This method is called when valid form data has been POSTed.
-        # It should return an HttpResponse.
-        # form.send_email()
-        return super().form_valid(form)
-
-
-def companies(request):
-    return HttpResponseRedirect(reverse('polls:index'))
-
-
-class CompanyView(generic.DetailView):
+class CompanyDetailView(generic.DetailView):
     model = Company
     # template_name = 'polls/company_detail.html'
-
-
-def set_file(request, company_id):
-    company = get_object_or_404(Company, pk=company_id)
-    try:
-        selected_choice = company.file_set.get(pk=request.POST['file'])
-    except (KeyError, File.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(request, 'polls/company_forms.html', {
-            'company': company,
-            'error_message': "You didn't select a choice.",
-        })
-    else:
-        # selected_choice.votes += 1
-        # selected_choice.save()
-        # Always return an HttpResponseRedirect after successfully dealing
-        # with POST data. This prevents data from being posted twice if a
-        # user hits the Back button.
-        return HttpResponseRedirect(reverse('polls:company', args=(company.id,)))
-
-
-
-
-
-

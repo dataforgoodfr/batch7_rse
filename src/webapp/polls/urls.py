@@ -6,12 +6,8 @@ from . import views
 app_name = 'polls'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
-    # ex: /polls/company/
-    path('company/', views.companies, name='companies'),
-    # ex: /polls/company/5/
-    path('company/<int:pk>/', views.CompanyView.as_view(), name='company'),
-    path('company/<int:company_id>/set/', views.set_file, name='set_file'),
-    path('importRSE/', views.ImportRSEView.as_view(), name='importRSE'),
-    # path('sector/form/', views.Se)
+    path('entreprises/', views.CompanyListView.as_view(), name='company_list'),
+    path('entreprises/<int:pk>/', views.CompanyDetailView.as_view(), name='company_detail'),
+    path('search/', views.SearchView.as_view(), name='search'),
 ]
 

@@ -4,7 +4,7 @@
     {% load static %}
 
     <link rel="stylesheet" type="text/css" href="{% static 'polls/base.css' %}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
     <title>{% block title %}DataForGood{% endblock %}</title>
 
@@ -19,12 +19,12 @@
         <ul>
             <li><a href="/polls/">Accueil</a></li>
             <li><a href="/polls/entreprises/">Entreprises</a></li>
-            <li><a href="/polls/rechercher/">Rechercher</a></li>
+            <li><a href="/polls/search/">Rechercher</a></li>
         </ul>
       {% endblock %}
     </div>
-    <div id="content" class="col-sm-9">>
-        {% block content %}{% endblock %}
+    <div id="content" class="col-sm-9">
+        {% block content %} {% endblock %}
     </div>
   </div>
 </div>

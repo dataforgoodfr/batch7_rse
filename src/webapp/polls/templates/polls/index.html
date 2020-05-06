@@ -1,13 +1,19 @@
 
 {% extends "base.html" %}
 {% block content %}
-    {% if company_list %}
-        <ul>
-        {% for company in company_list %}
-            <li><a href="/polls/company/{{ company.id }}/">{{ company.name }}</a></li>
+    <p>Ceci est la page d'accueil, décrivant le site.</p>
+    <form action="{% url 'polls:search' %}" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="fieldWrapper">
+                {{ field.errors }}
+                {{ field.label_tag }} {{ field }}
+                {% if field.help_text %}
+                <p class="help">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
         {% endfor %}
-        </ul>
-    {% else %}
-        <p>No polls are available.</p>
-    {% endif %}
+        <input type="submit" value="Rechercher">
+    </form>
 {% endblock content %}
+
