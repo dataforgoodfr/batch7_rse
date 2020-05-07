@@ -111,7 +111,7 @@ def load_weighted_vectorizer(conf,
     return nlp
 
 
-if __name__ == __main__:
+if __name__ == "__main__":
 #     TEST_MODE = True  # TODO: delete when in production.
 #     if TEST_MODE:
 #         nlp = load_weighted_vectorizer(Config, create_from_scratch=True) 
