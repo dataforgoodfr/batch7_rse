@@ -1,11 +1,11 @@
 desktop.ini
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
-src/webapp/polls/rse_model/data/input/Entreprises/INSEE/*
+webapp/polls/rse_model/data/input/Entreprises/INSEE/*
 .idea
 *__pycache*
 *debug*.ipynb
 *_debug.csv
 *model_debug/*
 src/env/*
-src/webapp/polls/rse_model/data/model/*
+webapp/polls/rse_model/data/model/*
