@@ -62,7 +62,7 @@ class DPEF(dm.Model):
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
     file_object = dm.FileField(unique=True, validators=[_validate_file_extension],
-                               upload_to='models/dpef/',
+                               upload_to='polls/models/dpef/',
                                verbose_name=_("Fichier PDF"), help_text=_("Document DPEF ou DDR au format PDF."))
 
     year = dm.IntegerField(choices=[(i, i) for i in range(1990, date.today().year + 1)],  # list of years since 1990
@@ -117,7 +117,7 @@ class Sentence(dm.Model):
     context = dm.TextField(verbose_name=_("Contexte"),
                            help_text=_("Paragraphe contenant la phrase. "
                                        "Permet de redonner du contexte à la phrase."))
-    vector = Vector()  # put to non mandatory.
+    vector = Vector(default="0")  # put to non mandatory.
     # put filtres here like this one :
     # exacts_words = models.BooleanField(default=False)
 
