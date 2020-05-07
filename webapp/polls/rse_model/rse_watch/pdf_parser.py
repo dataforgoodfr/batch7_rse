@@ -371,7 +371,14 @@ def get_final_paragraphs(input_file_dict_annotations):
     )
     return df_par
 
+# TODO: code this
+def parse_dpef(dpef_path, conf):
 
+    df = pd.DataFrame()
+    return df
+
+
+# TODO: move, as it will only be a helper method for development time.
 def parse_dpefs_paragraphs_into_a_dataset(conf):
     """
     Create structured paragraphs from dpef, using only rse sections.
