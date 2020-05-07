@@ -116,7 +116,7 @@ class Sentence(dm.Model):
     context = dm.TextField(verbose_name=_("Contexte"),
                            help_text=_("Paragraphe contenant la phrase. "
                                        "Permet de redonner du contexte à la phrase."))
-    vector = Vector()  # put to non mandatory.
+    vector = Vector(default="0")  # put to non mandatory.
     # put filtres here like this one :
     # exacts_words = models.BooleanField(default=False)
 
