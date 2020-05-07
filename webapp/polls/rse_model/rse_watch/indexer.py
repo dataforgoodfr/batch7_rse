@@ -7,12 +7,12 @@ from pathlib import Path
 
 # local import
 from scoring import Scoring, VectorizerComponent, similarity_to_vector
-from scoring import spacy  # This import of spacy has custom extension to DOc object
+from scoring import spacy  # This import of spacy has custom extension to Doc object
 from conf import *
 
 
 def empty_directory(path_to_dir):
-    """ Util function to delet teh inside of a dir e.g. deleting data/model/* """
+    """ Util function to delet the inside of a dir e.g. deleting data/model/* """
     for root, dirs, files in os.walk(path_to_dir):
         for f in files:
             os.unlink(os.path.join(root, f))
@@ -85,7 +85,12 @@ def initialize_weighted_vectorizer(conf):
 
 def load_weighted_vectorizer(conf,
                              create_from_scratch=False):
-    """ Load custom spacy model, which should be created beforehand"""
+    """ Load custom spacy model, which should be created beforehand
+    To use the returned 'nlp' model:
+        # doc = nlp_wv("Une phrase simple avec des mots")
+        # numpy_vector_of_the_sentence = doc.vector
+        # similarity = doc.similarity_to_vector(another_numpy_vector)
+    """
     if create_from_scratch:
         print("Initialization from scratch. [force_creation is set to 'True']")
         empty_directory(conf.model_dir)
@@ -106,16 +111,14 @@ def load_weighted_vectorizer(conf,
     return nlp
 
 
-TEST_MODE = True
-
-if TEST_MODE:
-    nlp = load_weighted_vectorizer(Config, create_from_scratch=True)  # TODO: delete when in production.
-    print(nlp("Ceci est un test pollution marine").vector.sum())
-    print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
-
-
-nlp = load_weighted_vectorizer(Config)
-# Usage:
-# doc = nlp_wv("Une phrase simple avec des mots")
-# numpy_vector_of_the_sentence = doc.vector
-# similarity = doc.similarity_to_vector(another_numpy_vector)
+if __name__ == __main__:
+#     TEST_MODE = True  # TODO: delete when in production.
+#     if TEST_MODE:
+#         nlp = load_weighted_vectorizer(Config, create_from_scratch=True) 
+#         print(nlp("Ceci est un test pollution marine").vector.sum())
+#         print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
+    nlp = load_weighted_vectorizer(Config)
+    # Usage:
+    # doc = nlp_wv("Une phrase simple avec des mots")
+    # numpy_vector_of_the_sentence = doc.vector
+    # similarity = doc.similarity_to_vector(another_numpy_vector)
