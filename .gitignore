@@ -8,4 +8,4 @@ webapp/polls/rse_model/data/input/Entreprises/INSEE/*
 *_debug.csv
 *model_debug/*
 src/env/*
-*webapp/polls/rse_model/data/model/*
+src/webapp/polls/rse_model/data/model/*
