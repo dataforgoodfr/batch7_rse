@@ -5,6 +5,7 @@ from django.db.models.fields.files import FieldFile
 from datetime import date
 import os
 import numpy as np
+from polls.rse_model.rse_watch.indexer import nlp
 
 
 class ActivitySector(dm.Model):
@@ -119,6 +120,14 @@ class Sentence(dm.Model):
     vector = Vector()  # put to non mandatory.
     # put filtres here like this one :
     # exacts_words = models.BooleanField(default=False)
+
+    def get_vector(self):
+        doc = nlp(self.text)
+        vector = doc.vector
+        return vector
+
+    def get_similarity(self, vector):
+        return self.get_vector().similarity_to_vector(vector)
 
     def clean(self):
         super().clean()

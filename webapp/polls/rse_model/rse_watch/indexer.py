@@ -6,9 +6,9 @@ import pickle
 from pathlib import Path
 
 # local import
-from scoring import Scoring, VectorizerComponent, similarity_to_vector
-from scoring import spacy  # This import of spacy has custom extension to DOc object
-from conf import *
+from polls.rse_model.rse_watch.scoring import Scoring, VectorizerComponent, similarity_to_vector
+from polls.rse_model.rse_watch.scoring import spacy  # This import of spacy has custom extension to DOc object
+from polls.rse_model.rse_watch.conf import *
 
 
 def empty_directory(path_to_dir):
