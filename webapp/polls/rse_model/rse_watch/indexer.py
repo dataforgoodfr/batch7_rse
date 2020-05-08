@@ -1,14 +1,15 @@
 # general imports
 import pandas as pd
-import os
+import os, sys
 import shutil
 import pickle
 from pathlib import Path
 
 # local import
-from scoring import Scoring, VectorizerComponent, similarity_to_vector
+from scoring import Scoring, VectorizerComponent
 from scoring import spacy  # This import of spacy has custom extension to Doc object
 from conf import *
+
 
 
 def empty_directory(path_to_dir):
@@ -33,11 +34,11 @@ def initialize_scorer(conf):
     nlp = spacy.load('fr_core_news_sm')
 
     # index
-    scorer = Scoring.create(SCORING_METHOD)
+    scorer = Scoring.create(conf.SCORING_METHOD)
     documents_words = []
     for doc in nlp.pipe(documents, disable=["parser", "ner"]):  # only tagger is needed here
         documents_words.append([token.text for token in doc if token.pos_ != "PUNCT"])
-    print("Indexing from {} sentences with {} as method".format(len(documents_words), SCORING_METHOD))
+    print("Indexing from {} sentences with {} as method".format(len(documents_words), conf.SCORING_METHOD))
     scorer.index(documents_words)
 
     # save
