@@ -22,7 +22,7 @@ from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextL
 
 # local imports
 import sententizer
-from conf import *
+from webapp.conf import *
 
 def get_list_of_pdfs_filenames(dirName):
     """
