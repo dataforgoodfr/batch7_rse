@@ -6,10 +6,8 @@ import pickle
 from pathlib import Path
 
 # local import
-from scoring import Scoring, VectorizerComponent
-from scoring import spacy  # This import of spacy has custom extension to Doc object
-from conf import *
-
+from webapp.polls.rse_model.rse_watch.scoring import Scoring, VectorizerComponent, spacy
+# NB: This import of spacy has custom extension to Doc object
 
 
 def empty_directory(path_to_dir):
@@ -112,14 +110,17 @@ def load_weighted_vectorizer(conf,
     return nlp
 
 
-if __name__ == "__main__":
-#     TEST_MODE = True  # TODO: delete when in production.
-#     if TEST_MODE:
-#         nlp = load_weighted_vectorizer(Config, create_from_scratch=True) 
-#         print(nlp("Ceci est un test pollution marine").vector.sum())
-#         print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
-    nlp = load_weighted_vectorizer(Config)
+def run(config):
+    """"""
+    # TEST_MODE = True  # TODO: delete when in production.
+    # if TEST_MODE:
+    #     nlp = load_weighted_vectorizer(Config, create_from_scratch=True)
+    #     print(nlp("Ceci est un test pollution marine").vector.sum())
+    #     print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
+
+    nlp = load_weighted_vectorizer(config)
     # Usage:
     # doc = nlp_wv("Une phrase simple avec des mots")
     # numpy_vector_of_the_sentence = doc.vector
     # similarity = doc.similarity_to_vector(another_numpy_vector)
+    return nlp
