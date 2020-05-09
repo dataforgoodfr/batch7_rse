@@ -1,6 +1,7 @@
 from pathlib import Path
 from rse_watch.scoring import ScoringMethod
 
+
 class Config:
 
     def __init__(self, src_model: Path):

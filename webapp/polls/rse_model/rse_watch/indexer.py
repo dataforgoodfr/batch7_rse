@@ -4,14 +4,15 @@ import os, sys
 import shutil
 import pickle
 from pathlib import Path
+import fr_core_news_md
 
 # local import
-from webapp.polls.rse_model.rse_watch.scoring import Scoring, VectorizerComponent, spacy
+from rse_watch.scoring import Scoring, VectorizerComponent, spacy
 # NB: This import of spacy has custom extension to Doc object
 
 
 def empty_directory(path_to_dir):
-    """ Util function to delet the inside of a dir e.g. deleting data/model/* """
+    """ Util function to delete the inside of a dir e.g. deleting data/model/* """
     for root, dirs, files in os.walk(path_to_dir):
         for f in files:
             os.unlink(os.path.join(root, f))
@@ -22,6 +23,7 @@ def empty_directory(path_to_dir):
 def initialize_scorer(conf):
     # load data
     df = pd.read_csv(conf.parsed_sent_file, sep=";")
+
     documents = df["sentence"].values.tolist()
 
     # load *small* nlp parser for pos tagging
@@ -30,6 +32,7 @@ def initialize_scorer(conf):
         spacy.cli.download('fr_core_news_sm')
         print("done.")
     nlp = spacy.load('fr_core_news_sm')
+
 
     # index
     scorer = Scoring.create(conf.SCORING_METHOD)
@@ -72,7 +75,7 @@ def initialize_weighted_vectorizer(conf):
         print("Downloading fr_core_news_md spacy model for pos tagging...")
         spacy.cli.download('fr_core_news_md')
         print("done.")
-    nlp_wv = spacy.load('fr_core_news_md')
+    nlp_wv = fr_core_news_md.load()
     nlp_wv.remove_pipe("ner")  # no need, and it seems not implemented for french model
     vectorizer_component = VectorizerComponent()
     vectorizer_component.add_scorer(scorer)

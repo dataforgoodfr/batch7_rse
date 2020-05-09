@@ -23,6 +23,25 @@ To setup your local env using virtualenvwrapper use:
 
     mkvirtualenv rse_watch -r requirements.txt
 
-If you want to go source your virtual env:
+If you want to source your virtual env:
 
     workon rse_watch
+    
+# Running the django server
+
+Before running Django, the dpefs must be parsed. 
+Currently, this is done by creating a file dpef_sentences.csv, which is then used to train the BM25 scorer and to save a Spacy model that can do weighted vectorization of sentences (therefore called "weighted vectorizer"). You can parse the PDFs and instantiate the model via:
+
+    cd webapp
+    python main.py
+
+Hack to parse only a subset of the PDFs (still takes up to (6 minutes)):
+
+	cd webapp
+	python main.py --mode debug
+
+The model is created under (DEBUG)-Model, but can be renamed to "Model" to be used by Django in debug phases.
+Django can then be run with:
+
+    cd webapp
+    python manage.py runserver
