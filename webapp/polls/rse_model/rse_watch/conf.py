@@ -15,12 +15,11 @@ class Config:
         self.src_model = src_model
         self.dpef_dir = self.src_model / "DPEFs/"
         self.annotations_file = self.src_model / "Companies/companies_metadata.csv"
-        self.parsed_par_file = self.src_model / "DPEFs/__parsed_dpefs__/dpef_paragraphs.csv"
         self.parsed_sent_file = self.src_model / "DPEFs/__parsed_dpefs__/dpef_sentences.csv"
         self.model_dir = self.src_model / "Model/"
         self.scorer_pickle_file = self.model_dir / "vectorizer_component/words_scorer.pckl"
         self.SCORING_METHOD = ScoringMethod.BM25  # "bm25self.scorer_pickle_file = self.model_dir / "vectorizer_component/words_scorer.pckl""
-
+        self.MIN_NB_OF_WORDS = 3
 
 # smaller task for debug/tests
 class DebugConfig(Config):

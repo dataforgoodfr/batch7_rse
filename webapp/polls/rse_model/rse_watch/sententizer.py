@@ -3,7 +3,6 @@ from spacy.tokens import Span
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
-MIN_NB_OF_WORDS = 3
 
 
 def get_nb_words(doc):
@@ -39,49 +38,19 @@ def load_nlp_sententizer_object():
     return nlp
 
 
-def sententize_df(df):
+def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
     nlp = load_nlp_sententizer_object()
-    df["paragraph_sentences"] = df["paragraph"].apply(
-        lambda x: [sent.text for sent in nlp(x).sents if sent._.nb_words > MIN_NB_OF_WORDS]
+    df_sent = df_par
+    df_sent["paragraph_sentences"] = df_sent["paragraph"].apply(
+        lambda x: [sent.text for sent in nlp(x).sents if sent._.nb_words > config.MIN_NB_OF_WORDS]
     ).values
-    df = df[df["paragraph_sentences"].apply(lambda x: len(x) > 0)]  # keep if there was >0 valid sentences
-    return df
+    df_sent = df_sent[df_sent["paragraph_sentences"].apply(lambda x: len(x) > 0)]  # keep if there was >0 valid sentences
+    df_sent = (df_sent
+               .set_index(df_sent.columns[:-1].values.tolist())['paragraph_sentences']  # all except last colname as index
+               .apply(pd.Series)
+               .stack()
+               .reset_index()
+               .drop('level_{}'.format(len(df_sent.columns) - 1), axis=1)
+               .rename(columns={0: 'sentence'}))
+    return df_sent
 
-
-# TODO: maybe use this in pdf_parser as well ?
-def parallelize_dataframe_apply(df, func):
-    n_cores = mp.cpu_count()-1 or 1   # use all except one if more than one available
-    df_split = np.array_split(df, n_cores)
-    print("Parallel sententization with {} cores".format(n_cores))
-    pool = mp.Pool(n_cores)
-    df = pd.concat(pool.map(func, df_split))
-    pool.close()
-    pool.join()
-    return df
-
-
-# TODO: optimize with parallelism or direct writing to sql database
-# TODO: parallelize the index as well ?
-# Takes > 20 sec for 4 (large) dpefs (Energéticien) so not really scalable...
-def turn_paragraphs_into_sentences(conf):
-    """
-    Transform paragrph level text to sentence level text, keeping only sentences with more than N words
-    :param conf: configuration class with paths to files and directories
-    :return:
-    """
-    print("Reading paragraph level data.")
-    df = pd.read_csv(conf.parsed_par_file, sep=";")
-    df = df[df.paragraph.notna()] # sanity check
-    df = parallelize_dataframe_apply(df, sententize_df)
-    # convert to 1 row / sentence format
-    print("Get sentence level structure")
-    df = (df
-           .set_index(df.columns[:-1].values.tolist())['paragraph_sentences']  # all except last colname as index
-           .apply(pd.Series)
-           .stack()
-           .reset_index()
-           .drop('level_{}'.format(len(df.columns) - 1), axis=1)
-           .rename(columns={0: 'sentence'}))
-    # save
-    df.to_csv(conf.parsed_sent_file, sep=";")
-    return df

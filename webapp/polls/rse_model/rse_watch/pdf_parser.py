@@ -5,6 +5,7 @@ import re
 import argparse
 from time import time
 import multiprocessing as mp
+from functools import partial
 
 # processing imports
 import pandas as pd
@@ -25,6 +26,7 @@ from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextL
 
 import rse_watch.sententizer as sententizer
 
+
 def get_list_of_pdfs_filenames(dirName):
     """
         For the given path, get the List of all files in the directory tree
@@ -33,7 +35,7 @@ def get_list_of_pdfs_filenames(dirName):
     for path, subdirs, files in os.walk(dirName):
         for name in files:
             if (name.lower().endswith(".pdf")):
-                paths.append((Path(path+"/"+name)))
+                paths.append((Path(path + "/" + name)))
     return paths
 
 
@@ -41,7 +43,7 @@ def clean_child_str(child_str):
     child_str = ' '.join(child_str.split()).strip()
     # dealing with hyphens:
     # 1. Replace words separators in row by a different char than hyphen (i.e. longer hyphen)
-    child_str = re.sub("[A-Za-z] - [A-Za-z]", lambda x:x.group(0).replace(' - ', ' – '), child_str)
+    child_str = re.sub("[A-Za-z] - [A-Za-z]", lambda x: x.group(0).replace(' - ', ' – '), child_str)
     # 2. Attach the negative term to the following number, # TODO: inutile ? Enlever ?
     child_str = re.sub("(- )([0-9])", r"-\2", child_str)
     return child_str
@@ -82,7 +84,8 @@ class PDFPageDetailedAggregator(PDFPageAggregator):
         self.rows = sorted(self.rows, key=lambda x: (x[0], -x[2]))
         self.result = ltpage
 
-def pdf_to_raw_content(input_file, rse_range=None):
+
+def get_raw_content_from_pdf(input_file, rse_range=None):
     """
     Parse pdf file,  within rse range of pages if needed, and return list of rows with all metadata
     :param input_file: PDF filename
@@ -104,7 +107,7 @@ def pdf_to_raw_content(input_file, rse_range=None):
         pages_selection = range(rse_range[0] - 1, (rse_range[1] - 1) + 1)
     else:
         pages_selection = range(0, 10000)
-    first_page_nb = pages_selection[0]+1  # to start indexation at 1
+    first_page_nb = pages_selection[0] + 1  # to start indexation at 1
     # Checked: only useful pages are actually parsed.
     for nb_page_parsed, page in enumerate(PDFPage.create_pages(doc)):
         if nb_page_parsed in pages_selection:
@@ -131,7 +134,7 @@ def clean_paragraph(p):
     return p
 
 
-def raw_content_to_paragraphs(device, idx_first_page):
+def get_paragraphs_from_raw_content(device, idx_first_page):
     """
     From parsed data with positional information, aggregate into paragraphs using simple rationale
     :param device:
@@ -145,7 +148,8 @@ def raw_content_to_paragraphs(device, idx_first_page):
         page_nb = idx_first_page + page_nb  # elsewise device starts again at 0
         if page_nb not in column_text.keys():
             column_text[page_nb] = {}
-        x_group = round(x_min) // 150  # Si trois paragraphes -> shift de 170, max à droite ~600 # problem was shifted titles
+        x_group = round(
+            x_min) // 150  # Si trois paragraphes -> shift de 170, max à droite ~600 # problem was shifted titles
         if x_group in column_text[page_nb].keys():
             column_text[page_nb][x_group].append((y_min, y_max, text))
         else:
@@ -173,8 +177,8 @@ def raw_content_to_paragraphs(device, idx_first_page):
                 current_y_min = y_min
                 max_height = max(previous_height, current_height)
 
-                relative_var_in_height = (current_height-previous_height)/float(max_height)  # Was min before ???
-                relative_var_in_y_min = abs(current_y_min-previous_y_min)/float(current_height)
+                relative_var_in_height = (current_height - previous_height) / float(max_height)  # Was min before ???
+                relative_var_in_y_min = abs(current_y_min - previous_y_min) / float(current_height)
 
                 positive_change_in_font_size = (relative_var_in_height > 0.05)
                 change_in_font_size = abs(relative_var_in_height) > 0.05
@@ -205,23 +209,23 @@ def raw_content_to_paragraphs(device, idx_first_page):
             # structure the output
             for p in x_groups_data_paragraphs:
                 pararaphs_list.append({"paragraph_id": paragraph_index,
-                                           "page_nb": page_nb,
-                                           "x_group": x_group_name,
-                                           "y_min_paragraph": round(p["y_min"]),
-                                           "y_max_paragraph": round(p["y_max"]),
-                                           "paragraph": p["paragraph"]})
+                                       "page_nb": page_nb,
+                                       "x_group": x_group_name,
+                                       "y_min_paragraph": round(p["y_min"]),
+                                       "y_max_paragraph": round(p["y_max"]),
+                                       "paragraph": p["paragraph"]})
                 paragraph_index += 1
     df_par = pd.DataFrame(data=pararaphs_list,
-                                  columns=["paragraph_id",
-                                           "page_nb",
-                                           "paragraph",
-                                           "x_group",
-                                           "y_min_paragraph",
-                                           "y_max_paragraph"])
+                          columns=["paragraph_id",
+                                   "page_nb",
+                                   "paragraph",
+                                   "x_group",
+                                   "y_min_paragraph",
+                                   "y_max_paragraph"])
     return df_par
 
 
-def pdf_to_paragraphs(input_file, rse_ranges=None):
+def parse_paragraphs_from_pdf(input_file, rse_ranges=None):
     """
     From filename, parse pdf and output structured paragraphs with filter on rse_ranges uif present.
     :param input_file: filename ending  with ".pdf" or ".PDF".
@@ -231,133 +235,134 @@ def pdf_to_paragraphs(input_file, rse_ranges=None):
     rse_ranges_list = list(map(eval, rse_ranges.split("|")))
     df_paragraphs_list = []
     for rse_range in rse_ranges_list:
-        df_par, idx_first_page = pdf_to_raw_content(input_file, rse_range=rse_range)
-        df_par = raw_content_to_paragraphs(df_par, idx_first_page)
+        df_par, idx_first_page = get_raw_content_from_pdf(input_file, rse_range=rse_range)
+        df_par = get_paragraphs_from_raw_content(df_par, idx_first_page)
         df_paragraphs_list.append(df_par)
     df_par = pd.concat(df_paragraphs_list, axis=0, ignore_index=True)
     return df_par
 
 
 def compute_string_similarity(a, b):
-    "Compares two strings and returns a similarity ratio between 0 and 1"
+    """Compares two strings and returns a similarity ratio between 0 and 1 """
     return SequenceMatcher(None, a, b).ratio()
 
 
 def cut_footer(df_par, p=0.8, verbose=False):
-    "Cut the paragraph with lowest y_min if other paragraphs are similar"
-    "The similarity is measured with function compute_string_similarity"
-    len_first=len(df_par)
-    footers=[]
+    """
+    Cut the paragraph with lowest y_min if other paragraphs are similar.
+    The similarity is measured with function compute_string_similarity
+    """
+    len_first = len(df_par)
+    footers = []
     deno = df_par['project_denomination'].values[0]
     c = 0
     while True:
         c += 1
-        len_start=len(df_par)
+        len_start = len(df_par)
         y_bottom = df_par['y_min_paragraph'].min()
-        y_top = df_par[df_par['y_min_paragraph']==y_bottom]['y_max_paragraph'].min()
-        DSmin = df_par[(df_par['y_max_paragraph']==y_top)&(df_par['y_min_paragraph']==y_bottom)].copy()
-        if len(DSmin)==1 and c==1:
-            if verbose==True:
-                print('\n',deno)
+        y_top = df_par[df_par['y_min_paragraph'] == y_bottom]['y_max_paragraph'].min()
+        DSmin = df_par[(df_par['y_max_paragraph'] == y_top) & (df_par['y_min_paragraph'] == y_bottom)].copy()
+        if len(DSmin) == 1 and c == 1:
+            if verbose:
+                print('\n', deno)
             return df_par
-        if len(DSmin)==1:
+        if len(DSmin) == 1:
             break
         for candidate in DSmin['paragraph'].values:
-            DSmin['is_foot']=DSmin['paragraph'].apply(lambda x: compute_string_similarity(str(x),candidate)>p)
-            count = len((DSmin[DSmin['is_foot']==True]))
-            if  count>1:
+            DSmin['is_foot'] = DSmin['paragraph'].apply(lambda x: compute_string_similarity(str(x), candidate) > p)
+            count = len((DSmin[DSmin['is_foot'] == True]))
+            if count > 1:
                 footers.append((candidate, count))
-                index_foot = DSmin[DSmin['is_foot']==True].index
+                index_foot = DSmin[DSmin['is_foot'] == True].index
                 break
             else:
                 DSmin = DSmin.drop(DSmin.index[0])
-        if len(footers)==0:
-            if verbose==True:
-                print('\n',deno)
+        if len(footers) == 0:
+            if verbose:
+                print('\n', deno)
             return df_par
         len_end = (len(df_par[~df_par.index.isin(index_foot)]))
         df_par = df_par[~df_par.index.isin(index_foot)]
-        if len_start==len_end:
+        if len_start == len_end:
             break
-    #Below part is for human check that the function works properly
-    if verbose==True:
-        len_last = len(df_par)
-        S = sum([i for _,i in footers])
-        print('\n',deno)
-        print(f"Removed {len_first-len_last} lines. {len_first-len_last==S}")
-        if footers!=[]:
-            L = [foot+" x "+ str(count) for foot, count in footers]
-            print("Footers(s) --->\n",'\n '.join(L))
+    # Below part is for human check that the function works properly
+    # if verbose:
+    #     len_last = len(df_par)
+    #     S = sum([i for _,i in footers])
+    #     print('\n',deno)
+    #     print(f"Removed {len_first-len_last} lines. {len_first-len_last==S}")
+    #     if footers!=[]:
+    #         L = [foot+" x "+ str(count) for foot, count in footers]
+    #         print("Footers(s) --->\n",'\n '.join(L))
     return df_par
 
 
 def cut_header(df_par, p=0.8, verbose=False):
     "Same as function cut_footer() but for headers"
-    len_first=len(df_par)
-    headers=[]
+    len_first = len(df_par)
+    headers = []
     deno = df_par['project_denomination'].values[0]
-    c=0
+    c = 0
     while True:
-        c +=1
-        len_start=len(df_par)
+        c += 1
+        len_start = len(df_par)
         y_top = df_par['y_max_paragraph'].max()
-        y_bottom = df_par[df_par['y_max_paragraph']==y_top]['y_min_paragraph'].max()
-        DSmax = df_par[(df_par['y_max_paragraph']==y_top)&(df_par['y_min_paragraph']==y_bottom)].copy()
-        if len(DSmax)==1 and c==1:
-            if verbose==True:
-                print('\n',deno)
+        y_bottom = df_par[df_par['y_max_paragraph'] == y_top]['y_min_paragraph'].max()
+        DSmax = df_par[(df_par['y_max_paragraph'] == y_top) & (df_par['y_min_paragraph'] == y_bottom)].copy()
+        if len(DSmax) == 1 and c == 1:
+            if verbose:
+                print('\n', deno)
             return df_par
-        if len(DSmax)==1:
+        if len(DSmax) == 1:
             break
         for candidate in DSmax['paragraph'].values:
-            DSmax['is_head']=DSmax['paragraph'].apply(lambda x: compute_string_similarity(str(x),candidate)>p)
-            count = len((DSmax[DSmax['is_head']==True]))
-            if  count>1:
+            DSmax['is_head'] = DSmax['paragraph'].apply(lambda x: compute_string_similarity(str(x), candidate) > p)
+            count = len((DSmax[DSmax['is_head'] == True]))
+            if count > 1:
                 headers.append((candidate, count))
-                index_head = DSmax[DSmax['is_head']==True].index
+                index_head = DSmax[DSmax['is_head'] == True].index
                 break
             else:
                 DSmax = DSmax.drop(DSmax.index[0])
-        if len(headers)==0:
-            if verbose==True:
-                print('\n',deno)
+        if len(headers) == 0:
+            if verbose:
+                print('\n', deno)
             return df_par
         len_end = (len(df_par[~df_par.index.isin(index_head)]))
         df_par = df_par[~df_par.index.isin(index_head)]
-        if len_start==len_end:
+        if len_start == len_end:
             break
 
     # Below part is for human check that the function works properly
-    if verbose==True:
-        len_last = len(df_par)
-        S = sum([i for _,i in headers])
-        print('\n',deno)
-        print(f"Removed {len_first-len_last} lines. {len_first-len_last==S}")
-        if headers!=[]:
-            L = [head+" x "+ str(count) for head, count in headers]
-            print("Header(s) --->\n",'\n '.join(L))
+    # if verbose:
+    #     len_last = len(df_par)
+    #     S = sum([i for _, i in headers])
+    #     print('\n', deno)
+    #     print(f"Removed {len_first - len_last} lines. {len_first - len_last == S}")
+    #     if headers != []:
+    #         L = [head + " x " + str(count) for head, count in headers]
+    #         print("Header(s) --->\n", '\n '.join(L))
+
     return df_par
 
 
-# TRANSFORMATIONS PDF to TEXT
-
-def get_final_paragraphs(input_file_dict_annotations):
+def get_paragraphs_dataframe_from_pdf(dpef_path, dict_annotations):
     """
-    Get paragraphs from pdf of one DPEF.
-    :param input_file_dict_annotations: (inpout_file, dict_annotations) tuple
+    Parse a pdf and return a pandas df with paragraph level parsed text.
+
+    :param dpef_path_dict_annotations: (inpout_file, dict_annotations) tuple
     :return:
     """
-    input_file, dict_annotations = input_file_dict_annotations
-    project_denomination = input_file.name.split("_")[0]
-    company_sector = input_file.parent.name
-    document_year = input_file.name.split("_")[1]
+    project_denomination = dpef_path.name.split("_")[0]
+    company_sector = dpef_path.parent.name
+    document_year = dpef_path.name.split("_")[1]
     t = time()
     print("Start for {} [{}]".format(
         project_denomination,
-        input_file.name)
+        dpef_path.name)
     )
     rse_ranges = dict_annotations[project_denomination]["rse_ranges"]
-    df_par = pdf_to_paragraphs(input_file, rse_ranges=rse_ranges)
+    df_par = parse_paragraphs_from_pdf(dpef_path, rse_ranges=rse_ranges)
     df_par.insert(0, "project_denomination", project_denomination)
     df_par.insert(1, "company_sector", company_sector)
     df_par.insert(2, "document_year", document_year)
@@ -365,54 +370,58 @@ def get_final_paragraphs(input_file_dict_annotations):
     df_par = cut_footer(df_par, verbose=True)
     df_par = cut_header(df_par, verbose=True)
 
-    print("          End for {} [{}] - took {} seconds".format(
+    print("End for {} [{}] - took {} seconds".format(
         project_denomination,
-        input_file.name,
-        t-time())
+        dpef_path.name,
+        int(t - time()))
     )
     return df_par
 
 
-def parse_dpefs_paragraphs_into_a_dataset(conf):
+def get_sentences_dataframe_from_pdf(config, dpef_path):
+    """ Parse a pdf and return a pandas df with sentence level parsed text"""
+    dict_annotations = pd.read_csv(config.annotations_file, sep=";").set_index("project_denomination").T.to_dict()
+    df_par = get_paragraphs_dataframe_from_pdf(dpef_path, dict_annotations)
+    df_sent = sententizer.get_sentence_dataframe_from_paragraph_dataframe(df_par, config)
+    return df_sent
+
+
+def get_sentences_from_all_pdfs(config):
     """
-    Create structured paragraphs from dpef, using only rse sections.
-    :param annotations_filename: path to denomination - rse_range mapping
-    :param input_path: path to folder of DPEF pdfs
-    :param output_filename: path to output csv
+    Parses all dpefs into a sentence-level format and save the resulting csv according to config.
     """
-    dict_annotations = pd.read_csv(conf.annotations_file, sep=";").set_index("project_denomination").T.to_dict()
-    all_input_files = get_list_of_pdfs_filenames(conf.dpef_dir)
-    all_input_files = [input_file for input_file in all_input_files if input_file.name.split("_")[0] in dict_annotations.keys()]
-    input_data = list(zip(all_input_files, [dict_annotations]*len(all_input_files)))  # TODO change (?)
-    n_cores = mp.cpu_count()-1 or 1   # use all except one if more than one available
-    pool = mp.Pool(n_cores)
-    print("Multiprocessing with {} cores".format(n_cores))
-    paragraphs_df = list(tqdm(pool.imap(get_final_paragraphs, input_data), total=len(all_input_files)))
-    # TO DEBUG USE: annotated_dfs = [get_final_paragraphs(input_data[0])]
+    dict_annotations = pd.read_csv(config.annotations_file, sep=";").set_index("project_denomination").T.to_dict()
+    all_input_files = get_list_of_pdfs_filenames(config.dpef_dir)
+    all_input_files = [input_file for input_file in all_input_files if
+                       input_file.name.split("_")[0] in dict_annotations.keys()]
+
+    # PARALLELIZATION
+    parallel_get_sentences_dataframe_from_pdf = partial(get_sentences_dataframe_from_pdf, config)
+    n_cores = mp.cpu_count() - 1 or 1
+
+    with mp.Pool(n_cores) as pool:
+        print("Multiprocessing with {} cores".format(n_cores))
+        df_sents = list(
+            tqdm(pool.imap(parallel_get_sentences_dataframe_from_pdf, all_input_files), total=len(all_input_files)))
 
     # concat
-    paragraphs_df = pd.concat(paragraphs_df, axis=0, ignore_index=True)
+    df_sents = pd.concat(df_sents, axis=0, ignore_index=True)
     # create parent folder
-    pickle_path = conf.parsed_par_file.parent
+    pickle_path = config.parsed_sent_file.parent
     pickle_path.mkdir(parents=True, exist_ok=True)
-    paragraphs_df.to_csv(conf.parsed_par_file, sep=";", index=False)
+    # save to csv
+    df_sents.to_csv(config.parsed_sent_file, sep=";", index=False)
 
-    return paragraphs_df
+    return df_sents
 
-# TODO: will be updated when parse_pdf at pdf level is created
-def run(config, task="both"):
+
+def run(config):
     """
     Parse the pdfs into structured csv formats (for now)
     : param conf: conf object with relative paths.
     :param task: "parser", "sententizer" or "both" ; Whether to parse
     pdfs, sententize the paragraphs, or do both.
     """
-
-    if task in ["parser", "both"]:
-        print("Parse paragraph level text from rse sections in DPEF.")
-        parse_dpefs_paragraphs_into_a_dataset(config)
-        print("Over")
-    if task in ["sententizer", "both"]:
-        print("Sententize sentences from paragraphs of rse sections in DPEF.")
-        sententizer.turn_paragraphs_into_sentences(config)
-        print("Over")
+    df_sents = get_sentences_from_all_pdfs(config)
+    print(df_sents.shape)
+    return df_sents
