@@ -1,14 +1,13 @@
 # general imports
 import pandas as pd
-import os
+import os, sys
 import shutil
 import pickle
 from pathlib import Path
 
 # local import
-from polls.rse_model.rse_watch.scoring import Scoring, VectorizerComponent, similarity_to_vector
-from polls.rse_model.rse_watch.scoring import spacy  # This import of spacy has custom extension to DOc object
-from polls.rse_model.rse_watch.conf import *
+from webapp.polls.rse_model.rse_watch.scoring import Scoring, VectorizerComponent, spacy
+# NB: This import of spacy has custom extension to Doc object
 
 
 def empty_directory(path_to_dir):
@@ -33,11 +32,11 @@ def initialize_scorer(conf):
     nlp = spacy.load('fr_core_news_sm')
 
     # index
-    scorer = Scoring.create(SCORING_METHOD)
+    scorer = Scoring.create(conf.SCORING_METHOD)
     documents_words = []
     for doc in nlp.pipe(documents, disable=["parser", "ner"]):  # only tagger is needed here
         documents_words.append([token.text for token in doc if token.pos_ != "PUNCT"])
-    print("Indexing from {} sentences with {} as method".format(len(documents_words), SCORING_METHOD))
+    print("Indexing from {} sentences with {} as method".format(len(documents_words), conf.SCORING_METHOD))
     scorer.index(documents_words)
 
     # save
@@ -111,14 +110,17 @@ def load_weighted_vectorizer(conf,
     return nlp
 
 
-if __name__ == "__main__":
-#     TEST_MODE = True  # TODO: delete when in production.
-#     if TEST_MODE:
-#         nlp = load_weighted_vectorizer(Config, create_from_scratch=True)
-#         print(nlp("Ceci est un test pollution marine").vector.sum())
-#         print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
-    nlp = load_weighted_vectorizer(Config)
+def run(config):
+    """"""
+    # TEST_MODE = True  # TODO: delete when in production.
+    # if TEST_MODE:
+    #     nlp = load_weighted_vectorizer(Config, create_from_scratch=True)
+    #     print(nlp("Ceci est un test pollution marine").vector.sum())
+    #     print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
+
+    nlp = load_weighted_vectorizer(config)
     # Usage:
     # doc = nlp_wv("Une phrase simple avec des mots")
     # numpy_vector_of_the_sentence = doc.vector
     # similarity = doc.similarity_to_vector(another_numpy_vector)
+    return nlp
