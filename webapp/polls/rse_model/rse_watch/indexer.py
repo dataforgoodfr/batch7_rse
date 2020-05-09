@@ -4,6 +4,7 @@ import os
 import shutil
 import pickle
 from pathlib import Path
+import fr_core_news_md
 
 # local import
 from rse_watch.scoring import Scoring, VectorizerComponent, spacy
@@ -74,7 +75,7 @@ def initialize_weighted_vectorizer(conf):
         print("Downloading fr_core_news_md spacy model for pos tagging...")
         spacy.cli.download('fr_core_news_md')
         print("done.")
-    nlp_wv = spacy.load('fr_core_news_md')
+    nlp_wv = fr_core_news_md.load()
     nlp_wv.remove_pipe("ner")  # no need, and it seems not implemented for french model
     vectorizer_component = VectorizerComponent()
     vectorizer_component.add_scorer(scorer)

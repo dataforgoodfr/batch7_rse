@@ -399,6 +399,7 @@ def parse_dpefs_paragraphs_into_a_dataset(conf):
 
     return paragraphs_df
 
+
 # TODO: will be updated when parse_pdf at pdf level is created
 def run(config, task="both"):
     """
@@ -407,7 +408,6 @@ def run(config, task="both"):
     :param task: "parser", "sententizer" or "both" ; Whether to parse
     pdfs, sententize the paragraphs, or do both.
     """
-
     if task in ["parser", "both"]:
         print("Parse paragraph level text from rse sections in DPEF.")
         parse_dpefs_paragraphs_into_a_dataset(config)
