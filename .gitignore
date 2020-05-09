@@ -1,11 +1,14 @@
 desktop.ini
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
-webapp/polls/rse_model/data/input/Entreprises/INSEE/*
 .idea
+
+**/.ipynb_checkpoints/
 *__pycache*
+
 *debug*.ipynb
-*_debug.csv
-*model_debug/*
-src/env/*
-src/webapp/polls/rse_model/data/model/*
+(DEBUG)-*.csv
+**/(DEBUG)-Model/
+
+webapp/polls/rse_model/data/input/Entreprises/INSEE/* # deleted, might be removed from gitignore ?
+webapp/data/model/DPEFs/__parsed_dpefs__/
+webapp/data/model/Model/
+

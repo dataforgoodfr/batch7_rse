@@ -1,18 +1,18 @@
 # general imports
 import pandas as pd
-import os
+import os, sys
 import shutil
 import pickle
 from pathlib import Path
+import fr_core_news_md
 
 # local import
-from scoring import Scoring, VectorizerComponent, similarity_to_vector
-from scoring import spacy  # This import of spacy has custom extension to DOc object
-from conf import *
+from rse_watch.scoring import Scoring, VectorizerComponent, spacy
+# NB: This import of spacy has custom extension to Doc object
 
 
 def empty_directory(path_to_dir):
-    """ Util function to delet teh inside of a dir e.g. deleting data/model/* """
+    """ Util function to delete the inside of a dir e.g. deleting data/model/* """
     for root, dirs, files in os.walk(path_to_dir):
         for f in files:
             os.unlink(os.path.join(root, f))
@@ -23,6 +23,7 @@ def empty_directory(path_to_dir):
 def initialize_scorer(conf):
     # load data
     df = pd.read_csv(conf.parsed_sent_file, sep=";")
+
     documents = df["sentence"].values.tolist()
 
     # load *small* nlp parser for pos tagging
@@ -32,12 +33,13 @@ def initialize_scorer(conf):
         print("done.")
     nlp = spacy.load('fr_core_news_sm')
 
+
     # index
-    scorer = Scoring.create(SCORING_METHOD)
+    scorer = Scoring.create(conf.SCORING_METHOD)
     documents_words = []
     for doc in nlp.pipe(documents, disable=["parser", "ner"]):  # only tagger is needed here
         documents_words.append([token.text for token in doc if token.pos_ != "PUNCT"])
-    print("Indexing from {} sentences with {} as method".format(len(documents_words), SCORING_METHOD))
+    print("Indexing from {} sentences with {} as method".format(len(documents_words), conf.SCORING_METHOD))
     scorer.index(documents_words)
 
     # save
@@ -73,7 +75,7 @@ def initialize_weighted_vectorizer(conf):
         print("Downloading fr_core_news_md spacy model for pos tagging...")
         spacy.cli.download('fr_core_news_md')
         print("done.")
-    nlp_wv = spacy.load('fr_core_news_md')
+    nlp_wv = fr_core_news_md.load()
     nlp_wv.remove_pipe("ner")  # no need, and it seems not implemented for french model
     vectorizer_component = VectorizerComponent()
     vectorizer_component.add_scorer(scorer)
@@ -85,7 +87,12 @@ def initialize_weighted_vectorizer(conf):
 
 def load_weighted_vectorizer(conf,
                              create_from_scratch=False):
-    """ Load custom spacy model, which should be created beforehand"""
+    """ Load custom spacy model, which should be created beforehand
+    To use the returned 'nlp' model:
+        # doc = nlp_wv("Une phrase simple avec des mots")
+        # numpy_vector_of_the_sentence = doc.vector
+        # similarity = doc.similarity_to_vector(another_numpy_vector)
+    """
     if create_from_scratch:
         print("Initialization from scratch. [force_creation is set to 'True']")
         empty_directory(conf.model_dir)
@@ -106,16 +113,17 @@ def load_weighted_vectorizer(conf,
     return nlp
 
 
-TEST_MODE = True
+def run(config):
+    """"""
+    # TEST_MODE = True  # TODO: delete when in production.
+    # if TEST_MODE:
+    #     nlp = load_weighted_vectorizer(Config, create_from_scratch=True)
+    #     print(nlp("Ceci est un test pollution marine").vector.sum())
+    #     print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
 
-if TEST_MODE:
-    nlp = load_weighted_vectorizer(Config, create_from_scratch=True)  # TODO: delete when in production.
-    print(nlp("Ceci est un test pollution marine").vector.sum())
-    print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
-
-
-nlp = load_weighted_vectorizer(Config)
-# Usage:
-# doc = nlp_wv("Une phrase simple avec des mots")
-# numpy_vector_of_the_sentence = doc.vector
-# similarity = doc.similarity_to_vector(another_numpy_vector)
+    nlp = load_weighted_vectorizer(config)
+    # Usage:
+    # doc = nlp_wv("Une phrase simple avec des mots")
+    # numpy_vector_of_the_sentence = doc.vector
+    # similarity = doc.similarity_to_vector(another_numpy_vector)
+    return nlp

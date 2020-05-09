@@ -11,6 +11,7 @@ import pandas as pd
 from tqdm import tqdm
 from collections import OrderedDict
 from difflib import SequenceMatcher
+import os
 
 # pdfminer imports
 from pdfminer.pdfdocument import PDFDocument
@@ -21,8 +22,8 @@ from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextLine
 
 # local imports
-import sententizer
-from conf import *
+
+import rse_watch.sententizer as sententizer
 
 def get_list_of_pdfs_filenames(dirName):
     """
@@ -398,42 +399,27 @@ def parse_dpefs_paragraphs_into_a_dataset(conf):
 
     # concat
     paragraphs_df = pd.concat(paragraphs_df, axis=0, ignore_index=True)
+    # create parent folder
+    pickle_path = conf.parsed_par_file.parent
+    pickle_path.mkdir(parents=True, exist_ok=True)
     paragraphs_df.to_csv(conf.parsed_par_file, sep=";", index=False)
 
     return paragraphs_df
 
+# TODO: will be updated when parse_pdf at pdf level is created
+def run(config, task="both"):
+    """
+    Parse the pdfs into structured csv formats (for now)
+    : param conf: conf object with relative paths.
+    :param task: "parser", "sententizer" or "both" ; Whether to parse
+    pdfs, sententize the paragraphs, or do both.
+    """
 
-if __name__ == "__main__":
-    # execute only if run as a script
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--mode',
-                        default="final",
-                        choices=["final", "debug"],
-                        help="Wether to parse all dpefs only a subset.")
-    parser.add_argument("--task",
-                        default="both",
-                        choices=["parser", "sententizer","both"],
-                        help="Whether to parse pdfs, sententize the paragraphs, or do both.")
-    args = parser.parse_args()
-
-    print(args)
-    if args.mode == "final":
-        if args.task in ["parser", "both"]:
-            print("Parse paragraph level text from rse sections in DPEF.")
-            parse_dpefs_paragraphs_into_a_dataset(Config)
-            print("Over")
-        if args.task in ["sententizer", "both"]:
-            print("Sententize sentences from paragraphs of rse sections in DPEF.")
-            sententizer.turn_paragraphs_into_sentences(Config)
-            print("Over")
-
-    elif args.mode == "debug":
-        if args.task in ["parser", "both"]:
-            print("Parse paragraph level text from rse sections in DPEF.")
-            parse_dpefs_paragraphs_into_a_dataset(DebugConfig)
-            print("Over")
-        if args.task in ["sententizer", "both"]:
-            print("Sententize sentences from paragraphs of rse sections in DPEF.")
-            sententizer.turn_paragraphs_into_sentences(DebugConfig)
-            print("Over")
+    if task in ["parser", "both"]:
+        print("Parse paragraph level text from rse sections in DPEF.")
+        parse_dpefs_paragraphs_into_a_dataset(config)
+        print("Over")
+    if task in ["sententizer", "both"]:
+        print("Sententize sentences from paragraphs of rse sections in DPEF.")
+        sententizer.turn_paragraphs_into_sentences(config)
+        print("Over")
