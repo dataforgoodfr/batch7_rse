@@ -4,8 +4,9 @@ from django.db import models as dm  # django models
 from django.db.models.fields.files import FieldFile
 from datetime import date
 import os
+import sys
 import numpy as np
-from polls.rse_model.rse_watch.indexer import nlp
+
 
 
 class ActivitySector(dm.Model):

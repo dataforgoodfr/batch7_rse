@@ -8,14 +8,22 @@ import copy
 import numpy as np
 from collections import Counter
 from sklearn.metrics.pairwise import cosine_similarity
-
 import spacy
 from spacy.tokens import Doc
+import enum
 
 # Global parameters
 # Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
 IGNORED_POS = ['PRON', 'AUX', 'DET', "PUNCT"]
 # TODO: add a list of stop words to ignore -> il existe des dictionnaires tous faits !
+
+
+@enum.unique
+class ScoringMethod(enum.Enum):
+
+    BM25 = 1
+    SIF = 2
+    TFDIF = 3
 
 
 class Scoring(object):
@@ -35,11 +43,11 @@ class Scoring(object):
             Scoring object
         """
 
-        if method == "bm25":
+        if method == ScoringMethod.BM25:  # "bm25":
             return BM25()
-        elif method == "sif":
+        elif method == ScoringMethod.SIF:  # "sif":
             return SIF()
-        elif method == "tfidf":
+        elif method == ScoringMethod.TFDIF:  # "tfidf":
             # Default scoring object implements tf-idf
             return Scoring()
 

@@ -1,17 +1,17 @@
 # general imports
 import pandas as pd
-import os, sys
+import os
 import shutil
 import pickle
 from pathlib import Path
 
 # local import
-from webapp.polls.rse_model.rse_watch.scoring import Scoring, VectorizerComponent, spacy
+from rse_watch.scoring import Scoring, VectorizerComponent, spacy
 # NB: This import of spacy has custom extension to Doc object
 
 
 def empty_directory(path_to_dir):
-    """ Util function to delet the inside of a dir e.g. deleting data/model/* """
+    """ Util function to delete the inside of a dir e.g. deleting data/model/* """
     for root, dirs, files in os.walk(path_to_dir):
         for f in files:
             os.unlink(os.path.join(root, f))
