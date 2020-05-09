@@ -26,3 +26,13 @@ To setup your local env using virtualenvwrapper use:
 If you want to go source your virtual env:
 
     workon rse_watch
+    
+    
+Before running Django, a file dpef_sentences.csv must be created via:
+    cd webapp
+    python main.py
+
+Run Django
+
+    cd webapp
+    python manage.py runserver

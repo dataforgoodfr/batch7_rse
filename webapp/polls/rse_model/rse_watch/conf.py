@@ -1,5 +1,5 @@
 from pathlib import Path
-from polls.rse_model.rse_watch.scoring import ScoringMethod
+from rse_watch.scoring import ScoringMethod
 # TODO: add an abstract class interface from which the other heritate
 
 
@@ -19,7 +19,7 @@ class Config:
         self.parsed_par_file = self.src_model / "DPEFs/__parsed_dpefs__/dpef_paragraphs.csv"
         self.parsed_sent_file = self.src_model / "DPEFs/__parsed_dpefs__/dpef_sentences.csv"
         self.model_dir = self.src_model / "Model/"
-        self.scorer_pickle_file = self.model_dir + "vectorizer_component/words_scorer.pckl"
+        self.scorer_pickle_file = self.model_dir / "vectorizer_component/words_scorer.pckl"
         self.SCORING_METHOD = ScoringMethod.BM25  # "bm25"
 
 

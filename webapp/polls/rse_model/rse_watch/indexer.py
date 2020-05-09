@@ -22,6 +22,7 @@ def empty_directory(path_to_dir):
 def initialize_scorer(conf):
     # load data
     df = pd.read_csv(conf.parsed_sent_file, sep=";")
+
     documents = df["sentence"].values.tolist()
 
     # load *small* nlp parser for pos tagging
@@ -30,6 +31,7 @@ def initialize_scorer(conf):
         spacy.cli.download('fr_core_news_sm')
         print("done.")
     nlp = spacy.load('fr_core_news_sm')
+
 
     # index
     scorer = Scoring.create(conf.SCORING_METHOD)

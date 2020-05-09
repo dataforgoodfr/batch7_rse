@@ -22,7 +22,7 @@ from pdfminer.converter import PDFPageAggregator
 from pdfminer.layout import LTPage, LTChar, LTAnno, LAParams, LTTextBox, LTTextLine
 
 # local imports
-import webapp.polls.rse_model.rse_watch.sententizer as sententizer
+import rse_watch.sententizer as sententizer
 
 
 def get_list_of_pdfs_filenames(dirName):
@@ -392,6 +392,9 @@ def parse_dpefs_paragraphs_into_a_dataset(conf):
 
     # concat
     paragraphs_df = pd.concat(paragraphs_df, axis=0, ignore_index=True)
+    # create parent folder
+    pickle_path = conf.parsed_par_file.parent
+    pickle_path.mkdir(parents=True, exist_ok=True)
     paragraphs_df.to_csv(conf.parsed_par_file, sep=";", index=False)
 
     return paragraphs_df
