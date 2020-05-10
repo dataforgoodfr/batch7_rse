@@ -6,7 +6,7 @@ from datetime import date
 import os
 import sys
 import numpy as np
-
+from polls import nlp
 
 
 class ActivitySector(dm.Model):
@@ -87,7 +87,19 @@ class Vector(dm.TextField):
     # TODO: Test transformation from string to numpy array
     @staticmethod
     def to_numpy(value: str):
-        return np.array([float(val) for val in value.split(' ')])
+        return Vector.vector(value)
+
+    @staticmethod
+    def vector(value: str):
+        if value != "0":
+            return np.array([float(val) for val in value.split(' ')])
+        doc = nlp(value)
+        vector = doc.vector
+        return vector
+
+    @staticmethod
+    def get_similarity(value: str):
+        return self.get_vector().similarity_to_vector(vector)
 
     def to_python(self, value):
         if isinstance(value, np.ndarray):
@@ -119,16 +131,6 @@ class Sentence(dm.Model):
                            help_text=_("Paragraphe contenant la phrase. "
                                        "Permet de redonner du contexte à la phrase."))
     vector = Vector(default="0")  # put to non mandatory.
-    # put filtres here like this one :
-    # exacts_words = models.BooleanField(default=False)
-
-    def get_vector(self):
-        doc = nlp(self.text)
-        vector = doc.vector
-        return vector
-
-    def get_similarity(self, vector):
-        return self.get_vector().similarity_to_vector(vector)
 
     def clean(self):
         super().clean()

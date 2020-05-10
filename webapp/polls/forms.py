@@ -2,7 +2,7 @@ from django.utils.translation import gettext_lazy as _
 from django import forms
 from polls.models import ActivitySector as Sectors
 from datetime import date
-
+from polls.models import Company
 
 class BasicSearchForm(forms.Form):
     search_bar = forms.CharField(label=_("Rechercher"), max_length="100", required=True)
@@ -26,3 +26,5 @@ class SearchForm(BasicSearchForm):
     def is_valid(self):
         return self._is_period_valid()
 
+    def get_response(self):
+        companies =
