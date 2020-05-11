@@ -25,7 +25,7 @@ SECRET_KEY = 'ky4nwynj3yj9+job20xs%2vooskha#r#ah%vy!3$v^(z)fi_&='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'dataforgood.renauddha.ovh']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'dataforgood.renauddha.ovh']
 
 
 # Application definition
