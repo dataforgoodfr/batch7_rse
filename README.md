@@ -1,15 +1,23 @@
-# 
-Objective: identifying all environmental engagements from large companies subject to extra-financial performance declaration, based on public reference documents.
+# General Description
 
-Approach:
-- Reference larges companies subject to this declaration (~250) (use public databases + manual completion
-- Collect reference documents (usually 1 (sometimes 2/3) large unstructured PDFs) (find URLs
-- Identify pages refering to environmental strategies and performances (manual labelling (followed by classification)
-- Parse text from PDFs, keeping paragraph structure (PDFminer + sliding windows)
-- Clean the text data for NLP algorithms
-- Scope what kind of information defines an engagement (basic feature creation & filters, labelling)
-- Train supervised model to identify such engagements 
+Objective: give access to societal and environmental commitments and actions from large French corporations subject to extra-financial performance declaration (_Declaration de Performances Extra-Financières_, or DPEFs), based on public reference documents.
 
+Results: on [link_to_website](link_to_website) (FR), one can have access to: [WORK IN PROGRESS]
+- A PDFs Database centralizing a collection of more than 150 extra-financial performances declaration from large French corporations.
+- The underlying text of that Database, downloadable in a structured csv format, enabling re-analyses of the underlying information contained in the PDFs.
+- A smart search engine of the PDF's content, to be used as a technology watch tool for societal and environmental innovation.
+
+
+Steps:
+- Reference a set of larges corporations subject to this declaration (_via_ public databases and web searches; there is no official public listing)
+- Collect their reference documents (large unstructured PDFs)
+- Identify pages refering to environmental strategies and performances (labelling)
+- Parse text from PDFs, keeping paragraph structure (PDFminer + sliding windows algorithms)
+- Get sentences from text paragraphs, and add relevant metada to each sentence to enable filtering (e.g. presence of a year in the future) 
+- Train a BM25 scorer to be able to give weights to words based on their frequency (in corpus and sentence).
+- Build a custom NLP pipeline that takes a sentence, tokenize it, and turn it into a vector using pretrained Word2Vec embeddings and BM25 weights.
+- Use similarity-based searches to allow for querying the DPEFs sentences.
+- Deploy the solution on a website. 
 
 # Installation
 
