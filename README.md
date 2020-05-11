@@ -1,12 +1,10 @@
-# General Description
+### General Description
+We aim to give access to societal and environmental commitments and actions from large French corporations subject to extra-financial performance declaration (_Declaration de Performances Extra-Financières_, or DPEFs), based on public reference documents.
 
-Objective: give access to societal and environmental commitments and actions from large French corporations subject to extra-financial performance declaration (_Declaration de Performances Extra-Financières_, or DPEFs), based on public reference documents.
-
-Results: on [link_to_website](link_to_website) (FR), one can have access to: [WORK IN PROGRESS]
-- A PDFs Database centralizing a collection of more than 150 extra-financial performances declaration from large French corporations.
-- The underlying text of that Database, downloadable in a structured csv format, enabling re-analyses of the underlying information contained in the PDFs.
-- A smart search engine of the PDF's content, to be used as a technology watch tool for societal and environmental innovation.
-
+On [link_to_website](link_to_website) (FR), one can have access to: [WORK IN PROGRESS]
+- A **PDFs Database** centralizing a collection of more than 150 extra-financial performances declaration from large French corporations.
+- The underlying **text Database**, downloadable in a structured csv format, enabling re-analyses of the underlying information contained in the PDFs.
+- A smart **search engine** of the PDF's content, to be used as a technology watch tool for societal and environmental innovation.
 
 Steps:
 - Reference a set of larges corporations subject to this declaration (_via_ public databases and web searches; there is no official public listing)
