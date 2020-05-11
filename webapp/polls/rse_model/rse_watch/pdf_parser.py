@@ -177,7 +177,7 @@ def get_paragraphs_from_raw_content(device, idx_first_page):
                 current_y_min = y_min
                 max_height = max(previous_height, current_height)
 
-                relative_var_in_height = (current_height - previous_height) / float(max_height)  # Was min before ???
+                relative_var_in_height = (current_height - previous_height) / float(current_height)  # Was min before ???
                 relative_var_in_y_min = abs(current_y_min - previous_y_min) / float(current_height)
 
                 positive_change_in_font_size = (relative_var_in_height > 0.05)
@@ -195,8 +195,8 @@ def get_paragraphs_from_raw_content(device, idx_first_page):
                              "y_max": y_max,
                              "paragraph": paragraph}
                     else:
-                        if change_in_font_size:  # to separate titles
-                            paragraph = paragraph + ".\n"
+                        # if change_in_font_size:  # to separate titles
+                        #     paragraph = paragraph + ".\n"
                         # paragraph continues
                         p["y_min"] = y_min
                         p["paragraph"] = p["paragraph"] + " " + paragraph
@@ -402,7 +402,14 @@ def get_sentences_from_all_pdfs(config):
     with mp.Pool(n_cores) as pool:
         print("Multiprocessing with {} cores".format(n_cores))
         df_sents = list(
-            tqdm(pool.imap(parallel_get_sentences_dataframe_from_pdf, all_input_files), total=len(all_input_files)))
+            tqdm(
+                pool.imap(
+                    parallel_get_sentences_dataframe_from_pdf,
+                    all_input_files
+                ),
+                 total=len(all_input_files)
+                 )
+        )
 
     # concat
     df_sents = pd.concat(df_sents, axis=0, ignore_index=True)
