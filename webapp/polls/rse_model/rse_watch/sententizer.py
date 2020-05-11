@@ -14,6 +14,9 @@ def exception_to_split(token):
     """Identify usage of cf. to forbid splitting."""
     if 'cf' in token.nbor(-2).text and token.nbor(-1).text == ".":
         return True
+    # do not split if sentence ends with an apostrophe
+    if token.nbor(-1).text == "'":
+        return True
     return False
 
 
@@ -32,8 +35,9 @@ def load_nlp_sententizer_object():
         print("Downloading fr_core_news_sm spacy model...")
         spacy.cli.download('fr_core_news_sm')
         print("done.")
-    nlp = spacy.load('fr_core_news_sm')
-    nlp.add_pipe(custom_sentence_boundaries, before="parser")  # add exception to sententizer
+    nlp = spacy.load("fr_core_news_sm")
+    nlp.remove_pipe("parser")  # elsewise splits sentences on ' and some uppercase...
+    nlp.add_pipe(custom_sentence_boundaries)  # add exception to sententizer: apostrop, cf.,
     nlp.add_pipe(nlp.create_pipe('sentencizer'))  # to add default sentencizer, AFTER custom rule
     return nlp
 
@@ -41,8 +45,9 @@ def load_nlp_sententizer_object():
 def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
     nlp = load_nlp_sententizer_object()
     df_sent = df_par
+    # TODO: could be parallelized.
     df_sent["paragraph_sentences"] = df_sent["paragraph"].apply(
-        lambda x: [sent.text for sent in nlp(x).sents if sent._.nb_words > config.MIN_NB_OF_WORDS]
+        lambda x: [sent.text for sent in nlp(x).sents if sent._.nb_words >= config.MIN_NB_OF_WORDS]
     ).values
     df_sent = df_sent[df_sent["paragraph_sentences"].apply(lambda x: len(x) > 0)]  # keep if there was >0 valid sentences
     df_sent = (df_sent
