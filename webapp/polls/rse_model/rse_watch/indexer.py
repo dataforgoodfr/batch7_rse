@@ -19,8 +19,11 @@ def empty_directory(path_to_dir):
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
 
-
+# TODO: modify this to be able to run on the full sql database
 def initialize_scorer(conf):
+    """
+    Initialize the BM25 scorer object, from a csv file with a sentence by row.
+    """
     # load data
     df = pd.read_csv(conf.parsed_sent_file, sep=";")
 
