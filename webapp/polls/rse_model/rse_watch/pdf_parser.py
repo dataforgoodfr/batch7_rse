@@ -39,6 +39,14 @@ def get_list_of_pdfs_filenames(dirName):
     return paths
 
 
+def get_companies_metadata_dict(config):
+    """ Read companies metadata from config and turn it into dictionnary"""
+    companies_metadata_dict = pd.read_csv(config.annotations_file,
+                                          sep=";",
+                                          encoding='utf-8-sig').set_index("project_denomination").T.to_dict()
+    return companies_metadata_dict
+
+
 def clean_child_str(child_str):
     child_str = ' '.join(child_str.split()).strip()
     # dealing with hyphens:
@@ -177,7 +185,8 @@ def get_paragraphs_from_raw_content(device, idx_first_page):
                 current_y_min = y_min
                 max_height = max(previous_height, current_height)
 
-                relative_var_in_height = (current_height - previous_height) / float(current_height)  # Was min before ???
+                relative_var_in_height = (current_height - previous_height) / float(
+                    current_height)  # Was min before ???
                 relative_var_in_y_min = abs(current_y_min - previous_y_min) / float(current_height)
 
                 positive_change_in_font_size = (relative_var_in_height > 0.05)
@@ -380,8 +389,8 @@ def get_paragraphs_dataframe_from_pdf(dpef_path, dict_annotations):
 
 def get_sentences_dataframe_from_pdf(config, dpef_path):
     """ Parse a pdf and return a pandas df with sentence level parsed text"""
-    dict_annotations = pd.read_csv(config.annotations_file, sep=";").set_index("project_denomination").T.to_dict()
-    df_par = get_paragraphs_dataframe_from_pdf(dpef_path, dict_annotations)
+    companies_metadata_dict = get_companies_metadata_dict(config)
+    df_par = get_paragraphs_dataframe_from_pdf(dpef_path, companies_metadata_dict)
     df_sent = sententizer.get_sentence_dataframe_from_paragraph_dataframe(df_par, config)
     return df_sent
 
@@ -390,13 +399,14 @@ def get_sentences_from_all_pdfs(config):
     """
     Parses all dpefs into a sentence-level format and save the resulting csv according to config.
     """
-    dict_annotations = pd.read_csv(config.annotations_file, sep=";").set_index("project_denomination").T.to_dict()
+    companies_metadata_dict = get_companies_metadata_dict(config)
     all_input_files = get_list_of_pdfs_filenames(config.dpef_dir)
     all_input_files = [input_file for input_file in all_input_files if
-                       input_file.name.split("_")[0] in dict_annotations.keys()]
+                       input_file.name.split("_")[0] in companies_metadata_dict.keys()]
 
     # PARALLELIZATION
-    parallel_get_sentences_dataframe_from_pdf = partial(get_sentences_dataframe_from_pdf, config)
+    parallel_get_sentences_dataframe_from_pdf = partial(get_sentences_dataframe_from_pdf,
+                                                        config)
     n_cores = mp.cpu_count() - 1 or 1
 
     with mp.Pool(n_cores) as pool:
@@ -407,8 +417,8 @@ def get_sentences_from_all_pdfs(config):
                     parallel_get_sentences_dataframe_from_pdf,
                     all_input_files
                 ),
-                 total=len(all_input_files)
-                 )
+                total=len(all_input_files)
+            )
         )
 
     # concat
@@ -417,7 +427,7 @@ def get_sentences_from_all_pdfs(config):
     pickle_path = config.parsed_sent_file.parent
     pickle_path.mkdir(parents=True, exist_ok=True)
     # save to csv
-    df_sents.to_csv(config.parsed_sent_file, sep=";", index=False)
+    df_sents.to_csv(config.parsed_sent_file, sep=";", index=False, encoding='utf-8-sig')
 
     return df_sents
 

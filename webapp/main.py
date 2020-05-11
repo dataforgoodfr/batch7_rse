@@ -24,7 +24,7 @@ def main():
                         help="Wether to parse all dpefs only a subset.")
     parser.add_argument('--task',
                         default="both",
-                        choices=["parse", "train", "both"],
+                        choices=["parse", "model", "both"],
                         help="Wether to parse pdfs, train the BM25+embedding model, or both.")
     args = parser.parse_args()
     if args.mode == "final":
@@ -36,7 +36,7 @@ def main():
     print("Begin Initialization.")
     if args.task in ["parse", "both"]:
         run_parser(config)
-    if args.task in ["train", "both"]:
+    if args.task in ["model", "both"]:
         run_indexer(config)
     print("Finished intialization")
     print("Took {} seconds to initialize.".format(int(time()-t)))
