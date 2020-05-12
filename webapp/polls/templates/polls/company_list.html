@@ -1,22 +1,25 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 {% block content %}
+{% load filters %}
+{% load static %}
 
-    <ul>
-        {% for company in company_list %}
-            <li>
-                <a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a>
-                    (
-                    {% for sector in company.sectors %}
-                        {{ sector.name }}
-                    {% endfor %}
-                    )
-                <ul>
-                    {% for dpef in company.dpefs %}
-                        <li>{{ dpef.file_object }} ({{ dpef.year }})</li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
+<div class="row justify-content-center myrow p-2">
+
+
+    <div class="row justify-content-center myrow p-2">
+        <table class="table">
+          <tbody>
+          {% for company in company_list %}
+            <tr>
+              <td><a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a></td>
+              <td> {% for sector in company.sectors %} {{ sector.name }} {% endfor %}</td>
+              <td> {% for dpef in company.dpefs %} <li>{{ dpef.file_object }} ({{ dpef.year }}) <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></li> {% endfor %}</td>
+            </tr>
+           {% endfor %}
+         </table>
+ </div>
+
+
+
 
 {% endblock content %}

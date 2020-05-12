@@ -1,31 +1,105 @@
-.container {
-    width: 100%;
+.img-fluid {
+  max-width: 120px !important;
+  height:auto;
 }
 
-.row {
-    width: 100%;
-}
-
-#sidebar {
-    background-color: #e7a61a;
-    border-radius: 10px 10px 10px 10px;
-    -moz-border-radius: 10px 10px 10px 10px;
-    -webkit-border-radius: 10px 10px 10px 10px;
-    border: 0px solid #000000;
-}
-
-#sidebar ul {
-    list-style: none;
-}
-
-#sidebar li {
-    /*border-radius: 35px 35px 35px 35px;*/
-    /*-moz-border-radius: 35px 35px 35px 35px;*/
-    /*-webkit-border-radius: 35px 35px 35px 35px;*/
-    /*border: 1px dashed #0a010a;*/
+#navbar {
+background-color: #e08907;
 }
 
 
-#content {
-    /*width: 80%*/
+
+#btn-navbar {
+    color: black;
+    background-color: #ebc157;
+    box-shadow: 3px 2px 5px -4px rgba(0,0,0,0.75);
+    min-height:55px;
 }
+
+
+hr {
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  width:150%;
+  align-content:center;
+}
+
+#footer{
+margin-top:  10px;
+margin-bottom: 10px;
+margin-block-start: 0;
+margin-block-end: 0;
+align-content:center;
+padding-inline-start: 0px;
+display:inline;
+}
+
+ul#footer li {
+  display:inline;
+}
+
+img#footer {
+  padding: 2px;
+  height:40px;
+  width:auto;
+}
+
+#id_search_bar, #id_start_period, #id_end_period {
+    width:99%;
+    border-radius:15px;
+    border-width: 0.5px;
+    border-style: solid;
+    border-color: rgb(200, 200, 200);
+}
+
+input#homepage {
+    width:70%;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-width: 0.5px;
+    border-style: solid;
+    border-color: rgb(200, 200, 200);
+}
+
+button#homepage {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-width: 0.5px;
+
+}
+
+#id_start_period, #id_end_period {
+    width:30%;
+    height: calc(1.5em + .75rem + 2px);
+    padding-left:6px;
+    padding-right:6px;
+}
+
+label {
+ margin-bottom: 0rem !important;
+}
+
+/*Page construction helpers, do not include in final version
+
+.mycontainer {
+    border:solid;
+    border-color:blue;
+}
+
+.myrow {
+    border:solid;
+    border-color:red;
+}
+
+.mycol {
+    border:solid;
+    border-color:green;
+}
+
+*/
