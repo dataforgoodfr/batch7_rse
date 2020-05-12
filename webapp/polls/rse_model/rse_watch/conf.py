@@ -31,7 +31,8 @@ class DebugConfig(Config):
         :type model_dir: Path or str. If str, will be cast into a pathlib.Path object
         """
         super().__init__(src_model)
-        self.dpef_dir = self.dpef_dir / "Energéticien/"
+        self.dpef_dir = self.dpef_dir / "Debug/"
+        self.annotations_file = self.src_model / "Companies/companies_metadata_debug.csv"
         self.parsed_par_file = self.src_model / "DPEFs/__parsed_dpefs__/(DEBUG)-dpef_paragraphs.csv"
         self.parsed_sent_file = self.src_model / "DPEFs/__parsed_dpefs__/(DEBUG)-dpef_sentences.csv"
         self.model_dir = self.src_model / "(DEBUG)-Model/"
