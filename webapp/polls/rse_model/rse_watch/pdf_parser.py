@@ -6,8 +6,10 @@ import argparse
 from time import time
 import multiprocessing as mp
 from functools import partial
+from collections import Counter
 
 # processing imports
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from collections import OrderedDict
@@ -151,25 +153,73 @@ def get_paragraphs_from_raw_content(device, idx_first_page):
     :return:
     """
     # GROUPING BY COLUMN
-    column_text = OrderedDict()  # keep order of identification in the document.
-    for (page_nb, x_min, y_min, _, y_max, text) in device.rows:
-        page_nb = idx_first_page + page_nb  # elsewise device starts again at 0
-        if page_nb not in column_text.keys():
-            column_text[page_nb] = {}
-        x_group = round(
-            x_min) // 150  # Si trois paragraphes -> shift de 170, max à droite ~600 # problem was shifted titles
-        if x_group in column_text[page_nb].keys():
-            column_text[page_nb][x_group].append((y_min, y_max, text))
-        else:
-            column_text[page_nb][x_group] = [(y_min, y_max, text)]
+    column_text_dict = OrderedDict()  # keep order of identification in the document.
 
-    pararaphs_list = []
-    paragraph_index = 0
+    APPROXIMATION_FACTOR = 10  # to allow for slight shifts at beg of aligned text
+    N_MOST_COMMON = 4  # e.g. nb max of columns of text that can be considered
+    LEFT_SECURITY_SHIFT = 20  # to include way more shifted text of previous column
+    counter = Counter()
+    item_holder = []
+
+    item_index = 0
+    while "There are unchecked items in device.rows":
+
+        # add the item to the list of the page
+        (page_id, x_min, _, _, _, _) = device.rows[item_index]
+        item_holder.append(device.rows[item_index])
+
+        # increment the count of x_min
+        counter[(x_min // APPROXIMATION_FACTOR) * APPROXIMATION_FACTOR] += 1
+
+        # go to next item
+        it_was_last_item = item_index == (len(device.rows) - 1)
+        if not it_was_last_item:
+            item_index += 1
+            (next_page_id, _, _, _, _, _) = device.rows[item_index]
+            changing_page = (next_page_id > page_id)
+
+        if changing_page or it_was_last_item:  # approximate next page
+
+            top_n_x_min_approx = counter.most_common(N_MOST_COMMON)
+            df = pd.DataFrame(top_n_x_min_approx, columns=["x_min_approx", "freq"])
+            df = df[df["freq"] > df["freq"].sum() * (1 / (N_MOST_COMMON + 1))].sort_values(by="x_min_approx")
+            x_min_approx = (df["x_min_approx"] - LEFT_SECURITY_SHIFT).values
+            x_min_approx = x_min_approx * (x_min_approx > 0)
+            left_x_min_suport = np.hstack([x_min_approx,
+                                           [10000]])
+
+            def x_grouper(x_min):
+                delta = left_x_min_suport - x_min
+                x_group = left_x_min_suport[np.argmin(delta < 0) * 1 - 1]
+                return x_group
+
+            # iter on x_group and add items
+            page_nb = idx_first_page + page_id
+            column_text_dict[page_nb] = {}
+
+            for item in item_holder:
+                (page_id, x_min, y_min, x_max, y_max, text) = item
+                page_nb = idx_first_page + page_id
+                x_group = x_grouper(x_min)
+                if x_group in column_text_dict[page_nb].keys():
+                    column_text_dict[page_nb][x_group].append((y_min, y_max, text))
+                else:
+                    column_text_dict[page_nb][x_group] = [(y_min, y_max, text)]
+
+            if it_was_last_item:
+                break
+            else:
+                # restart from zero for next page
+                counter = Counter()
+                item_holder = []
+
 
     # CREATE THE PARAGRAPHS IN EACH COLUMN
     # define minimal conditions to define a change of paragraph:
     # Being spaced by more than the size of each line (min if different to account for titles)
-    for page_nb, x_groups_dict in column_text.items():
+    pararaphs_list = []
+    paragraph_index = 0
+    for page_nb, x_groups_dict in column_text_dict.items():
         for x_group_name, x_groups_data in x_groups_dict.items():
             x_groups_data = sorted(x_groups_data, key=lambda x: x[0],
                                    reverse=True)  # sort vertically, higher y = before
