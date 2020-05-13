@@ -2,6 +2,7 @@ from django.template import Library
 
 register = Library()
 
+
 @register.filter(name='add_attr')
 def add_attr(field, css):
     attrs = {}
@@ -15,3 +16,4 @@ def add_attr(field, css):
             attrs[key] = val
 
     return field.as_widget(attrs=attrs)
+
