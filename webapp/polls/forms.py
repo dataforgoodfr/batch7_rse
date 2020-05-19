@@ -2,7 +2,7 @@ from django.utils.translation import gettext_lazy as _
 from django import forms
 from polls.models import ActivitySector as Sectors, Company, Sentence
 from datetime import date
-
+from polls.models import Company
 
 class CompanyForm(forms.Form):
     company_name = forms.CharField(label=_("Nom de l'entreprise"), max_length=100, required=False)
@@ -52,3 +52,5 @@ class SearchForm(BasicSearchForm):
         # TODO: add filter for sectors
         return companies
 
+    def get_response(self):
+        companies =
