@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from django import forms
-from polls.models import ActivitySector as Sectors, Company
+from polls.models import ActivitySector as Sectors, Company, Sentence
 from datetime import date
 
 
@@ -12,7 +12,7 @@ class CompanyForm(forms.Form):
 
     def filter_company(self):
         try:
-            companies = Company.objects.all().filter(name=self.company_name)
+            companies = Company.objects.all().filter(name=self.cleaned_data['company_name'])
         except AttributeError:
             companies = Company.objects.all()
         # TODO: add filter for sectors
@@ -40,5 +40,15 @@ class SearchForm(BasicSearchForm):
             return True
 
     def is_valid(self):
-        return self._is_period_valid()
+        super().is_valid()
+        return True
+
+    def get_sentences(self):
+        try:
+            # Pourquoi on a pas ce fichu cleaned data !!! .......
+            sentences = Sentence.objects.all()
+        except AttributeError:
+            companies = Company.objects.all()
+        # TODO: add filter for sectors
+        return companies
 
