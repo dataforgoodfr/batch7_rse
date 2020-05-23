@@ -4,6 +4,7 @@ from polls.models import ActivitySector as Sectors, Company, Sentence
 from datetime import date
 from polls.models import Company
 
+
 class CompanyForm(forms.Form):
     company_name = forms.CharField(label=_("Nom de l'entreprise"), max_length=100, required=False)
     sector_list = [(sector.id, sector.name) for sector in Sectors.objects.all()]
@@ -12,7 +13,12 @@ class CompanyForm(forms.Form):
 
     def filter_company(self):
         try:
-            companies = Company.objects.all().filter(name=self.cleaned_data['company_name'])
+            if self.cleaned_data['company_name'] == '':  # no company name set
+                companies = Company.objects.filter(_activity_sectors__in=self.cleaned_data['sectors'])
+            else:
+                companies = Company.objects\
+                    .filter(name__contains=self.cleaned_data['company_name'])\
+                    .filter(_activity_sectors__in=self.cleaned_data['sectors'])
         except AttributeError:
             companies = Company.objects.all()
         # TODO: add filter for sectors
@@ -53,4 +59,4 @@ class SearchForm(BasicSearchForm):
         return companies
 
     def get_response(self):
-        companies =
+        companies = None

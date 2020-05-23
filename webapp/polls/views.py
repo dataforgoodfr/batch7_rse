@@ -52,9 +52,10 @@ class CompanyListView(View):
     @staticmethod
     def get_context(form):
         context = {'form': form}
-        company_list = Company.objects.all()
-        if form.is_valid():
+        if form.is_valid() and form.is_bound:
             company_list = form.filter_company()
+        else:
+            company_list = Company.objects.all()
         context['company_list'] = company_list
         return context
 
