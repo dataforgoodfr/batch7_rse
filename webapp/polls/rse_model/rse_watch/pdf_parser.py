@@ -420,7 +420,11 @@ def get_paragraphs_dataframe_from_pdf(dpef_path, dict_annotations):
         project_denomination,
         dpef_path.name)
     )
-    rse_ranges = dict_annotations[project_denomination]["rse_ranges"]
+    try:
+        rse_ranges = dict_annotations[project_denomination]["rse_ranges_"+document_year]
+    except KeyError:
+        print("RSE ranges not found for company {} for year {}".format(project_denomination,
+                                                                       document_year))
     df_par = parse_paragraphs_from_pdf(dpef_path, rse_ranges=rse_ranges)
     df_par.insert(0, "project_denomination", project_denomination)
     df_par.insert(1, "company_sector", company_sector)
