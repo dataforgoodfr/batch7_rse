@@ -3,6 +3,7 @@ from django import forms
 from polls.models import ActivitySector as Sectors, Company, Sentence
 from datetime import date
 from polls.models import Company
+from polls import nlp
 
 
 class CompanyForm(forms.Form):
@@ -29,8 +30,10 @@ class BasicSearchForm(forms.Form):
 
     def get_sentences(self):
         try:
-            sentences = Sentence.objects.filter(_activity_sectors__in=self.cleaned_data['sectors'])
-
+            search_vector = nlp(self.cleaned_data['search_bar']).vector
+            sentences = Sentence.objects.all()
+            sentences = [(s, Sentence.similarity_vector(s.vector, search_vector)) for s in sentences]
+            sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
         except AttributeError:
             sentences = Sentence.objects.all()
         # TODO: add filter for sectors

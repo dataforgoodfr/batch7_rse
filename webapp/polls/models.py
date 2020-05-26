@@ -2,11 +2,12 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.db import models as dm  # django models
 from django.db.models.fields.files import FieldFile
+from scipy import spatial
 from datetime import date
 import os
-import sys
-import numpy as np
 from polls import nlp
+import pickle
+import base64
 
 
 class ActivitySector(dm.Model):
@@ -82,42 +83,6 @@ class DPEF(dm.Model):
         return self.file_object.name  # file path
 
 
-class Vector(dm.TextField):
-
-    # TODO: Test transformation from string to numpy array
-    @staticmethod
-    def to_numpy(value: str):
-        return Vector.vector(value)
-
-    @staticmethod
-    def vector(value: str):
-        if value != "0":
-            return np.array([float(val) for val in value.split(' ')])
-        doc = nlp(value)
-        vector = doc.vector
-        return vector
-
-    @staticmethod
-    def get_similarity(value: str):
-        return self.get_vector().similarity_to_vector(vector)
-
-    def to_python(self, value):
-        if isinstance(value, np.ndarray):
-            return value
-
-        if value is None:
-            return value
-
-        return self.to_numpy(value)
-
-    # TODO: Test construction of a true vector list as a string
-    @staticmethod
-    def from_numpy(numpy_vector: np.ndarray):
-        if isinstance(numpy_vector, np.ndarray):
-            return ' '.join([val for val in numpy_vector])
-        return None
-
-
 class Sentence(dm.Model):
 
     reference_file = dm.ForeignKey(DPEF, on_delete=dm.CASCADE,
@@ -130,11 +95,56 @@ class Sentence(dm.Model):
     context = dm.TextField(verbose_name=_("Contexte"),
                            help_text=_("Paragraphe contenant la phrase. "
                                        "Permet de redonner du contexte à la phrase."))
-    vector = Vector(default="0")  # put to non mandatory.
+    _vector = dm.BinaryField(null=True, blank=True)  # Vector(null=True, blank=True)
+
+    def _construct_vector(self):
+        vec = nlp(self.text).vector  # construct vector from self.text
+        np_bytes = pickle.dumps(vec)
+        np_base64 = base64.b64encode(np_bytes)
+        self._vector = np_base64
 
     def clean(self):
         super().clean()
+        self._construct_vector()
+
+    @property
+    def vector(self):
+        np_bytes = base64.b64decode(self._vector)
+        vec = pickle.loads(np_bytes)
+        return vec
+
+    def similarity(self, sentence):
+        return self.similarity_vector(self.vector, sentence.vector)
+
+    @staticmethod
+    def similarity_vector(vector1, vector2):
+        return spatial.distance.cosine(vector1, vector2)
 
     def __str__(self):
         return self.text
 
+#
+# class Vector(dm.TextField):
+#
+#     # TODO: Test transformation from string to numpy array
+#     @staticmethod
+#     def to_numpy(value: str):
+#         if value != "0":
+#             return np.array([float(val) for val in value.split(' ')])
+#         doc = nlp(value)
+#         vector = doc.vector
+#         return vector
+#
+#     def to_python(self, value):
+#         if isinstance(value, np.ndarray):
+#             return value
+#         elif value is None:
+#             return value
+#         return self.to_numpy(value)
+#
+#     # TODO: Test construction of a true vector list as a string
+#     @staticmethod
+#     def from_numpy(numpy_vector: np.ndarray):
+#         if isinstance(numpy_vector, np.ndarray):
+#             return ' '.join([val for val in numpy_vector])
+#         return None
