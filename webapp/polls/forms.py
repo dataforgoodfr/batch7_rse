@@ -21,12 +21,21 @@ class CompanyForm(forms.Form):
                     .filter(_activity_sectors__in=self.cleaned_data['sectors'])
         except AttributeError:
             companies = Company.objects.all()
-        # TODO: add filter for sectors
+        # TODO: add unique for multiple results
         return companies
 
 
 class BasicSearchForm(forms.Form):
     search_bar = forms.CharField(label=_("Rechercher"), max_length="100", required=True)
+
+    def get_sentences(self):
+        try:
+            sentences = Sentence.objects.filter(_activity_sectors__in=self.cleaned_data['sectors'])
+
+        except AttributeError:
+            sentences = Sentence.objects.all()
+        # TODO: add filter for sectors
+        return sentences
 
 
 class SearchForm(BasicSearchForm):
