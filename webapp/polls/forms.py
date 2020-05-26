@@ -21,8 +21,7 @@ class CompanyForm(forms.Form):
                     .filter(_activity_sectors__in=self.cleaned_data['sectors'])
         except AttributeError:
             companies = Company.objects.all()
-        # TODO: add unique for multiple results
-        return companies
+        return companies.distinct()
 
 
 class BasicSearchForm(forms.Form):
