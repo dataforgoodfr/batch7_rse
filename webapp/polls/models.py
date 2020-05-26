@@ -12,7 +12,10 @@ import base64
 
 class ActivitySector(dm.Model):
 
-    name = dm.CharField(max_length=50, verbose_name=_("Nom du secteur"), help_text=_("Nom du secteur"))
+    name = dm.CharField(max_length=50,
+                        verbose_name=_("Nom du secteur"),
+                        help_text=_("Nom du secteur"),
+                        unique=True)
 
     def __str__(self):
         return self.name
