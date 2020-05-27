@@ -52,3 +52,10 @@ Django can then be run with:
 
     cd webapp
     python manage.py runserver
+
+
+if you want to run the server with an other settings file, you can also launch :
+
+    python manage.py runserver  --settings batch7rse.settings.dev
+
+for the dev settings for example.
