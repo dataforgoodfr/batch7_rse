@@ -11,7 +11,6 @@ import base64
 
 
 class ActivitySector(dm.Model):
-
     name = dm.CharField(max_length=50,
                         verbose_name=_("Nom du secteur"),
                         help_text=_("Nom du secteur"),
@@ -22,7 +21,6 @@ class ActivitySector(dm.Model):
 
 
 class Company(dm.Model):
-
     name = dm.CharField(max_length=50, unique=True,
                         verbose_name=_("Nom"), help_text=_("Nom complet de l'entreprise"))
     pdf_name = dm.CharField(max_length=20, unique=True,
@@ -57,18 +55,23 @@ def _validate_file_extension(value: FieldFile):
 
 
 class DPEF(dm.Model):
-
     # class FileType(models.TextChoices):
     #     DPEF = 'DPEF', _('dpef')
     #     RSE = 'DDR', _('ddr')
-
+    file_name = dm.CharField(max_length=100,
+                             primary_key=True,
+                             unique=True,
+                             verbose_name=_("Nom du fichier PDF"),
+                             help_text=_("Nom complet du pdf de la DPEF, avec extension '.pdf'.."))
     company = dm.ForeignKey(Company, on_delete=dm.CASCADE,
                             verbose_name=_("Entreprise"), help_text=_("L'entreprise référencée par le document."))
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
-    file_object = dm.FileField(unique=True, validators=[_validate_file_extension],
+    file_object = dm.FileField(unique=True,
+                               validators=[_validate_file_extension],
                                upload_to='polls/models/dpef/',
-                               verbose_name=_("Fichier PDF"), help_text=_("Document DPEF ou DDR au format PDF."))
+                               verbose_name=_("Fichier PDF"),
+                               help_text=_("Document DPEF ou DDR au format PDF."))
 
     year = dm.IntegerField(choices=[(i, i) for i in range(1990, date.today().year + 1)],  # list of years since 1990
                            verbose_name=_("Année"), help_text=_("Année de référence du document DPEF"))
@@ -87,7 +90,6 @@ class DPEF(dm.Model):
 
 
 class Sentence(dm.Model):
-
     reference_file = dm.ForeignKey(DPEF, on_delete=dm.CASCADE,
                                    verbose_name=_("Fichier"), help_text=_("Document contenant la phrase"))
     text = dm.TextField(verbose_name=_("Texte"), help_text=_("Texte de la phrase"))

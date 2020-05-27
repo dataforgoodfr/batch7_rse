@@ -1,9 +1,11 @@
 from django.core.management.base import BaseCommand
+from django.core.files import File
 import pickle
 import base64
 from polls import nlp, model_directory, Config, DebugConfig
 from polls.models import ActivitySector, Company, DPEF, Sentence
-from pdf_parser import get_companies_metadata_dict, get_list_of_pdfs_filenames, get_sentences_dataframe_from_pdf, \
+from rse_watch.pdf_parser import get_companies_metadata_dict, get_list_of_pdfs_filenames, \
+    get_sentences_dataframe_from_pdf, \
     extract_company_metadata
 
 
@@ -61,7 +63,7 @@ class Command(BaseCommand):
         companies_metadata_dict = get_companies_metadata_dict(config)
         all_dpef_path = get_list_of_pdfs_filenames(config.dpef_dir)
         all_dpef_path = [input_file for input_file in all_dpef_path if
-                           input_file.name.split("_")[0] in companies_metadata_dict.keys()]
+                         input_file.name.split("_")[0] in companies_metadata_dict.keys()]
 
         # TODO: consider parallelization
         for dpef_path in all_dpef_path:
@@ -74,15 +76,25 @@ class Command(BaseCommand):
                                                                  company_sectors)
 
             # create the DPEF instance
-            dpef_instance, newly_created = DPEF.objects.get_or_create(company=company_instance,
-                                                                      file_object=str(dpef_path),
-                                                                      year=document_year)
-            if newly_created:
-                print("Start parsing for file: {}".format(dpef_path))
-                df_sent = get_sentences_dataframe_from_pdf(config, dpef_path)
-                df_sent.apply(lambda row: add_sentence(row, dpef_instance),
-                              axis=1)
-                print("finished")
-            else:
-                print("File is already included: {}".format(dpef_path))
-            # print(Sentence.objects.all())
+            # TODO: verify that get_or_create check uniqueness of files.
+            # TODO: correct this very bad handling of the path
+            #  (dpef_path.open("rb") throwed:
+            #  AttributeError: 'WindowsPath' object has no attribute 'path'
+
+            try:
+                DPEF.objects.get(file_name=dpef_path.name)
+            except:
+                with dpef_path.open("rb") as fi:
+                    dpef_file = File(fi, name=dpef_path.name)
+                    dpef_instance, newly_created = DPEF.objects.get_or_create(file_name=dpef_path.name,
+                                                                               company=company_instance,
+                                                                               file_object=dpef_file,
+                                                                               year=document_year)
+                if newly_created:
+                    print("Start parsing for file: {}".format(dpef_path))
+                    df_sent = get_sentences_dataframe_from_pdf(config, dpef_path)
+                    df_sent.apply(lambda row: add_sentence(row, dpef_instance),
+                                  axis=1)
+                    print("finished")
+                else:
+                    print("File is already included: {}".format(dpef_path))

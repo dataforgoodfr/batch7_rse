@@ -16,16 +16,17 @@ config = Config(model_directory)
 # Load the model
 # N.B. model should be created prior to this,
 # USe 'python manage.py index_sentences' to do so.
-# TODO: Currently this is called even when populate_db is called. This is
+# TODO: Currently this is called even when populate_db is called and even
+#  before flush is called. This is
 #  a bit weird: parsing should be done once, and then the model created
 #  and then the model used by the server !
 #  --> This is not the right place for load_weighted_vectorizer.
 documents = []
-nlp = load_weighted_vectorizer(config,
-                               documents,
-                               create_from_scratch=False)
+# nlp = load_weighted_vectorizer(config,
+#                                documents,
+#                                create_from_scratch=False)
 
 # # TODO: delete fake nlp for debug
-# class nlp:
-#     def __init__(self, sentence):
-#         self.vector = np.random.random((100,))
+class nlp:
+    def __init__(self, sentence):
+        self.vector = np.random.random((100,))
