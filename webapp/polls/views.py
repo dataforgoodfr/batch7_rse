@@ -10,10 +10,12 @@ class IndexView(View):
     form_class = BasicSearchForm
 
     @staticmethod
-    def get_context(form, response=None):
+    def get_context(form):
         context = {'form': form}
-        if response is not None:
-            context['response'] = response
+        response = []
+        if form.is_valid() and form.is_bound:
+            response = form.get_sentences()
+        context['sentences'] = response
         return context
 
     def render(self, request, context: dict):
@@ -29,11 +31,7 @@ class SearchView(IndexView):
     form_class = SearchForm
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        response = None
-        if form.is_valid():
-            response = None  # TODO: Complete this to get a valid response.
-        context = self.get_context(form, response)
+        context = self.get_context(self.form_class(request.POST))
         return self.render(request, context)
 
 

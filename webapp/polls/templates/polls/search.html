@@ -12,7 +12,7 @@
 
     <div class="row  myrow p-2">
         <div class="col-sm-2 mycol text-right p-1"> <strong>Entreprise</strong></div>
-        <div class="col-sm-4 mycol">   {{ form.search_bar | add_attr:"class: form-control align-items-center, placeholder:ex. Total" }}</div>
+        <div class="col-sm-4 mycol">   {{ form.company_name | add_attr:"class: form-control align-items-center, placeholder:ex. Total" }}</div>
         <div class="col-sm-2 mycol text-right p-1"> <strong>Période</strong> </div>
          <div class="col-sm-4 mycol"> {{ form.start_period}} à {{ form.end_period }}</div>
     </div>
@@ -34,5 +34,21 @@
          </div>
     </form>
 </div>
+
+<div class="row justify-content-center myrow p-2">
+    <div class="row justify-content-center myrow p-2">
+        <table class="table">
+          <tbody>
+          {% for sentence in sentences %}
+            <tr>
+              <td>{{ sentence.0.text }}</a></td>
+              <td> {{ sentence.1 }}</td>
+            </tr>
+           {% endfor %}
+         </table>
+    </div>
+</div>
+
+
 
 {% endblock content %}

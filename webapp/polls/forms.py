@@ -33,14 +33,15 @@ class BasicSearchForm(forms.Form):
             search_vector = nlp(self.cleaned_data['search_bar']).vector
             sentences = Sentence.objects.all()
             sentences = [(s, Sentence.similarity_vector(s.vector, search_vector)) for s in sentences]
-            sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
+            sentences = sorted(sentences, key=lambda s: s[1], reverse=False)
         except AttributeError:
             sentences = Sentence.objects.all()
         # TODO: add filter for sectors
-        return sentences
+        return sentences[:10]
 
 
 class SearchForm(BasicSearchForm):
+    company_name = forms.CharField(label=_("Nom de l'entreprise"), max_length=100, required=False)
     start_period = forms.IntegerField(label=_("De"), min_value=1990, max_value=date.today().year + 1, required=False)
     end_period = forms.IntegerField(label=_("à"), min_value=1990, max_value=date.today().year + 1, required=False)
     sector_list = [(sector.id, sector.name) for sector in Sectors.objects.all()]
@@ -61,13 +62,8 @@ class SearchForm(BasicSearchForm):
         return True
 
     def get_sentences(self):
-        try:
-            # Pourquoi on a pas ce fichu cleaned data !!! .......
-            sentences = Sentence.objects.all()
-        except AttributeError:
-            companies = Company.objects.all()
-        # TODO: add filter for sectors
-        return companies
+        sentences = super().get_sentences()
+        return sentences
 
     def get_response(self):
         companies = None
