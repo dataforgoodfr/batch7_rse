@@ -1,8 +1,6 @@
 desktop.ini
 .idea
 
-webapp/db.sqlite3
-
 **/.ipynb_checkpoints/
 *__pycache*
 
