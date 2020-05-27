@@ -504,7 +504,7 @@ def get_sentences_from_all_pdfs(config):
 
 def run(config):
     """
-    Parse the pdfs into structured csv formats (for now)
+    Parse the pdfs into structured csv formats
     : param conf: conf object with relative paths.
     :param task: "parser", "sententizer" or "both" ; Whether to parse
     pdfs, sententize the paragraphs, or do both.
