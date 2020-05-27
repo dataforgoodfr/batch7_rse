@@ -34,21 +34,62 @@ If you want to source your virtual env:
 
     workon rse_watch
     
-# Running the django server
+# FLushing the database
+If you need to empty the database after some tests:
 
-Before running Django, the dpefs must be parsed. 
-Currently, this is done by creating a file dpef_sentences.csv, which is then used to train the BM25 scorer and to save a Spacy model that can do weighted vectorization of sentences (therefore called "weighted vectorizer"). You can parse the PDFs and instantiate the model via:
+	cd webapp
+	python manage.py flush
+
+
+If the schema of your sql database is **outdated with the current schema**, you may want to restart it from scratch. Indeed, Django makes it mandatory to keep all old classes that appeared at least once in the db schema, and this can make the model messy in times of development.
+
+To restart from scratch, you can follow scenario 1 in [this tutorial](https://simpleisbetterthancomplex.com/tutorial/2016/07/26/how-to-reset-migrations.html).
+
+But Django will have trouble running makemigrations because some part of the model are used in various scripts (e.g. views.py) and Django NEEDs the tables to exist... before creating them. 
+
+A hackky way to deal with that is to comment the lines that call classes of the data model:
+- Comment all lines in views.py
+- Comment all lines in forms.py
+- Comment the content of list urlpatterns in urls.py
+Then make the migrations (cf. step 3 in tutorial) and uncomment. 
+
+
+# Parsing the pdfs and indexing the sentences with a BM25 model
+
+The DPEFs must be parsed, and a Spacy pipeline that include a BM25 model must be saved.
+There are custom Django commands to do so (of course debug mode is waaay faster):
+
+	cd webapp
+	python manage.py populate_db --mode debug
+	# or for full run and parsing:
+	python manage.py populate_db --mode final 
+
+Then, to create the model, run:
+
+	python manage.py indexe_sentences --mode debug
+	# or for full run of the model:
+	python manage.py populate_db --mode final 
+
+# Running the server locally
+
+The server can then started with:
+
+    cd webapp
+    python manage.py runserver --noreload
+
+where noreload avoid double initialization.
+___
+### (deprecated) Parsing the pdfs and indexing the sentences with a BM25 model - The CSV way
+
+This is done by creating a file dpef_sentences.csv, which is then used to train the BM25 scorer and to save a Spacy model that can do weighted vectorization of sentences (therefore called "weighted vectorizer"). You can parse the PDFs and instantiate the model via:
 
     cd webapp
     python main.py
 
-Hack to parse only a subset of the PDFs (still takes up to (6 minutes)):
+Hack to parse only a subset of the PDFs:
 
 	cd webapp
 	python main.py --mode debug
 
 The model is created under (DEBUG)-Model, but can be renamed to "Model" to be used by Django in debug phases.
-Django can then be run with:
 
-    cd webapp
-    python manage.py runserver
