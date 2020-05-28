@@ -106,10 +106,12 @@ class Command(BaseCommand):
             all_dpef_paths = [input_file for input_file in all_dpef_paths if
                               input_file.name.split("_")[0] in companies_metadata_dict.keys()]
 
-            # TODO: consider parallelization
             # PARALLELIZATION
             parallel_add_dpef = partial(add_dpef, config)
-            n_cores = mp.cpu_count() - 1 or 1
+
+            # TODO: need to change the DB to have real multiprocessing
+            # n_cores = mp.cpu_count() - 1 or 1
+            n_cores = 1
             with mp.Pool(n_cores) as pool:
                 print("Multiprocessing with {} cores".format(n_cores))
                 df_sents = list(
