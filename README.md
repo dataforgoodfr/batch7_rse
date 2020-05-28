@@ -40,7 +40,6 @@ If you need to empty the database after some tests:
 	cd webapp
 	python manage.py flush
 
-
 If the schema of your sql database is **outdated with the current schema**, you may want to restart it from scratch. Indeed, Django makes it mandatory to keep all old classes that appeared at least once in the db schema, and this can make the model messy in times of development.
 
 To restart from scratch, you can follow scenario 1 in [this tutorial](https://simpleisbetterthancomplex.com/tutorial/2016/07/26/how-to-reset-migrations.html).
@@ -57,29 +56,32 @@ Then make the migrations (cf. step 3 in tutorial) and uncomment.
 # Parsing the pdfs and indexing the sentences with a BM25 model
 
 The DPEFs must be parsed, and a Spacy pipeline that include a BM25 model must be saved.
-There are custom Django commands to do so (of course debug mode is waaay faster):
+There are custom Django commands to do so:
 
 	cd webapp
-	python manage.py populate_db --mode debug
+	python manage.py populate_db
+ 
+Of course debug mode is waaay faster:
+
 	# or for full run and parsing:
-	python manage.py populate_db --mode final 
+	python manage.py populate_db --mode debug 
 
-Then, to create the model, run:
-
-	python manage.py indexe_sentences --mode debug
-	# or for full run of the model:
-	python manage.py populate_db --mode final 
+Other options:
+ - task: parse, model, or task_and_model
 
 # Running the server locally
 
 The server can then started with:
 
     cd webapp
-    python manage.py runserver --noreload
+    python manage.py runserver --noreload --settings settings.dev
 
 where noreload avoid double initialization.
+
 ___
 ### (deprecated) Parsing the pdfs and indexing the sentences with a BM25 model - The CSV way
+
+_Kept for tests of parsing_
 
 This is done by creating a file dpef_sentences.csv, which is then used to train the BM25 scorer and to save a Spacy model that can do weighted vectorization of sentences (therefore called "weighted vectorizer"). You can parse the PDFs and instantiate the model via:
 

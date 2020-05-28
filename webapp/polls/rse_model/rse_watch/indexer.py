@@ -25,18 +25,18 @@ def initialize_scorer(config, documents):
     Initialize the BM25 scorer object, from a csv file with a sentence by row.
     """
 
-    # load *small* nlp parser for pos tagging
-    if not spacy.util.is_package("fr_core_news_sm"):
-        print("Downloading fr_core_news_sm spacy model for pos tagging...")
-        spacy.cli.download('fr_core_news_sm')
-        print("done.")
-    nlp = spacy.load('fr_core_news_sm')
+    # # load *small* nlp parser for pos tagging
+    # if not spacy.util.is_package("fr_core_news_sm"):
+    #     print("Downloading fr_core_news_sm spacy model for pos tagging...")
+    #     spacy.cli.download('fr_core_news_sm')
+    #     print("done.")
+    # nlp = spacy.load('fr_core_news_sm')
 
     # index
     scorer = Scoring.create(config.SCORING_METHOD)
-    documents_words = []
-    for doc in nlp.pipe(documents, disable=["parser", "ner"]):  # only tagger is needed here
-        documents_words.append([token.text for token in doc if token.pos_ != "PUNCT"])
+    documents_words = documents
+    # for doc in nlp.pipe(documents, disable=["parser", "ner"]):  # only tagger is needed here
+    #     documents_words.append([token.text for token in doc if token.pos_ != "PUNCT"])
     print("Indexing from {} sentences with {} as method".format(len(documents_words), config.SCORING_METHOD))
     scorer.index(documents_words)
 

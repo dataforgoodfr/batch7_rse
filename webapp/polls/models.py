@@ -84,6 +84,10 @@ class Sentence(dm.Model):
     reference_file = dm.ForeignKey(DPEF, on_delete=dm.CASCADE,
                                    verbose_name=_("Fichier"), help_text=_("Document contenant la phrase"))
     text = dm.TextField(verbose_name=_("Texte"), help_text=_("Texte de la phrase"))
+    # better way to do this: https://stackoverflow.com/a/1113039
+    text_tokens = dm.TextField(verbose_name=_("Tokens"),
+                               help_text=_("Tokens du texte de la phrase, "
+                                           "sous forme de string et séparé par des pipe |"))
     page = dm.PositiveIntegerField(verbose_name=_("Page"),
                                    help_text=_("Page sur laquelle se situe la phrase. "
                                                "Si la phrase est étalée sur plusieur pages, "
@@ -93,15 +97,22 @@ class Sentence(dm.Model):
                                        "Permet de redonner du contexte à la phrase."))
     _vector = dm.BinaryField(null=True, blank=True)  # Vector(null=True, blank=True)
 
-    def _construct_vector(self):
-        vec = nlp(self.text).vector  # construct vector from self.text
+
+    def get_tokens(self):
+        """Get the tokens stored in text_tokens"""
+        tokens = self.text_tokens.split("|")
+        return tokens
+
+    def _construct_vector(self, nlp_vectorizer):
+        vec = nlp_vectorizer(self.text).vector  # construct vector from self.text
         np_bytes = pickle.dumps(vec)
         np_base64 = base64.b64encode(np_bytes)
         self._vector = np_base64
+        self.save()
 
-    def clean(self):
-        super().clean()
-        self._construct_vector()
+    # def clean(self):
+    #     super().clean()
+    #     self._construct_vector()
 
     @property
     def vector(self):
