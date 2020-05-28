@@ -95,6 +95,7 @@ class Sentence(dm.Model):
 
     def _construct_vector(self):
         vec = nlp(self.text).vector  # construct vector from self.text
+        vec = vec - vec.mean()  # adjusting for cosine similarity
         np_bytes = pickle.dumps(vec)
         np_base64 = base64.b64encode(np_bytes)
         self._vector = np_base64
@@ -114,35 +115,9 @@ class Sentence(dm.Model):
 
     @staticmethod
     def similarity_vector(vector1, vector2):
-        vector1 = vector1 - vector1.mean()
-        vector2 = vector2 - vector2.mean()
+        print(spatial.distance.cosine(vector1, vector2))
         return 1 - spatial.distance.cosine(vector1, vector2)
 
     def __str__(self):
         return self.text
 
-#
-# class Vector(dm.TextField):
-#
-#     # TODO: Test transformation from string to numpy array
-#     @staticmethod
-#     def to_numpy(value: str):
-#         if value != "0":
-#             return np.array([float(val) for val in value.split(' ')])
-#         doc = nlp(value)
-#         vector = doc.vector
-#         return vector
-#
-#     def to_python(self, value):
-#         if isinstance(value, np.ndarray):
-#             return value
-#         elif value is None:
-#             return value
-#         return self.to_numpy(value)
-#
-#     # TODO: Test construction of a true vector list as a string
-#     @staticmethod
-#     def from_numpy(numpy_vector: np.ndarray):
-#         if isinstance(numpy_vector, np.ndarray):
-#             return ' '.join([val for val in numpy_vector])
-#         return None
