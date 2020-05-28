@@ -5,6 +5,7 @@ import sys
 import os
 from pathlib import Path
 
+
 # Importing rse_watch package and config
 dir_path = Path(os.getcwd())
 sys.path.append(str(dir_path / 'polls/rse_model'))
@@ -21,12 +22,15 @@ config = Config(model_directory)
 #  a bit weird: parsing should be done once, and then the model created
 #  and then the model used by the server !
 #  --> This is not the right place for load_weighted_vectorizer.
-documents = []
+# documents = []
 # nlp = load_weighted_vectorizer(config,
 #                                documents,
 #                                create_from_scratch=False)
+nlp = None
+if 'runserver' in sys.argv:
+    nlp = load_weighted_vectorizer(config, None, create_from_scratch=False)
+# else:
+#     class nlp:
+#         def __init__(self, sentence):
+#             self.vector = np.random.random((300,))
 
-# # TODO: delete fake nlp for debug
-class nlp:
-    def __init__(self, sentence):
-        self.vector = np.random.random((100,))
