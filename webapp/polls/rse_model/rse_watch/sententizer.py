@@ -3,6 +3,7 @@ from spacy.tokens import Span
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
+import spacy_filters as sf
 
 
 def get_nb_words(doc):
@@ -47,7 +48,7 @@ def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
     df_sent = df_par
     # TODO: could be parallelized.
     df_sent["paragraph_sentences"] = df_sent["paragraph"].apply(
-        lambda x: [sent.text for sent in nlp(x).sents if sent._.nb_words >= config.MIN_NB_OF_WORDS]
+        lambda x: [sent for sent in nlp(x).sents if sent._.nb_words >= config.MIN_NB_OF_WORDS]
     ).values
     df_sent = df_sent[df_sent["paragraph_sentences"].apply(lambda x: len(x) > 0)]  # keep if there was >0 valid sentences
     df_sent = (df_sent
@@ -57,5 +58,7 @@ def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
                .reset_index()
                .drop('level_{}'.format(len(df_sent.columns) - 1), axis=1)
                .rename(columns={0: 'sentence'}))
+    df_sent['date']=df_sent['sentence'].apply(sf.isDate)
+    df_sent['sentence']=df_sent['sentence'].apply(lambda x: x.text)
     return df_sent
 
