@@ -213,7 +213,6 @@ def get_paragraphs_from_raw_content(device, idx_first_page):
                 counter = Counter()
                 item_holder = []
 
-
     # CREATE THE PARAGRAPHS IN EACH COLUMN
     # define minimal conditions to define a change of paragraph:
     # Being spaced by more than the size of each line (min if different to account for titles)
@@ -405,35 +404,51 @@ def cut_header(df_par, p=0.8, verbose=False):
     return df_par
 
 
-def get_paragraphs_dataframe_from_pdf(dpef_path, dict_annotations):
+def extract_company_metadata(dpef_path, companies_metadata_dict):
+    """ From metadata dict and a dpef file, get the relevant info."""
+    project_denomination = dpef_path.name.split("_")[0]
+    document_year = dpef_path.name.split("_")[1]
+    company_name = companies_metadata_dict[project_denomination]["denomination"]
+    company_sectors = None
+    try:
+        company_sectors = companies_metadata_dict[project_denomination]["sectors"].split(";")
+    except KeyError:
+        print("Sectors not found for company {} for year {}".format(project_denomination,
+                                                                    document_year))
+    rse_ranges = None
+    try:
+        rse_ranges = companies_metadata_dict[project_denomination]["rse_ranges_" + document_year]
+    except KeyError:
+        print("RSE ranges not found for company {} for year {}".format(project_denomination,
+                                                                       document_year))
+
+    return company_name, project_denomination, company_sectors, document_year, rse_ranges
+
+
+def get_paragraphs_dataframe_from_pdf(dpef_path, companies_metadata_dict):
     """
     Parse a pdf and return a pandas df with paragraph level parsed text.
 
     :param dpef_path_dict_annotations: (inpout_file, dict_annotations) tuple
     :return:
     """
-    project_denomination = dpef_path.name.split("_")[0]
-    company_sector = dpef_path.parent.name
-    document_year = dpef_path.name.split("_")[1]
+
+    company_name, project_denomination, company_sectors, document_year, rse_ranges \
+        = extract_company_metadata(dpef_path, companies_metadata_dict)
     t = time()
-    print("Start for {} [{}]".format(
+    print("Start parsing -  {} [{}]".format(
         project_denomination,
         dpef_path.name)
     )
-    try:
-        rse_ranges = dict_annotations[project_denomination]["rse_ranges_"+document_year]
-    except KeyError:
-        print("RSE ranges not found for company {} for year {}".format(project_denomination,
-                                                                       document_year))
     df_par = parse_paragraphs_from_pdf(dpef_path, rse_ranges=rse_ranges)
     df_par.insert(0, "project_denomination", project_denomination)
-    df_par.insert(1, "company_sector", company_sector)
+    df_par.insert(1, "company_sector", ";".join(company_sectors))
     df_par.insert(2, "document_year", document_year)
     df_par = df_par.drop_duplicates(['paragraph'])
     df_par = cut_footer(df_par, verbose=True)
     df_par = cut_header(df_par, verbose=True)
 
-    print("End for {} [{}] - took {} seconds".format(
+    print("End parsing - {} [{}] - took {} seconds".format(
         project_denomination,
         dpef_path.name,
         int(t - time()))
@@ -457,6 +472,7 @@ def get_sentences_from_all_pdfs(config):
     all_input_files = get_list_of_pdfs_filenames(config.dpef_dir)
     all_input_files = [input_file for input_file in all_input_files if
                        input_file.name.split("_")[0] in companies_metadata_dict.keys()]
+    print(all_input_files)
 
     # PARALLELIZATION
     parallel_get_sentences_dataframe_from_pdf = partial(get_sentences_dataframe_from_pdf,
@@ -488,7 +504,7 @@ def get_sentences_from_all_pdfs(config):
 
 def run(config):
     """
-    Parse the pdfs into structured csv formats (for now)
+    Parse the pdfs into structured csv formats
     : param conf: conf object with relative paths.
     :param task: "parser", "sententizer" or "both" ; Whether to parse
     pdfs, sententize the paragraphs, or do both.

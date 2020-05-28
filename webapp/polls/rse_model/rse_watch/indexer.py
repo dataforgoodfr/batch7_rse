@@ -19,15 +19,11 @@ def empty_directory(path_to_dir):
         for d in dirs:
             shutil.rmtree(os.path.join(root, d))
 
-# TODO: modify this to be able to run on the full sql database
-def initialize_scorer(conf):
+
+def initialize_scorer(config, documents):
     """
     Initialize the BM25 scorer object, from a csv file with a sentence by row.
     """
-    # load data
-    df = pd.read_csv(conf.parsed_sent_file, sep=";")
-
-    documents = df["sentence"].values.tolist()
 
     # load *small* nlp parser for pos tagging
     if not spacy.util.is_package("fr_core_news_sm"):
@@ -36,32 +32,31 @@ def initialize_scorer(conf):
         print("done.")
     nlp = spacy.load('fr_core_news_sm')
 
-
     # index
-    scorer = Scoring.create(conf.SCORING_METHOD)
+    scorer = Scoring.create(config.SCORING_METHOD)
     documents_words = []
     for doc in nlp.pipe(documents, disable=["parser", "ner"]):  # only tagger is needed here
         documents_words.append([token.text for token in doc if token.pos_ != "PUNCT"])
-    print("Indexing from {} sentences with {} as method".format(len(documents_words), conf.SCORING_METHOD))
+    print("Indexing from {} sentences with {} as method".format(len(documents_words), config.SCORING_METHOD))
     scorer.index(documents_words)
 
     # save
     print("Saving scorer.")
-    pickle_path = Path(conf.scorer_pickle_file).parent
+    pickle_path = Path(config.scorer_pickle_file).parent
     pickle_path.mkdir(parents=True, exist_ok=True)
-    with open(conf.scorer_pickle_file, "wb") as f:
+    with open(config.scorer_pickle_file, "wb") as f:
         pickle.dump(scorer, f)
 
     return scorer
 
 
-def load_scorer(conf):
+def load_scorer(conf, documents):
     """ Load it or initialize it if it does not exist"""
     try:
         f = open(conf.scorer_pickle_file, "rb")
     except FileNotFoundError:
         print("Scorer not found and thus created (at address: {})".format(conf.scorer_pickle_file))
-        scorer = initialize_scorer(conf)
+        scorer = initialize_scorer(conf, documents)
     else:
         print("Loading scorer from {}".format(conf.scorer_pickle_file))
         scorer = pickle.load(f)
@@ -69,10 +64,10 @@ def load_scorer(conf):
 
 
 # TODO: add kwargs like method, paths...
-def initialize_weighted_vectorizer(conf):
+def initialize_weighted_vectorizer(conf, documents):
     print("Initializing weighted vectorizer.")
     # load scoring method or create it if not existing
-    scorer = load_scorer(conf)
+    scorer = load_scorer(conf, documents)
     # instantiate
     if not spacy.util.is_package("fr_core_news_md"):
         print("Downloading fr_core_news_md spacy model for pos tagging...")
@@ -88,8 +83,9 @@ def initialize_weighted_vectorizer(conf):
     return nlp_wv
 
 
-def load_weighted_vectorizer(conf,
-                             create_from_scratch=False):
+def load_weighted_vectorizer(config,
+                             documents,
+                             create_from_scratch=True):
     """ Load custom spacy model, which should be created beforehand
     To use the returned 'nlp' model:
         # doc = nlp_wv("Une phrase simple avec des mots")
@@ -98,33 +94,30 @@ def load_weighted_vectorizer(conf,
     """
     if create_from_scratch:
         print("Initialization from scratch. [force_creation is set to 'True']")
-        empty_directory(conf.model_dir)
-        nlp = initialize_weighted_vectorizer(conf)
+        empty_directory(config.model_dir)
+        nlp = initialize_weighted_vectorizer(config, documents)
         return nlp
     try:
         print("Loading weighted vectorizer.")
-        nlp = spacy.load(conf.model_dir)
+        nlp = spacy.load(config.model_dir)
         print("Loaded.")
     except FileNotFoundError as e:
         print("Model needs to be created first.")
-        nlp = initialize_weighted_vectorizer(conf)
+        nlp = initialize_weighted_vectorizer(config, documents)
     except Exception as e:
         print("An error occured while loading weighted vectorizer:")
         print(e)
         print("We recreate the model from scratch and save it.")
-        nlp = initialize_weighted_vectorizer(conf)
+        nlp = initialize_weighted_vectorizer(config, documents)
     return nlp
 
 
 def run(config):
-    """"""
-    # TEST_MODE = True  # TODO: delete when in production.
-    # if TEST_MODE:
-    #     nlp = load_weighted_vectorizer(Config, create_from_scratch=True)
-    #     print(nlp("Ceci est un test pollution marine").vector.sum())
-    #     print(nlp("Ceci est un test pollution marine")._.similarity_to_vector(nlp("Ceci est un test pollution marine error").vector))
-
-    nlp = load_weighted_vectorizer(config)
+    """ Called from main.py; this load or create the weighted vectorizer via csv files. """
+    # load data
+    df = pd.read_csv(config.parsed_sent_file, sep=";")
+    documents = df["sentence"].values.tolist()
+    nlp = load_weighted_vectorizer(config, documents)
     # Usage:
     # doc = nlp_wv("Une phrase simple avec des mots")
     # numpy_vector_of_the_sentence = doc.vector

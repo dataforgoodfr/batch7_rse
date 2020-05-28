@@ -33,7 +33,7 @@ class BasicSearchForm(forms.Form):
             search_vector = nlp(self.cleaned_data['search_bar']).vector
             sentences = Sentence.objects.all()
             sentences = [(s, Sentence.similarity_vector(s.vector, search_vector)) for s in sentences]
-            sentences = sorted(sentences, key=lambda s: s[1], reverse=False)
+            sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
         except AttributeError:
             sentences = Sentence.objects.all()
         # TODO: add filter for sectors
