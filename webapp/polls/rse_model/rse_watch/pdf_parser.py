@@ -162,10 +162,16 @@ def get_paragraphs_from_raw_content(device, idx_first_page):
     item_holder = []
 
     item_index = 0
+    it_was_last_item = False
     while "There are unchecked items in device.rows":
 
         # add the item to the list of the page
-        (page_id, x_min, _, _, _, _) = device.rows[item_index]
+        try:
+            (page_id, x_min, _, _, _, _) = device.rows[item_index]
+        except e:
+            print("Wrong index {} for device.rows of len {}".format(item_index, len(device.rows)))
+            print("was that last page ? : {]".format(it_was_last_item))
+            raise
         item_holder.append(device.rows[item_index])
 
         # increment the count of x_min
