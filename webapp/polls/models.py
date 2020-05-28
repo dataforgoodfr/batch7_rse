@@ -97,7 +97,6 @@ class Sentence(dm.Model):
                                        "Permet de redonner du contexte à la phrase."))
     _vector = dm.BinaryField(null=True, blank=True)  # Vector(null=True, blank=True)
 
-
     def get_tokens(self):
         """Get the tokens stored in text_tokens"""
         tokens = self.text_tokens.split("|")

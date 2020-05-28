@@ -162,10 +162,16 @@ def get_paragraphs_from_raw_content(device, idx_first_page):
     item_holder = []
 
     item_index = 0
+    it_was_last_item = False
     while "There are unchecked items in device.rows":
 
         # add the item to the list of the page
-        (page_id, x_min, _, _, _, _) = device.rows[item_index]
+        try:
+            (page_id, x_min, _, _, _, _) = device.rows[item_index]
+        except e:
+            print("Wrong index {} for device.rows of len {}".format(item_index, len(device.rows)))
+            print("was that last page ? : {]".format(it_was_last_item))
+            raise
         item_holder.append(device.rows[item_index])
 
         # increment the count of x_min
@@ -469,10 +475,10 @@ def get_sentences_from_all_pdfs(config):
     Parses all dpefs into a sentence-level format and save the resulting csv according to config.
     """
     companies_metadata_dict = get_companies_metadata_dict(config)
-    all_input_files = get_list_of_pdfs_filenames(config.dpef_dir)
-    all_input_files = [input_file for input_file in all_input_files if
-                       input_file.name.split("_")[0] in companies_metadata_dict.keys()]
-    print(all_input_files)
+    all_dpef_paths = get_list_of_pdfs_filenames(config.dpef_dir)
+    all_dpef_paths = [dpef_path for dpef_path in all_dpef_paths if
+                       dpef_path.name.split("_")[0] in companies_metadata_dict.keys()]
+    print(all_dpef_paths)
 
     # PARALLELIZATION
     parallel_get_sentences_dataframe_from_pdf = partial(get_sentences_dataframe_from_pdf,
@@ -485,9 +491,9 @@ def get_sentences_from_all_pdfs(config):
             tqdm(
                 pool.imap(
                     parallel_get_sentences_dataframe_from_pdf,
-                    all_input_files
+                    all_dpef_paths
                 ),
-                total=len(all_input_files)
+                total=len(all_dpef_paths)
             )
         )
 
