@@ -97,6 +97,7 @@ class Sentence(dm.Model):
                                        "Permet de redonner du contexte à la phrase."))
     _vector = dm.BinaryField(null=True, blank=True)  # Vector(null=True, blank=True)
 
+
     def get_tokens(self):
         """Get the tokens stored in text_tokens"""
         tokens = self.text_tokens.split("|")
@@ -104,7 +105,6 @@ class Sentence(dm.Model):
 
     def _construct_vector(self, nlp_vectorizer):
         vec = nlp_vectorizer(self.text).vector  # construct vector from self.text
-        vec = vec - vec.mean()  # adjusting for cosine similarity
         np_bytes = pickle.dumps(vec)
         np_base64 = base64.b64encode(np_bytes)
         self._vector = np_base64
