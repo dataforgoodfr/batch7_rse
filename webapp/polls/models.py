@@ -55,9 +55,6 @@ def _validate_file_extension(value: FieldFile):
 
 
 class DPEF(dm.Model):
-    # class FileType(models.TextChoices):
-    #     DPEF = 'DPEF', _('dpef')
-    #     RSE = 'DDR', _('ddr')
     file_name = dm.CharField(max_length=100,
                              primary_key=True,
                              unique=True,
@@ -75,12 +72,6 @@ class DPEF(dm.Model):
 
     year = dm.IntegerField(choices=[(i, i) for i in range(1990, date.today().year + 1)],  # list of years since 1990
                            verbose_name=_("Année"), help_text=_("Année de référence du document DPEF"))
-
-    # file_type = models.CharField(
-    #     max_length=4,
-    #     choices=FileType.choices,
-    #     # default=FileType.DPEF
-    # )
 
     def sentences(self):
         return Sentence.objects.filter(reference_file__id=self.id)

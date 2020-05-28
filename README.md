@@ -93,3 +93,10 @@ Hack to parse only a subset of the PDFs:
 
 The model is created under (DEBUG)-Model, but can be renamed to "Model" to be used by Django in debug phases.
 
+
+
+if you want to run the server with an other settings file, you can also launch :
+
+    python manage.py runserver  --settings batch7rse.settings.dev
+
+for the dev settings for example.
