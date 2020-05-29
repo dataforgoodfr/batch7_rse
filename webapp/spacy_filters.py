@@ -1,6 +1,7 @@
 import pandas as pd
 
 
+white_list_words = pd.read_csv("./white_list_words.csv")['word'].values
 
 
 def isDate(span, find_context=False, earliest=0):
@@ -13,13 +14,15 @@ def isDate(span, find_context=False, earliest=0):
                 and len(token) == 4  # token must be of length 4
                 and int(token.text) > earliest  # Token must be above certain date
                 and token.i != 0
+                and token.text in white_list_words
                 # and tokens[token.i-1].shape[0]!=X
                 # and tokens[token.i-1] in before_context.values
 
         ):
             current = []
             current.append((int(token.text)))
-            before = ' '
+
+            #This part is for debug
             if find_context == True:
                 if token.i != 0:
                     before = tokens[token.i - 1]
@@ -27,7 +30,9 @@ def isDate(span, find_context=False, earliest=0):
                     before = ' '
                 """if token.i<len(tokens)-1:
                     after.append(tokens[token.i+1])"""
-            current.append(before)
+                current.append(before)
+                #End of debug part
+
             dates.append(current)
-    result = dates if dates else False
+    result = [date[0] for date in dates] if dates else False
     return result
