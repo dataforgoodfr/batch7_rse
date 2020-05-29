@@ -1,7 +1,7 @@
 from .models import Company, DPEF
 from django.views.generic.edit import View
 from django.views import generic
-from .forms import BasicSearchForm, SearchForm
+from .forms import BasicSearchForm, SearchForm, CompanyForm
 from django.shortcuts import render
 
 
@@ -10,10 +10,12 @@ class IndexView(View):
     form_class = BasicSearchForm
 
     @staticmethod
-    def get_context(form, response=None):
+    def get_context(form):
         context = {'form': form}
-        if response is not None:
-            context['response'] = response
+        response = []
+        if form.is_valid() and form.is_bound:
+            response = form.get_sentences()
+        context['sentences'] = response
         return context
 
     def render(self, request, context: dict):
@@ -29,21 +31,31 @@ class SearchView(IndexView):
     form_class = SearchForm
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        response = None
-        if form.is_valid():
-            response = None  # TODO: Complete this to get a valid response.
-        context = self.get_context(form, response)
+        context = self.get_context(self.form_class(request.POST))
         return self.render(request, context)
 
 
-class CompanyListView(generic.ListView):
+class CompanyListView(View):
     template_name = 'polls/company_list.html'
-    context_object_name = 'company_list'
+    form_class = CompanyForm
 
-    def get_queryset(self):
-        companies = Company.objects.all()
-        return companies
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class())
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class(request.POST))
+        return render(request, self.template_name, context)
+
+    @staticmethod
+    def get_context(form):
+        context = {'form': form}
+        if form.is_valid() and form.is_bound:
+            company_list = form.filter_company()
+        else:
+            company_list = Company.objects.all()
+        context['company_list'] = company_list
+        return context
 
 
 class CompanyDetailView(generic.DetailView):
