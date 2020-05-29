@@ -46,8 +46,8 @@ img#footer {
   width:auto;
 }
 
-#id_search_bar, #id_start_period, #id_end_period {
-    width:99%;
+#id_search_bar, #id_start_period, #id_end_period, #id_company_name {
+    width:85%;
     border-radius:15px;
     border-width: 0.5px;
     border-style: solid;
@@ -74,7 +74,7 @@ button#homepage {
 
 }
 
-#id_start_period, #id_end_period {
+#id_start_period, #id_end_period, #id_company_name {
     width:30%;
     height: calc(1.5em + .75rem + 2px);
     padding-left:6px;
@@ -84,6 +84,13 @@ button#homepage {
 label {
  margin-bottom: 0rem !important;
 }
+/*
+@media only screen and (max-width : 768px) {
+  label.btn-toolbar-vertical > label.btn{
+    display: block;
+  }
+}
+*/
 
 /*Page construction helpers, do not include in final version
 

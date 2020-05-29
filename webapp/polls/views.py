@@ -1,8 +1,9 @@
-from .models import Company, DPEF
+from .models import Company, DPEF, ActivitySector
 from django.views.generic.edit import View
 from django.views import generic
 from .forms import BasicSearchForm, SearchForm, CompanyForm
 from django.shortcuts import render
+from django.db.models import Count
 
 
 class IndexView(View):
@@ -30,10 +31,22 @@ class SearchView(IndexView):
     template_name = 'polls/search.html'
     form_class = SearchForm
 
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class())
+        return render(request, self.template_name, context)
+
     def post(self, request, *args, **kwargs):
         context = self.get_context(self.form_class(request.POST))
         return self.render(request, context)
 
+    @staticmethod
+    def get_context(form):
+        context = {'form': form}
+        context['total_companies'] = len(Company.objects.all())
+        context['total_docs'] = len(DPEF.objects.all())
+        context['total_sectors'] = len(ActivitySector.objects.all())
+        context['total_sentences'] = len(list(DPEF.objects.aggregate(Count('sentence'))))
+        return context
 
 class CompanyListView(View):
     template_name = 'polls/company_list.html'
@@ -55,6 +68,9 @@ class CompanyListView(View):
         else:
             company_list = Company.objects.all()
         context['company_list'] = company_list
+        context['total_companies'] = len(company_list)
+        context['total_docs'] = len(DPEF.objects.all())
+        context['total_sectors'] = len(ActivitySector.objects.all())
         return context
 
 

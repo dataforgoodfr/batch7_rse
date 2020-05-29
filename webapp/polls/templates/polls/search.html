@@ -3,34 +3,37 @@
 {% load static %}
 {% block content %}
 
-<div class="container justify-content-center mycontainer shadow-sm p-3 mb-5 bg-white rounded">
+<div class="container justify-content-center mycontainer shadow p-3 mb-5 bg-white rounded">
+        <h3 class="text-muted"> <b>Recherche thématique</b></h3>
+    <p>Effectuez une recherche par mots-clefs parmi {{ total_sentences }} extraits issus de {{ total_docs }} DPEFs appartenant à  {{ total_companies }} entreprises réparties en {{ total_sectors }} secteurs</p>
     <form action="{% url 'polls:search' %}" method="post" class="form-rounded">
     {% csrf_token %}
     <div class="row justify-content-center myrow p-2">
-       <div class="col-12 mycol  p-1"><strong>Thème</strong>{{ form.search_bar | add_attr:"class: form-control-lg align-items-center, placeholder:ex. Biodiversité" }} </div>
+       <div class="col-12 mycol  p-1"><h3>Thème {{ form.search_bar | add_attr:"class: form-control-lg align-items-center,  placeholder:ex. Réchauffement climatique" }} </h3></div>
     </div>
 
     <div class="row  myrow p-2">
-        <div class="col-sm-2 mycol text-right p-1"> <strong>Entreprise</strong></div>
-        <div class="col-sm-4 mycol">   {{ form.company_name | add_attr:"class: form-control align-items-center, placeholder:ex. Total" }}</div>
-        <div class="col-sm-2 mycol text-right p-1"> <strong>Période</strong> </div>
-         <div class="col-sm-4 mycol"> {{ form.start_period}} à {{ form.end_period }}</div>
+        <div class="col-sm-6 mycol text-center p-1">  <strong> {{ form.company_name.label }}</strong>
+        {{ form.company_name | add_attr:"class: form-control, align-items-center, w-50, mx-2, placeholder:ex. Total" }}
+        </div>
+
+        <div class="col-sm-6 mycol text-center p-1"> <strong>Période</strong>
+          {{ form.start_period}} à {{ form.end_period }}</div>
     </div>
 
-      <div class="row justify-content-start myrow p-2">
-       <div class="col-4 mycol p-1"><strong>Secteurs</strong></div>
-
-        <div class="btn-group btn-group-toggle col-12 mycol" data-toggle="buttons">
+      <div class="col-sm-12 mycol text-left p-1">  <strong> Secteurs </strong> (décocher)
+       <div class="btn btn-group-toggle flex-wrap" data-toggle="buttons">
             {% for sector in form.sectors %}
-            <label class="btn btn-outline-primary"> {{ sector }} </label>
+
+            <label class="btn btn-outline-info my-1"> {{ sector }} </label>
 
             {% endfor %}
         </div>
 
-
       </div>
-        <div class="row justify-content-center myrow">
-        <button type="submit" class="btn btn-primary">Rechercher</button>
+
+        <div class="row justify-content-center myrow w-100 my-1">
+        <button type="submit" class="w-50 btn btn-outline-dark">Rechercher</button>
          </div>
     </form>
 </div>
