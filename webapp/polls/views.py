@@ -17,6 +17,10 @@ class IndexView(View):
         if form.is_valid() and form.is_bound:
             response = form.get_sentences()
         context['sentences'] = response
+        context['total_companies'] = len(Company.objects.all())
+        context['total_docs'] = len(DPEF.objects.all())
+        context['total_sectors'] = len(ActivitySector.objects.all())
+        context['total_sentences'] = len(list(DPEF.objects.aggregate(Count('sentence'))))
         return context
 
     def render(self, request, context: dict):
@@ -26,7 +30,14 @@ class IndexView(View):
         context = self.get_context(self.form_class())
         return self.render(request, context)
 
+class SearchView(IndexView):
+    template_name = 'polls/search.html'
+    form_class = SearchForm
 
+    def post(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class(request.POST))
+        return self.render(request, context)
+'''
 class SearchView(IndexView):
     template_name = 'polls/search.html'
     form_class = SearchForm
@@ -47,6 +58,7 @@ class SearchView(IndexView):
         context['total_sectors'] = len(ActivitySector.objects.all())
         context['total_sentences'] = len(list(DPEF.objects.aggregate(Count('sentence'))))
         return context
+'''
 
 class CompanyListView(View):
     template_name = 'polls/company_list.html'
