@@ -14,7 +14,7 @@
 12,période,date
 13,semestre,date
 14,cap,date
-15, été,date
+15,été,date
 16,automne,date
 17,hiver,date
 18,printemps,date
@@ -55,3 +55,27 @@
 53,pour,time_marker
 54,cap,date
 55,avant,time_marker
+56,décembre,mois
+57,ﬁn,date
+58,juin,mois
+59,trimestre,date
+60,mi-septembre,date
+61,mi-janvier,mois
+62,mi-février,mois
+63,mi-mars,mois
+64,mi-avril,mois
+65,mi-mai,mois
+66,mi-juillet,mois
+67,mi-août,mois
+68,mi-septembre,mois
+69,mi-octobre,mois
+70,mi-novembre,mois
+71,mi-décembre,mois
+72,mi-juin,mois
+73,courant,time_marker
+74,Dès,time_marker
+75,Depuis,time_marker
+76,En,time_marker
+77,EN,time_marker
+78,campagne,divers
+79,ici,time_marker
