@@ -37,28 +37,6 @@ class SearchView(IndexView):
     def post(self, request, *args, **kwargs):
         context = self.get_context(self.form_class(request.POST))
         return self.render(request, context)
-'''
-class SearchView(IndexView):
-    template_name = 'polls/search.html'
-    form_class = SearchForm
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context(self.form_class())
-        return render(request, self.template_name, context)
-
-    def post(self, request, *args, **kwargs):
-        context = self.get_context(self.form_class(request.POST))
-        return self.render(request, context)
-
-    @staticmethod
-    def get_context(form):
-        context = {'form': form}
-        context['total_companies'] = len(Company.objects.all())
-        context['total_docs'] = len(DPEF.objects.all())
-        context['total_sectors'] = len(ActivitySector.objects.all())
-        context['total_sentences'] = len(list(DPEF.objects.aggregate(Count('sentence'))))
-        return context
-'''
 
 class CompanyListView(View):
     template_name = 'polls/company_list.html'
