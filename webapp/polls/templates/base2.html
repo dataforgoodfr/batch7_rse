@@ -18,18 +18,18 @@
 <!------- Navbar --------->
 
         <aside class="col-12 col-md-2 p-0 flex-shrink-1 shadow-sm" id="navbar">
-            <nav class="navbar navbar-expand navbar-dark flex-md-column flex-row py-2" >
+            <nav class="navbar navbar-expand navbar-dark flex-md-column flex-row" >
                 <div class="collapse navbar-collapse ">
-                    <ul class="flex-md-column flex-row navbar-nav w-100 justify-content-between text-center">
+                    <ul class="flex-md-column flex-row navbar-nav justify-content-between text-center">
                         <li class="nav-item">
-                            <a class="nav-link pl-0 text-nowrap" href="/"><img src="{% static 'img/Logo-small.png' %}" class="img-fluid" alt="RSE Explorer"></a>
+                            <a class="nav-link text-nowrap " href="/"><img src="{% static 'img/Logo-small.png' %}" class="img-fluid" style="width:90%;min-width:90px;" alt="RSE Explorer"></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link pl-0" href="/entreprises/"><button type="button" class="btn" id="btn-navbar">Liste des DPEF</button></a>
+                            <a class="nav-link" href="/entreprises/"><button type="button" class="btn w-100" id="btn-navbar">Rechercher une DPEF</button></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link pl-0" href="/search/"><button type="button" class="btn" id="btn-navbar">Recherche thématique</button></a>
-                     </li>
+                            <a class="nav-link" href="/search/"><button type="button" class="btn w-100" id="btn-navbar">Recherche thématique</button></a>
+                       </li>
 
                  </ul>
 
@@ -54,16 +54,21 @@
 </div>
 
 <!------- Footer --------->
-    <footer class="d-flex justify-content-center" style="background-color:#fff3d5;">
+    <footer class="d-flex py-1 row justify-content-center" style="background-color:#fff3d5;">
 
-      <div >
+      <div class="col-5 p-1 text-center">
           <ul id="footer">
-            <li> <a  href="https://www.ecologique-solidaire.gouv.fr/"> <img src="{% static 'img/MTES.jpg' %}"  alt="MTES" id="footer" ></a></li>
-            <li>  <a href="https://dataforgood.fr/"><img src="{% static 'img/d4g.png' %}"  alt="dataforgood" id="footer"></a></li>
-            <li> <a  href="https://github.com/dataforgoodfr/batch7_rse"><img src="{% static 'img/github.svg' %}"  alt="github" id="footer" ></a></li>
+            <li> Une collaboration <a  href="https://www.ecologique-solidaire.gouv.fr/"> <img src="{% static 'img/MTES.jpg' %}"  alt="MTES" id="footer" ></a></li>
+            <li>  et <a href="https://dataforgood.fr/"><img src="{% static 'img/d4g.png' %}"  alt="dataforgood" id="footer"></a> </li>
           </ul>
-
       </div>
+       <div class="col-2 p-1"> </div>
+      <div class="col-5  p-1 text-center">
+          <ul id="footer">
+            <li> Une question ? Une remarque ? Contactez-nous sur Github <a  href="https://github.com/dataforgoodfr/batch7_rse"><img src="{% static 'img/github.png' %}"  alt="github" id="footer" ></a></li>
+          </ul>
+       </div>
+
     </footer>
 <!------- END Footer --------->
 

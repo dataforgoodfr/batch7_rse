@@ -3,7 +3,7 @@
 {% load filters %}
 {% load static %}
 
-<div class="container justify-content-center mycontainer">
+<div class="container justify-content-center m-2 p-2 mycontainer">
 
     <div class="row justify-content-center myrow">
         <h1><strong>{{ company.name }}</strong> - ID: {{ company.id }} <h1/>
@@ -17,7 +17,7 @@
 
         <div class="col-5 p-3 mycol"> <p class="text-center"><p>Secteurs
         {% for sector in company.sectors %}
-            <button class="btn btn-primary">{{ sector.name }}</button>
+            <button class="btn btn-info">{{ sector.name }}</button>
         {% endfor %}</p></p></div>
 
         <div class="col-5 p-3 mycol"> <p class="text-center">DPEF disponibles : {{ company.pdf_name }} <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></p></div>
