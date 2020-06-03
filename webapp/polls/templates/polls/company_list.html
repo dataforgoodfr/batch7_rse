@@ -37,19 +37,42 @@
 
 
 <div class="container justify-content-center mycontainer p-2">
-    <div class="row justify-content-center myrow p-2">
         <table class="table">
-          <tbody>
-          {% for company in company_list %}
+            <thead>
             <tr>
-              <td><a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a></td>
-              <td> {% for sector in company.sectors %} {{ sector.name }} {% endfor %}</td>
-              <td> {% for dpef in company.dpefs %} <li style="list-style: none">{{ dpef.file_object }} ({{ dpef.year }}) <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></li> {% endfor %}</td>
+                <th scope="col">Entreprise</th>
+                <th scope="col">Secteurs</th>
+                <th scope="col">DPEFs</th>
+                <th scope="col">Documents</th>
             </tr>
-           {% endfor %}
+          </thead>
+          <tbody>
+              {% for company in company_list %}
+                <tr>
+                  <td><a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a></td>
+                  <td> {% for sector in company.sectors %} {{ sector.name }} {% endfor %}</td>
+                  <td> {% for dpef in company.dpefs %} <li style="list-style: none">{{ dpef.file_name }} ({{ dpef.year }}) {% endfor %}</td>
+                    <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></li> </td>
+                </tr>
+               {% endfor %}
          </table>
     </div>
-</div>
+
+
+
+    <!--    <div class="row justify-content-center myrow p-2">-->
+<!--        <table class="table">-->
+<!--          <tbody>-->
+<!--          {% for company in company_list %}-->
+<!--            <tr>-->
+<!--              <td><a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a></td>-->
+<!--              <td> {% for sector in company.sectors %} {{ sector.name }} {% endfor %}</td>-->
+<!--              <td> {% for dpef in company.dpefs %} <li style="list-style: none">{{ dpef.file_object }} ({{ dpef.year }}) <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></li> {% endfor %}</td>-->
+<!--            </tr>-->
+<!--           {% endfor %}-->
+<!--         </table>-->
+<!--    </div>-->
+<!--</div>-->
 
 
 
