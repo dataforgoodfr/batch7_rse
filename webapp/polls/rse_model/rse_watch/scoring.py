@@ -268,7 +268,7 @@ class VectorizerComponent(object):
 
 
 # Add entry point to access the custom component and loading the model.
-spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent(nlp, **cfg)
+spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent()
 
 
 def similarity_to_vector(doc, vector):
