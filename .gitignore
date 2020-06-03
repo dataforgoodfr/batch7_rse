@@ -12,5 +12,5 @@ batch7rse/db.sqlite3
 webapp/data/model/DPEFs/__parsed_dpefs__/
 webapp/data/model/DPEFs/__parsed_dpefs_debug__/
 webapp/data/model/Model/
-webapp/data/polls/models/dpef
+webapp/data/polls/models/dpef/
 
