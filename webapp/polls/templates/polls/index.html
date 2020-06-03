@@ -2,15 +2,16 @@
 {% load filters %}
 {% load static %}
 {% block content %}
-<div class="container justify-content-center mycontainer">
+<div class="container justify-content-center mycontainer m-2 p-2">
 
     <div class="row justify-content-center myrow">
-    <h1 class="text-center"><strong>La Resonsabilité Sociale des Entreprises enfin rassemblée en un seul endroit</strong><h1/>
+    <h1 class="text-center"><strong>La Resonsabilité Sociale des Entreprises enfin rassemblée en un seul endroit !</strong><h1/>
     </div>
 
 
 
-    <div class="row justify-content-center align-items-start myrow">
+
+    <div class="row justify-content-center align-items-start myrow p-3">
 
 
             <form action="{% url 'polls:search' %}" method="post" class="form-group" style="width:80%">
@@ -18,9 +19,11 @@
                 {% csrf_token %}
                 {% for field in form %}
                     {{ field.errors }}
+
                 <div class="input-group col-12 justify-content-center p-2" >
-                    {{ field | add_attr:"class:form-control-lg, id:homepage, placeholder: ex. énergies renouvelables" }}
-                    <div class="input-group-prepend"> <button class="btn btn-outline-info" type="submit" id="homepage">Chercher</button></div>
+                    <i>Entrez une requête et cliquez sur "Chercher"</i>
+                    {{ field | add_attr:"class:form-control-lg, id:homepage, placeholder: ex. énergies renouvelables..." }}
+                    <div class="input-group-prepend"> <button class="btn btn-outline-dark" type="submit" id="homepage">Chercher</button></div>
                 </div>
                     {% if field.help_text %}
                         {{ field.help_text|safe }}
@@ -40,15 +43,31 @@
 
 
 
-<div class="row justify-content-center myrow">
-    <img src="{% static 'img/index_banner.png' %}"  alt="banner" style="width:60%;"> </div>
+    <div class="row justify-content-center myrow">
+        <img src="{% static 'img/index_banner_small.png' %}"  alt="banner"  style="width:63%;">
+    </div>
     
     <div class="row justify-content-center myrow">
-        <div class="col-3 p-3 mycol"> <p class="text-center">Une base de données rassemblant toutes les DPEF des grandes entreprises françaises</p></div>
-        <div class="col-3 p-3 mycol"> <p class="text-center">Contenu analysé par Intelligence Artificielle </p></div>
-        <div class="col-3 p-3 mycol"> <p class="text-center">Moteur de recherche simple et rapide sur les pratiques et engagements RSE </p></div>
+        <div class="col-3 mx-3 mb-3 mt-1 mycol"> <p class="text-center">Une base de données rassemblant toutes les DPEF des grandes entreprises françaises</p></div>
+        <div class="col-3 mx-3 mb-3 mt-1 mycol"> <p class="text-center">Contenu analysé par Intelligence Artificielle </p></div>
+        <div class="col-3 mx-3 mb-3 mt-1  mycol"> <p class="text-center">Moteur de recherche simple et rapide sur les pratiques et engagements RSE </p></div>
     </div>
-</div>
+
+
+  <div class="row myrow" id="dpef-info">
+      <h1 class="display-8">Qu'est-ce qu'une DPEF ?</h1>
+      <p class="lead">C'est un document permettant la communication par une entreprise d’informations sociales,
+          environnementales, sociétales et de gouvernance, contribuant ainsi à une meilleure transparence sur ses activités,
+          ses caractéristiques et son organisation.</p>
+
+      <p>Cette déclaration est obligatoire depuis 2012 pour toutes les grandes entreprises françaises, côtée ou non.</p>
+      <p class="lead">
+        <a class="btn btn-outline-dark" href="{% url 'polls:company_list' %}" role="button">Consulter les DPEFs de notre base</a>
+      </p>
+    </div>
+
+
+</<div>
 
 {% endblock content %}
 

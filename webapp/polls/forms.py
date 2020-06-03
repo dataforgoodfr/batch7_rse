@@ -42,8 +42,8 @@ class BasicSearchForm(forms.Form):
 
 class SearchForm(BasicSearchForm):
     company_name = forms.CharField(label=_("Nom de l'entreprise"), max_length=100, required=False)
-    start_period = forms.IntegerField(label=_("De"), min_value=1990, max_value=date.today().year + 1, required=False)
-    end_period = forms.IntegerField(label=_("à"), min_value=1990, max_value=date.today().year + 1, required=False)
+    start_period = forms.IntegerField(label=_("De"), min_value=1990, max_value=date.today().year + 1, required=False, default=2015)
+    end_period = forms.IntegerField(label=_("à"), min_value=1990, max_value=date.today().year + 1, required=False, default=2020)
     sector_list = [(sector.id, sector.name) for sector in Sectors.objects.all()]
     sectors = forms.MultipleChoiceField(choices=sector_list, initial=[s[0] for s in sector_list],
                                         widget=forms.CheckboxSelectMultiple, required=False)
