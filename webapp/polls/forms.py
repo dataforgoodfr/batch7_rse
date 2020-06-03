@@ -14,7 +14,7 @@ class CompanyForm(forms.Form):
 
     def filter_company(self):
         try:
-            if self.cleaned_data['company_name'] == '':  # no company name set
+            if self.cleaned_data['company_name'].strip() == '':  # no company name set
                 companies = Company.objects.filter(_activity_sectors__in=self.cleaned_data['sectors'])
             else:
                 companies = Company.objects\

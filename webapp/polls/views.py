@@ -1,9 +1,9 @@
-from .models import Company, DPEF, ActivitySector
+from .models import Company, DPEF, ActivitySector, Sentence
 from django.views.generic.edit import View
 from django.views import generic
 from .forms import BasicSearchForm, SearchForm, CompanyForm
 from django.shortcuts import render
-from django.db.models import Count
+# from django.db.models import Count, Sum
 
 
 class IndexView(View):
@@ -17,10 +17,10 @@ class IndexView(View):
         if form.is_valid() and form.is_bound:
             response = form.get_sentences()
         context['sentences'] = response
-        context['total_companies'] = len(Company.objects.all())
-        context['total_docs'] = len(DPEF.objects.all())
-        context['total_sectors'] = len(ActivitySector.objects.all())
-        context['total_sentences'] = len(list(DPEF.objects.aggregate(Count('sentence'))))
+        context['total_companies'] = Company.objects.all().count()
+        context['total_docs'] = DPEF.objects.all().count()
+        context['total_sectors'] = ActivitySector.objects.all().count()
+        context['total_sentences'] = Sentence.objects.all().count()
         return context
 
     def render(self, request, context: dict):

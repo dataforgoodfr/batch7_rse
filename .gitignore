@@ -6,8 +6,8 @@ desktop.ini
 
 *debug*.ipynb
 (DEBUG)-*.csv
-data/model/__Model_debug__/
-batch7rse/db.sqlite3
+webapp/data/model/__Model_debug__/
+webapp/batch7rse/db.sqlite3
 
 webapp/data/model/DPEFs/__parsed_dpefs__/
 webapp/data/model/DPEFs/__parsed_dpefs_debug__/

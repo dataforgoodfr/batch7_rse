@@ -124,7 +124,7 @@ class Sentence(dm.Model):
 
     @staticmethod
     def similarity_vector(vector1, vector2):
-        print(spatial.distance.cosine(vector1, vector2))
+        # print(spatial.distance.cosine(vector1, vector2))
         return 1 - spatial.distance.cosine(vector1, vector2)
 
     def __str__(self):
