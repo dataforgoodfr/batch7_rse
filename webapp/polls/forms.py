@@ -30,14 +30,22 @@ class BasicSearchForm(forms.Form):
 
     def get_sentences(self):
         try:
-            search_vector = nlp(self.cleaned_data['search_bar']).vector
+            search_vector = nlp(self.cleaned_data['search_bar'].strip()).vector
             sentences = Sentence.objects.all()
             sentences = [(s, Sentence.similarity_vector(s.vector, search_vector)) for s in sentences]
             sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
         except AttributeError:
             sentences = Sentence.objects.all()
-        # TODO: add filter for sectors
         return sentences[:10]
+
+    def clean_search_bar(self):
+        cleaned_search_bar = self.cleaned_data['search_bar'].lower().strip()
+        # TODO: here the test could be made that the vector exists.
+        if cleaned_search_bar == "":
+            msg = "Your query is empty."
+            self.add_error('search_bar', msg)
+        return cleaned_search_bar
+
 
 
 class SearchForm(BasicSearchForm):
