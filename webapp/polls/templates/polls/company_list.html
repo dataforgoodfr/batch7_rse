@@ -51,8 +51,8 @@
                 <tr>
                   <td><a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a></td>
                   <td> {% for sector in company.sectors %} {{ sector.name }} {% endfor %}</td>
-                  <td> {% for dpef in company.dpefs %} <li style="list-style: none">{{ dpef.file_name }} ({{ dpef.year }}) {% endfor %}</td>
-                    <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></li> </td>
+                  <td> {% for dpef in company.dpefs %} <li style="list-style: none">{{ dpef.file_name }} ({{ dpef.year }}) </li> {% endfor %}</td>
+                    <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></li></td>
                 </tr>
                {% endfor %}
          </table>
