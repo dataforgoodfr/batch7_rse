@@ -11,16 +11,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import spacy
 from spacy.tokens import Doc
 import enum
-
-# Global parameters
-# Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
-IGNORED_POS = ['PRON', 'AUX', 'DET', "PUNCT"]
-# TODO: add a list of stop words to ignore -> il existe des dictionnaires tous faits !
+from sententizer import IGNORED_POS
 
 
 @enum.unique
 class ScoringMethod(enum.Enum):
-
     BM25 = 1
     SIF = 2
     TFDIF = 3
@@ -273,7 +268,7 @@ class VectorizerComponent(object):
 
 
 # Add entry point to access the custom component and loading the model.
-spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent()
+spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent(nlp, **cfg)
 
 
 def similarity_to_vector(doc, vector):
