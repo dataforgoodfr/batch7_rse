@@ -52,10 +52,10 @@
           <tbody>
           {% for sentence in sentences %}
             <tr>
-              <td>company_name</td>
+              <td>{{sentence.0.reference_file.company.name}}</td>
               <td><i>{{ sentence.0.text }}</i></td>
               <td>{{ sentence.1 | percentage }}</td>
-              <td> document_name, year, p.42</td>
+              <td> {{sentence.0.reference_file.file_name}}, p.{{sentence.0.page}}</td>
               <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></td>
             </tr>
            {% endfor %}
