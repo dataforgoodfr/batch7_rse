@@ -1,9 +1,9 @@
-version: '3'
+version: '3.5'
 
 services:
   db:
     image: postgres
-    container-name: dataforgood-postgres
+    container_name: dataforgood_postgres
     restart: always
     environment:
       - POSTGRES_DB=postgres
@@ -14,6 +14,7 @@ services:
 
   web:
     build: .
+    container_name: dataforgood_web
 #     command: python manage.py runserver 0.0.0.0:8000
 #    volumes:
 #      - .:/code
@@ -24,5 +25,4 @@ services:
 
 volumes:
   db:
-    name:
-      dataforgood_db
+    name: dataforgood_db
