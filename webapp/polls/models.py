@@ -56,12 +56,12 @@ def _validate_file_extension(value: FieldFile):
 
 class DPEF(dm.Model):
     file_name = dm.CharField(max_length=100,
-                             primary_key=True,
                              unique=True,
                              verbose_name=_("Nom du fichier PDF"),
                              help_text=_("Nom complet du pdf de la DPEF, avec extension '.pdf'.."))
     company = dm.ForeignKey(Company, on_delete=dm.CASCADE,
-                            verbose_name=_("Entreprise"), help_text=_("L'entreprise référencée par le document."))
+                            verbose_name=_("Entreprise"),
+                            help_text=_("L'entreprise référencée par le document."))
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
     file_object = dm.FileField(unique=True,
@@ -74,16 +74,19 @@ class DPEF(dm.Model):
                            verbose_name=_("Année"), help_text=_("Année de référence du document DPEF"))
 
     def sentences(self):
-        return Sentence.objects.filter(reference_file__id=self.id)
+        return Sentence.objects.filter(dpef__file_name=self.id)
 
     def __str__(self):
         return self.file_object.name  # file path
 
 
 class Sentence(dm.Model):
-    reference_file = dm.ForeignKey(DPEF, on_delete=dm.CASCADE,
-                                   verbose_name=_("Fichier"), help_text=_("Document contenant la phrase"))
-    text = dm.TextField(verbose_name=_("Texte"), help_text=_("Texte de la phrase"))
+    dpef = dm.ForeignKey(DPEF,
+                         on_delete=dm.CASCADE,
+                         verbose_name=_("Fichier"),
+                         help_text=_("Document contenant la phrase"))
+    text = dm.TextField(verbose_name=_("Texte"),
+                        help_text=_("Texte de la phrase"))
     # better way to do this: https://stackoverflow.com/a/1113039
     text_tokens = dm.TextField(verbose_name=_("Tokens"),
                                help_text=_("Tokens du texte de la phrase, "

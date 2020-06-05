@@ -15,7 +15,7 @@ class IndexView(View):
         context = {'form': form}
         response = []
         if form.is_valid() and form.is_bound:
-            response = form.get_sentences()
+            response = form.get_best_matching_sentences()
         context['sentences'] = response
         context['total_companies'] = Company.objects.all().count()
         context['total_docs'] = DPEF.objects.all().count()

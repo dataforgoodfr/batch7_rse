@@ -11,7 +11,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import spacy
 from spacy.tokens import Doc
 import enum
-from sententizer import IGNORED_POS
+from rse_watch.sententizer import IGNORED_POS
 
 
 @enum.unique
