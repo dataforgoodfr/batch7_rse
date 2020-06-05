@@ -71,7 +71,7 @@ def add_sentence(sentence_row, dpef_instance):
     context = sentence_row["paragraph"]
     page = int(sentence_row["page_nb"])
     # NB: vector will be included afterwards
-    Sentence.objects.create(reference_file=dpef_instance,
+    Sentence.objects.create(dpef=dpef_instance,
                             text=sentence,
                             text_tokens=sentence_tokens,
                             page=page,
