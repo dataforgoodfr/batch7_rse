@@ -13,14 +13,7 @@ from rse_watch.conf import Config, DebugConfig
 from rse_watch.indexer import load_weighted_vectorizer
 
 nlp = None
-# class NLP:
-#     vector = None
-#
-#     def __init__(self, text):
-#         vector = np.random.random((300,))
-
 
 if 'runserver' in sys.argv:
     config = Config(model_directory)
     nlp = load_weighted_vectorizer(config, None, create_from_scratch=False)
-    # nlp = NLP # TODO: for debg only !!!
