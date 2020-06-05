@@ -12,7 +12,6 @@ def filter_company_from_form(my_form):
         It is created outside of functions to prevent duplication in CompanyForm and SearchForm
     """
     print(my_form.cleaned_data)
-    print(my_form.cleaned_data['sectors'])
     try:
         if my_form.cleaned_data['company_name'].strip() == '':  # no company name set
             companies = Company.objects.filter(_activity_sectors__in=my_form.cleaned_data['sectors'])
@@ -76,9 +75,9 @@ class SearchForm(BasicSearchForm):
                                         widget=forms.CheckboxSelectMultiple, required=False)
 
     def _is_period_valid(self):
-        try: # TODO: check if this should be self.data["start_period"] instead
-            if self.start_period and self.end_period:
-                if self.start_period > self.end_period:
+        try:
+            if self.cleaned_data["start_period"] and self.cleaned_data["end_period"]:
+                if self.cleaned_data["start_period"] > self.cleaned_data["end_period"]:
                     return False
             return True
         except AttributeError:
@@ -91,17 +90,13 @@ class SearchForm(BasicSearchForm):
     def gather_sentences(self):
         """ This gather sentences into a QuerySet, filtering on sectors."""
         companies = filter_company_from_form(self)
-        print(companies)
         dpefs = DPEF.objects
         if self.cleaned_data["start_period"] is not None:
             dpefs = dpefs.filter(year__gte=self.cleaned_data["start_period"])
         if self.cleaned_data["end_period"] is not None:
             dpefs = dpefs.filter(year__lte=self.cleaned_data["end_period"])
         dpefs = dpefs.filter(company__in=companies)
-        print (self.cleaned_data["start_period"], self.cleaned_data["end_period"])
-        print(dpefs)
         sentences = Sentence.objects.filter(dpef__in=dpefs).all()
-        print(sentences)
         return sentences
 
     def get_response(self):
