@@ -134,6 +134,8 @@ class Command(BaseCommand):
                 raise
             nlp = load_weighted_vectorizer(config, documents, create_from_scratch=True)
             # Update the _vector field of the sentence
-            for sentence in Sentence.objects.iterator():
-                sentence._construct_vector(nlp)
+            print("Vectorization of all sentences based on word embeddings and BM25.")
+            for sentence in tqdm(Sentence.objects.iterator()):
+                sentence.construct_vector(nlp)
+
         print("Over for task {}".format(options["task"]))
