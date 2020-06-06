@@ -28,8 +28,8 @@ def add_company_and_sectors(project_denomination: str, company_name: str, sector
     if newly_created:
         activity_sectors = [ActivitySector.objects.get_or_create(name=my_sector_name)[0]
                             for my_sector_name in sectors_list]
-        for activity_sector in activity_sectors:
-            company._activity_sectors.set([activity_sector])
+        # for activity_sector in activity_sectors:
+        company._activity_sectors.set(activity_sectors)
 
     return company
 
@@ -71,7 +71,7 @@ def add_sentence(sentence_row, dpef_instance):
     context = sentence_row["paragraph"]
     page = int(sentence_row["page_nb"])
     # NB: vector will be included afterwards
-    Sentence.objects.create(reference_file=dpef_instance,
+    Sentence.objects.create(dpef=dpef_instance,
                             text=sentence,
                             text_tokens=sentence_tokens,
                             page=page,

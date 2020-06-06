@@ -11,16 +11,11 @@ from sklearn.metrics.pairwise import cosine_similarity
 import spacy
 from spacy.tokens import Doc
 import enum
-
-# Global parameters
-# Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
-IGNORED_POS = ['PRON', 'AUX', 'DET', "PUNCT"]
-# TODO: add a list of stop words to ignore -> il existe des dictionnaires tous faits !
+from rse_watch.sententizer import IGNORED_POS
 
 
 @enum.unique
 class ScoringMethod(enum.Enum):
-
     BM25 = 1
     SIF = 2
     TFDIF = 3
@@ -127,7 +122,7 @@ class Scoring(object):
         # Document length
         length = len(tokens)
 
-        for token in tokens:
+        for token in map(lambda x: x.lower(), tokens):
             # Lookup frequency and idf score - default to averages if not in repository
             freq = self.wordfreq[token] if token in self.wordfreq else self.avgfreq
             idf = self.idf[token] if token in self.idf else self.avgidf

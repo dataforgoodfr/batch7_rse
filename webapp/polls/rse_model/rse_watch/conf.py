@@ -19,7 +19,8 @@ class Config:
         self.model_dir = self.src_model / "Model/"
         self.scorer_pickle_file = self.model_dir / "vectorizer_component/words_scorer.pckl"
         self.SCORING_METHOD = ScoringMethod.BM25
-        self.MIN_NB_OF_WORDS = 2
+        self.MIN_NB_OF_WORDS = 3  # among words with non ignored pos
+
 
 # smaller task for debug/tests
 class DebugConfig(Config):

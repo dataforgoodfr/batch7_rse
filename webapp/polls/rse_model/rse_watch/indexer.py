@@ -64,10 +64,10 @@ def load_scorer(conf, documents):
 
 
 # TODO: add kwargs like method, paths...
-def initialize_weighted_vectorizer(conf, documents):
+def initialize_weighted_vectorizer(config, documents):
     print("Initializing weighted vectorizer.")
     # load scoring method or create it if not existing
-    scorer = load_scorer(conf, documents)
+    scorer = load_scorer(config, documents)
     # instantiate
     if not spacy.util.is_package("fr_core_news_md"):
         print("Downloading fr_core_news_md spacy model for pos tagging...")
@@ -79,7 +79,7 @@ def initialize_weighted_vectorizer(conf, documents):
     vectorizer_component.add_scorer(scorer)
     nlp_wv.add_pipe(vectorizer_component)
     # save
-    nlp_wv.to_disk(conf.model_dir)
+    nlp_wv.to_disk(config.model_dir)
     return nlp_wv
 
 

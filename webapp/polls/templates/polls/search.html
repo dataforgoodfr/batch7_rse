@@ -5,11 +5,11 @@
 
 <div class="container justify-content-center mycontainer shadow p-3 mb-3 bg-white rounded">
         <h3 class="text-muted"> <b>Recherche thématique</b></h3>
-    <p>Effectuez une recherche par mots-clefs parmi {{ total_sentences }} extraits issus de {{ total_docs }} DPEFs appartenant à  {{ total_companies }} entreprises réparties en {{ total_sectors }} secteurs</p>
+    <p>Effectuez une recherche par mots-clefs parmi {{ total_sentences }} extraits issus de {{ total_docs }} DPEFs appartenant à  {{ total_companies }} entreprises réparties en {{ total_sectors }} secteurs.</p>
     <form action="{% url 'polls:search' %}" method="post" class="form-rounded">
     {% csrf_token %}
     <div class="row justify-content-center myrow">
-       <div class="col-12 mycol  p-1"><h3>Thème {{ form.search_bar | add_attr:"class: form-control-lg align-items-center,  placeholder:ex. Réchauffement climatique" }} </h3></div>
+       <div class="col-12 mycol  p-1"><h3>Thème {{ form.search_bar | add_attr:"class: form-control-lg align-items-center,  placeholder:ex. Pollution atmosphérique usines" }} </h3></div>
     </div>
 
     <div class="row justify-content-center myrow">
@@ -18,7 +18,7 @@
         </div>
 
         <div class="col-sm-4 mycol text-center p-1"> <strong>Période</strong>
-          {{ form.start_period}} à {{ form.end_period }}</div>
+          {{ form.start_period  | add_attr:"class: form-control, align-items-center, w-50, mx-2,  placeholder: ex. 2018"}} à {{ form.end_period }}</div>
     </div>
 <div class="row justify-content-center myrow">
       <div class="col-sm-12 mycol text-center p-1">  <strong> Secteurs </strong> (décocher)
@@ -52,10 +52,10 @@
           <tbody>
           {% for sentence in sentences %}
             <tr>
-              <td>company_name</td>
+              <td>{{sentence.0.dpef.company.name}}</td>
               <td><i>{{ sentence.0.text }}</i></td>
               <td>{{ sentence.1 | percentage }}</td>
-              <td> document_name, year, p.42</td>
+              <td> {{sentence.0.dpef.file_name}}, p.{{sentence.0.page}}</td>
               <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></td>
             </tr>
            {% endfor %}
