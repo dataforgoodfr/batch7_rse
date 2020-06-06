@@ -27,6 +27,7 @@ class Scoring(object):
     """
 
     @staticmethod
+
     def create(method):
         """
         Factory method to construct a Scoring object.
@@ -81,6 +82,7 @@ class Scoring(object):
         # Calculate word frequency, total tokens and total documents
         for tokens in documents:
             # Total number of times token appears, count all tokens
+            tokens = map(lambda x: x.lower(), tokens)
             self.wordfreq.update(tokens)
 
             # Total number of documents a token is in, count unique tokens
@@ -123,9 +125,9 @@ class Scoring(object):
         length = len(tokens)
 
         for token in map(lambda x: x.lower(), tokens):
-            # Lookup frequency and idf score - default to averages if not in repository
+            # Lookup frequency and idf score - default to third of averages if not in repository
             freq = self.wordfreq[token] if token in self.wordfreq else self.avgfreq
-            idf = self.idf[token] if token in self.idf else self.avgidf
+            idf = self.idf[token] if token in self.idf else self.avgidf/3  # Reduce the weights of unknown words.
 
             # Calculate score for each token, use as weight
             weights.append(self.score(freq, idf, length))
@@ -274,18 +276,18 @@ class VectorizerComponent(object):
 spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent()
 
 
-def similarity_to_vector(doc, vector):
-    """
-    Extension method to Doc objects that return the cosine similarity.
-    :param doc: a doc obtained from a spacy model
-    :param vector: a vector of same dimension (numpy array).
-    :return: cosine similarity (float)
-    """
-    if vector is None:
-        raise ValueError("Forgotten 'vector' argument.")
-    vec1 = doc.vector
-    vec2 = vector
-    return cosine_similarity(vec1.reshape(1, -1), vec2.reshape(1, -1))[0][0]
+# def similarity_to_vector(doc, vector):
+#     """
+#     Extension method to Doc objects that return the cosine similarity.
+#     :param doc: a doc obtained from a spacy model
+#     :param vector: a vector of same dimension (numpy array).
+#     :return: cosine similarity (float)
+#     """
+#     if vector is None:
+#         raise ValueError("Forgotten 'vector' argument.")
+#     vec1 = doc.vector
+#     vec2 = vector
+#     return cosine_similarity(vec1.reshape(1, -1), vec2.reshape(1, -1))[0][0]
 
 
-spacy.tokens.Doc.set_extension("similarity_to_vector", method=similarity_to_vector)
+# spacy.tokens.Doc.set_extension("similarity_to_vector", method=similarity_to_vector)

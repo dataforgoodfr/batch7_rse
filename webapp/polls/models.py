@@ -25,7 +25,7 @@ class Company(dm.Model):
                         verbose_name=_("Nom"), help_text=_("Nom complet de l'entreprise"))
     pdf_name = dm.CharField(max_length=20, unique=True,
                             verbose_name=_("Nom PDF"),
-                            help_text=_("Nom de l'entreprise tel que trouvé dans le nom du fichier pdf. "
+                            help_text=_("nNom de l'entreprise tel que trouvé dans le nom du fichier pdf. "
                                         "Permet en outre de pouvoir automatiser la lecture des PDFs et de les "
                                         "faire correspondre à la bonne entreprise."))
     _activity_sectors = dm.ManyToManyField(ActivitySector,

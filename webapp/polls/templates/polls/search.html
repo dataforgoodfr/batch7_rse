@@ -9,7 +9,7 @@
     <form action="{% url 'polls:search' %}" method="post" class="form-rounded">
     {% csrf_token %}
     <div class="row justify-content-center myrow">
-       <div class="col-12 mycol  p-1"><h3>Thème {{ form.search_bar | add_attr:"class: form-control-lg align-items-center,  placeholder:ex. Pollution atmosphérique usines" }} </h3></div>
+       <div class="col-12 mycol  p-1"><h3>Thème {{ form.search_bar | add_attr:"class: form-control-lg align-items-center,  placeholder:ex. Pollution marine" }} </h3></div>
     </div>
 
     <div class="row justify-content-center myrow">

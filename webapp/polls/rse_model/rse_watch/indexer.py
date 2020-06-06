@@ -121,5 +121,4 @@ def run(config):
     # Usage:
     # doc = nlp_wv("Une phrase simple avec des mots")
     # numpy_vector_of_the_sentence = doc.vector
-    # similarity = doc.similarity_to_vector(another_numpy_vector)
     return nlp

@@ -36,16 +36,16 @@ def custom_sentence_boundaries(doc):
             token.is_sent_start = False
     return doc
 
-
+# TODO: should here be not in IGNORED_POS or is this done later ?
 def def_get_sentence_text_and_tokens(sent):
     text = sent.text
-    text_tokens = "|".join([token.text.lower() for token in sent if token.pos_ != "PUNCT"])
+    text_tokens = "|".join([token.text.lower() for token in sent if token.pos_ not in IGNORED_POS])
     return pd.Series([text, text_tokens])
 
 
 def get_nb_words(doc):
     """ Count numer of tokens in spacy Doc, ignoring NUM and ADP (e.g. for, at...) and not counting % as noun. """
-    return len([token for token in doc if (token.pos_ in IGNORED_POS) and (token.text != "%")])
+    return len([token for token in doc if (token.pos_ not in IGNORED_POS) and (token.text != "%")])
 
 
 def load_nlp_sententizer_object(config):
@@ -65,8 +65,6 @@ def load_nlp_sententizer_object(config):
 def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
     nlp = load_nlp_sententizer_object(config)
     df_sent = df_par
-    # TODO: could be parallelized.
-    # TODO: add sentence_tokens with pipe separator !!
     df_sent["paragraph_sentences"] = df_sent["paragraph"].apply(
         lambda x: [sent if sent._.nb_words >= config.MIN_NB_OF_WORDS else np.nan for sent in nlp(x).sents ]
     ).values
