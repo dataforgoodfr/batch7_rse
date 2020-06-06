@@ -201,7 +201,9 @@ class BM25(Scoring):
     BM25 scoring. Scores using Apache Lucene's version of BM25 which adds 1 to prevent
     negative scores.
     """
-
+    # TODO: tweak. Lower b means less diff between short and long sentence, which may reduce the bias toward short sentences.
+    #  cf. https://opensourceconnections.com/blog/2015/10/16/bm25-the-next-generation-of-lucene-relevation/
+    # TODO: k should could be higher to have slower saturation if a word is REALLY common in the EXTRACT!
     def __init__(self, k1=0.1, b=0.75):
         super(BM25, self).__init__()
 
@@ -215,6 +217,7 @@ class BM25(Scoring):
 
     def score(self, freq, idf, length):
         # Calculate BM25 score
+        # TODO: mabe use sqrt(length) to favorish less small sentences ?
         k = self.k1 * ((1 - self.b) + self.b * length / self.avgdl)
         return idf * (freq * (self.k1 + 1)) / (freq + k)
 
