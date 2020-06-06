@@ -251,7 +251,10 @@ class VectorizerComponent(object):
         word_tokens = [token.text for token in doc if token.pos_ not in self.IGNORED_POS]
         word_vectors = [token.vector for token in doc if token.pos_ not in self.IGNORED_POS]
         weights = self.data["scorer"].weights(word_tokens)
-        doc.vector = np.average(word_vectors, weights=np.array(weights, dtype=np.float32), axis=0)
+        if np.sum(weights) != 0:
+            doc.vector = np.average(word_vectors, weights=np.array(weights, dtype=np.float32), axis=0)
+        else:
+            doc.vector = np.zeros((300,))
         return doc
 
     def to_disk(self, path, **kwargs):
