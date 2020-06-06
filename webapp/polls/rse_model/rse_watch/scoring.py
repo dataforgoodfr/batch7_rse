@@ -204,7 +204,7 @@ class BM25(Scoring):
     # TODO: tweak. Lower b means less diff between short and long sentence, which may reduce the bias toward short sentences.
     #  cf. https://opensourceconnections.com/blog/2015/10/16/bm25-the-next-generation-of-lucene-relevation/
     # TODO: k should could be higher to have slower saturation if a word is REALLY common in the EXTRACT!
-    def __init__(self, k1=0.1, b=0.75):
+    def __init__(self, k1=0.1, b=0.0):
         super(BM25, self).__init__()
 
         # BM25 configurable parameters
