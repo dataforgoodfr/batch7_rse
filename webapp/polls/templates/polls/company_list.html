@@ -1,22 +1,61 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 {% block content %}
+{% load filters %}
+{% load static %}
 
-    <ul>
-        {% for company in company_list %}
-            <li>
-                <a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a>
-                    (
-                    {% for sector in company.sectors %}
-                        {{ sector.name }}
-                    {% endfor %}
-                    )
-                <ul>
-                    {% for dpef in company.dpefs %}
-                        <li>{{ dpef.file_object }} ({{ dpef.year }})</li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
+<div class="container justify-content-center mycontainer shadow p-2 px-3 m-3 bg-white rounded">
+    <h3 class="mt-1 text-muted"> <b>Base de données</b> </br>
+     Déclarations de Performances Extra-Financières</h3>
+    <p>Rechercher une DPEF parmi {{ total_docs }} documents appartenant à  {{ total_companies }} entreprises réparties en {{ total_sectors }} secteurs</p>
+    <form action="{% url 'polls:company_list' %}" method="post" class="form-rounded ">
+    {% csrf_token %}
+
+    <div class="row  myrow p-2">
+
+        <div class="col-sm-12 mycol text-left p-1">  <strong> {{ form.company_name.label }}</strong>
+        {{ form.company_name | add_attr:"class: form-control, align-items-center, w-50, mx-2, placeholder:ex. Total" }}
+        </div>
+
+        <div class="col-sm-12 mycol text-left p-1">  <strong> Secteurs </strong> (décocher)
+       <div class="btn btn-group-toggle flex-wrap" data-toggle="buttons">
+            {% for sector in form.sectors %}
+
+            <label class="btn btn-outline-info my-1"> {{ sector }} </label>
+
+            {% endfor %}
+        </div>
+        </div>
+
+
+        <div class="row justify-content-center myrow w-100 my-1">
+        <button type="submit" class="w-50 btn btn-outline-dark">Rechercher</button>
+         </div>
+    </form>
+
+</div>
+</div>
+
+
+<div class="container justify-content-center mycontainer p-2">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Entreprise</th>
+                <th scope="col">Secteurs</th>
+                <th scope="col">DPEFs</th>
+                <th scope="col">Documents</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for company in company_list %}
+                <tr>
+                  <td><a href="{% url 'polls:company_detail' company.id %}">{{ company.name }}</a></td>
+                  <td> {% for sector in company.sectors %} {{ sector.name }} {% endfor %}</td>
+                  <td> {% for dpef in company.dpefs %} <li style="list-style: none">{{ dpef.file_name }} ({{ dpef.year }}) </li> {% endfor %}</td>
+                    <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></li></td>
+                </tr>
+               {% endfor %}
+         </table>
+    </div>
 
 {% endblock content %}

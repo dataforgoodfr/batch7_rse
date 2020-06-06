@@ -1,14 +1,52 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 {% block content %}
+{% load filters %}
+{% load static %}
 
-    <p>identifiant : {{ company.id }}</p>
-    <p>Nom complet : {{ company.name }}</p>
-    <p>Nom pdf : {{ company.pdf_name }}</p>
-    <p>Introduction : {{ company.introduction }}</p>
-    <p>Secteurs :
+<div class="container justify-content-center m-2 p-2 mycontainer">
+
+    <div class="row justify-content-center myrow">
+        <h1><strong>{{ company.name }}</strong> - ID: {{ company.id }} <h1/>
+    </div>
+
+    <div class="row justify-content-center myrow">
+        <i>{{ company.introduction }}</i>
+    </div>
+
+    <div class="row justify-content-center align-items-start myrow">
+
+        <div class="col-5 p-3 mycol"> <p class="text-center"><p>Secteurs
         {% for sector in company.sectors %}
-            {{ sector.name }}
-        {% endfor %}
-    </p>
+            <button class="btn btn-info">{{ sector.name }}</button>
+        {% endfor %}</p></p></div>
+
+        <div class="col-5 p-3 mycol"> <p class="text-center">DPEF disponibles : {{ company.pdf_name }} <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></p></div>
+
+    </div>
+
+<div class="row justify-content-start myrow"><h4>2 engagements détectés</h4>
+    </div>
+ <div class="row justify-content-center myrow p-2">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td>"{{ company.name }} s'engage à réduire ....."</td>
+              <td>p.75</td>
+              <td> {{ company.name }}_2017_ddr.pdf </td>
+              <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></td>
+            </tr>
+
+            <tr>
+              <td>"{{ company.name }} milite pour la sauvegarde des tortues ....."</td>
+              <td>p.198</td>
+              <td> {{ company.name }}_2017_ddr.pdf </td>
+              <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></td>
+            </tr>
+
+         </table>
+   </div>
+
+
+
 
 {% endblock content %}

@@ -2,23 +2,25 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.db import models as dm  # django models
 from django.db.models.fields.files import FieldFile
+from scipy import spatial
 from datetime import date
 import os
-import sys
-import numpy as np
-
+from polls import nlp
+import pickle
+import base64
 
 
 class ActivitySector(dm.Model):
-
-    name = dm.CharField(max_length=50, verbose_name=_("Nom du secteur"), help_text=_("Nom du secteur"))
+    name = dm.CharField(max_length=50,
+                        verbose_name=_("Nom du secteur"),
+                        help_text=_("Nom du secteur"),
+                        unique=True)
 
     def __str__(self):
         return self.name
 
 
 class Company(dm.Model):
-
     name = dm.CharField(max_length=50, unique=True,
                         verbose_name=_("Nom"), help_text=_("Nom complet de l'entreprise"))
     pdf_name = dm.CharField(max_length=20, unique=True,
@@ -53,64 +55,42 @@ def _validate_file_extension(value: FieldFile):
 
 
 class DPEF(dm.Model):
-
-    # class FileType(models.TextChoices):
-    #     DPEF = 'DPEF', _('dpef')
-    #     RSE = 'DDR', _('ddr')
-
+    file_name = dm.CharField(max_length=100,
+                             unique=True,
+                             verbose_name=_("Nom du fichier PDF"),
+                             help_text=_("Nom complet du pdf de la DPEF, avec extension '.pdf'.."))
     company = dm.ForeignKey(Company, on_delete=dm.CASCADE,
-                            verbose_name=_("Entreprise"), help_text=_("L'entreprise référencée par le document."))
+                            verbose_name=_("Entreprise"),
+                            help_text=_("L'entreprise référencée par le document."))
 
     # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
-    file_object = dm.FileField(unique=True, validators=[_validate_file_extension],
+    file_object = dm.FileField(unique=True,
+                               validators=[_validate_file_extension],
                                upload_to='polls/models/dpef/',
-                               verbose_name=_("Fichier PDF"), help_text=_("Document DPEF ou DDR au format PDF."))
+                               verbose_name=_("Fichier PDF"),
+                               help_text=_("Document DPEF ou DDR au format PDF."))
 
     year = dm.IntegerField(choices=[(i, i) for i in range(1990, date.today().year + 1)],  # list of years since 1990
                            verbose_name=_("Année"), help_text=_("Année de référence du document DPEF"))
 
-    # file_type = models.CharField(
-    #     max_length=4,
-    #     choices=FileType.choices,
-    #     # default=FileType.DPEF
-    # )
-
     def sentences(self):
-        return Sentence.objects.filter(reference_file__id=self.id)
+        return Sentence.objects.filter(dpef__file_name=self.id)
 
     def __str__(self):
         return self.file_object.name  # file path
 
 
-class Vector(dm.TextField):
-
-    # TODO: Test transformation from string to numpy array
-    @staticmethod
-    def to_numpy(value: str):
-        return np.array([float(val) for val in value.split(' ')])
-
-    def to_python(self, value):
-        if isinstance(value, np.ndarray):
-            return value
-
-        if value is None:
-            return value
-
-        return self.to_numpy(value)
-
-    # TODO: Test construction of a true vector list as a string
-    @staticmethod
-    def from_numpy(numpy_vector: np.ndarray):
-        if isinstance(numpy_vector, np.ndarray):
-            return ' '.join([val for val in numpy_vector])
-        return None
-
-
 class Sentence(dm.Model):
-
-    reference_file = dm.ForeignKey(DPEF, on_delete=dm.CASCADE,
-                                   verbose_name=_("Fichier"), help_text=_("Document contenant la phrase"))
-    text = dm.TextField(verbose_name=_("Texte"), help_text=_("Texte de la phrase"))
+    dpef = dm.ForeignKey(DPEF,
+                         on_delete=dm.CASCADE,
+                         verbose_name=_("Fichier"),
+                         help_text=_("Document contenant la phrase"))
+    text = dm.TextField(verbose_name=_("Texte"),
+                        help_text=_("Texte de la phrase"))
+    # better way to do this: https://stackoverflow.com/a/1113039
+    text_tokens = dm.TextField(verbose_name=_("Tokens"),
+                               help_text=_("Tokens du texte de la phrase, "
+                                           "sous forme de string et séparé par des pipe |"))
     page = dm.PositiveIntegerField(verbose_name=_("Page"),
                                    help_text=_("Page sur laquelle se situe la phrase. "
                                                "Si la phrase est étalée sur plusieur pages, "
@@ -118,20 +98,37 @@ class Sentence(dm.Model):
     context = dm.TextField(verbose_name=_("Contexte"),
                            help_text=_("Paragraphe contenant la phrase. "
                                        "Permet de redonner du contexte à la phrase."))
-    vector = Vector(default="0")  # put to non mandatory.
-    # put filtres here like this one :
-    # exacts_words = models.BooleanField(default=False)
+    _vector = dm.BinaryField(null=True, blank=True)  # Vector(null=True, blank=True)
 
-    def get_vector(self):
-        doc = nlp(self.text)
-        vector = doc.vector
-        return vector
+    def get_tokens(self):
+        """Get the tokens stored in text_tokens"""
+        tokens = self.text_tokens.split("|")
+        return tokens
 
-    def get_similarity(self, vector):
-        return self.get_vector().similarity_to_vector(vector)
+    def _construct_vector(self, nlp_vectorizer):
+        vec = nlp_vectorizer(self.text).vector  # construct vector from self.text
+        np_bytes = pickle.dumps(vec)
+        np_base64 = base64.b64encode(np_bytes)
+        self._vector = np_base64
+        self.save()
 
-    def clean(self):
-        super().clean()
+    # def clean(self):
+    #     super().clean()
+    #     self._construct_vector()
+
+    @property
+    def vector(self):
+        np_bytes = base64.b64decode(self._vector)
+        vec = pickle.loads(np_bytes)
+        return vec
+
+    def similarity(self, sentence):
+        return self.similarity_vector(self.vector, sentence.vector)
+
+    @staticmethod
+    def similarity_vector(vector1, vector2):
+        # print(spatial.distance.cosine(vector1, vector2))
+        return 1 - spatial.distance.cosine(vector1, vector2)
 
     def __str__(self):
         return self.text

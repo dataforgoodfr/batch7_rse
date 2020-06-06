@@ -1,8 +1,9 @@
-from .models import Company, DPEF
+from .models import Company, DPEF, ActivitySector, Sentence
 from django.views.generic.edit import View
 from django.views import generic
-from .forms import BasicSearchForm, SearchForm
+from .forms import BasicSearchForm, SearchForm, CompanyForm
 from django.shortcuts import render
+# from django.db.models import Count, Sum
 
 
 class IndexView(View):
@@ -10,10 +11,16 @@ class IndexView(View):
     form_class = BasicSearchForm
 
     @staticmethod
-    def get_context(form, response=None):
+    def get_context(form):
         context = {'form': form}
-        if response is not None:
-            context['response'] = response
+        response = []
+        if form.is_valid() and form.is_bound:
+            response = form.get_best_matching_sentences()
+        context['sentences'] = response
+        context['total_companies'] = Company.objects.all().count()
+        context['total_docs'] = DPEF.objects.all().count()
+        context['total_sectors'] = ActivitySector.objects.all().count()
+        context['total_sentences'] = Sentence.objects.all().count()
         return context
 
     def render(self, request, context: dict):
@@ -23,27 +30,38 @@ class IndexView(View):
         context = self.get_context(self.form_class())
         return self.render(request, context)
 
-
 class SearchView(IndexView):
     template_name = 'polls/search.html'
     form_class = SearchForm
 
     def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        response = None
-        if form.is_valid():
-            response = None  # TODO: Complete this to get a valid response.
-        context = self.get_context(form, response)
+        context = self.get_context(self.form_class(request.POST))
         return self.render(request, context)
 
-
-class CompanyListView(generic.ListView):
+class CompanyListView(View):
     template_name = 'polls/company_list.html'
-    context_object_name = 'company_list'
+    form_class = CompanyForm
 
-    def get_queryset(self):
-        companies = Company.objects.all()
-        return companies
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class())
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context(self.form_class(request.POST))
+        return render(request, self.template_name, context)
+
+    @staticmethod
+    def get_context(form):
+        context = {'form': form}
+        if form.is_valid() and form.is_bound:
+            company_list = form.filter_company()
+        else:
+            company_list = Company.objects.all()
+        context['company_list'] = company_list
+        context['total_companies'] = len(company_list)
+        context['total_docs'] = len(DPEF.objects.all())
+        context['total_sectors'] = len(ActivitySector.objects.all())
+        return context
 
 
 class CompanyDetailView(generic.DetailView):
