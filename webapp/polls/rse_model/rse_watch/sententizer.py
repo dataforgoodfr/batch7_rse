@@ -2,6 +2,14 @@ import spacy
 from spacy.tokens import Span
 import pandas as pd
 import numpy as np
+import multiprocessing as mp
+import spacy_filters as sf
+
+
+def get_nb_words(doc):
+    """ Count numer of tokens in spacy Doc, ignoring NUM and ADP (e.g. for, at...) and not counting % as noun. """
+    return len([token for token in doc if (token.pos_ in ["NOUN","PROPN","VERB"]) and (token.text!="%")])
+
 
 # Global parameters
 # Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
@@ -68,7 +76,8 @@ def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
     # TODO: could be parallelized.
     # TODO: add sentence_tokens with pipe separator !!
     df_sent["paragraph_sentences"] = df_sent["paragraph"].apply(
-        lambda x: [sent if sent._.nb_words >= config.MIN_NB_OF_WORDS else np.nan for sent in nlp(x).sents ]
+        lambda x: [sent for sent in nlp(x).sents if sent._.nb_words >= config.MIN_NB_OF_WORDS]
+
     ).values
     df_sent = df_sent.dropna(subset=["paragraph_sentences"])
     df_sent = df_sent[
@@ -81,9 +90,7 @@ def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
                .reset_index()
                .drop('level_{}'.format(len(df_sent.columns) - 1), axis=1)
                .rename(columns={0: 'sentence'}))
-    df_sent[["sentence",
-             "sentence_tokens"]] = df_sent[["sentence"]]. \
-        apply(lambda row: def_get_sentence_text_and_tokens(row["sentence"]),
-              axis=1,
-              result_type="expand")
+    df_sent['date']=df_sent['sentence'].apply(sf.isDate)
+    df_sent['sentence']=df_sent['sentence'].apply(lambda x: x.text)
+
     return df_sent
