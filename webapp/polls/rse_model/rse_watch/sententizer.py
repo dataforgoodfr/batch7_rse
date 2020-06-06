@@ -7,6 +7,7 @@ import numpy as np
 # Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
 # Ref: https://spacy.io/api/annotation
 IGNORED_POS = ["ADP",  # in, to, during
+               "AUX",  #is, has (done), will (do), should (do)
                "CONJ",  # and, or, but
                "CCONJ",  # and, or, but
                "DET",  # a, an the
