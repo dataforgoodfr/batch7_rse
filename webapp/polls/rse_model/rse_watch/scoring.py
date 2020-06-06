@@ -82,7 +82,7 @@ class Scoring(object):
         # Calculate word frequency, total tokens and total documents
         for tokens in documents:
             # Total number of times token appears, count all tokens
-            tokens = map(lambda x: x.lower(), tokens)
+            tokens = list(map(lambda x: x.lower(), tokens))
             self.wordfreq.update(tokens)
 
             # Total number of documents a token is in, count unique tokens
