@@ -1,3 +1,4 @@
+import numpy
 from django.utils.translation import gettext_lazy as _
 from django import forms
 from django.db.models import Q
@@ -52,9 +53,13 @@ class BasicSearchForm(forms.Form):
             sentences = Sentence.objects.none()
             return sentences
         sentences = self.gather_sentences()
-        sentences = [(s, Sentence.similarity_vector(s.vector, search_vector)) for s in sentences]
+        # V2: keep if similarity > 70% and score > 40 and then combine:
+        #     relevance = similarity * cbrt(score)/ cbrt(seuil score)
+        #     The max is set to 150 based on observation -> cubic root create a dampening effect for higher scores.
+        sentences = [(s, Sentence.similarity_vector(s.embedding_vector, search_vector), s.scoring_weight) for s in sentences]
+        sentences = [(s[0], s[1] * min(numpy.cbrt(s[2])/numpy.cbrt(150), 1.0)) for s in sentences if (s[1] > 0.70) and (s[2] > 40)]
         sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
-        return sentences[:10]
+        return sentences[:15]
 
     def clean_search_bar(self):
         cleaned_search_bar = self.cleaned_data['search_bar'].lower().strip()

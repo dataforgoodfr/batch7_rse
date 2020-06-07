@@ -1,4 +1,6 @@
 # WHY : to allow multiprocessing with Pool.map()
+from time import time
+
 import django
 
 django.setup()
@@ -108,7 +110,7 @@ class Command(BaseCommand):
 
             # PARALLELIZATION
             parallel_add_dpef = partial(add_dpef, config)
-
+            start_t = time()
             # TODO: need to change the DB to have real multiprocessing
             # n_cores = mp.cpu_count() - 1 or 1
             n_cores = 1
@@ -123,7 +125,9 @@ class Command(BaseCommand):
                         total=len(all_dpef_paths)
                     )
                 )
-
+            # TODO: uncomment next time you can try that in debug mode. DOnt want top take the risk now haha
+            # duration_sec = int(time(), start_t)
+            # print("Parsed all DPEFs ; took {}m{}s.".format(duration_sec//60, duration_sec%60))
         if options["task"] in ["model", "parse_and_model"]:
             # train the BM25 vectorizer
             try:
@@ -134,6 +138,8 @@ class Command(BaseCommand):
                 raise
             nlp = load_weighted_vectorizer(config, documents, create_from_scratch=True)
             # Update the _vector field of the sentence
-            for sentence in Sentence.objects.iterator():
-                sentence._construct_vector(nlp)
+            print("Vectorization of all sentences based on word embeddings and BM25.")
+            for sentence in tqdm(Sentence.objects.iterator(), total=Sentence.objects.count()):
+                sentence.construct_vector(nlp)
+
         print("Over for task {}".format(options["task"]))

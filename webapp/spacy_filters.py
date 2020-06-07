@@ -14,7 +14,6 @@ def condition(token):
 # and tokens[token.i-1].shape[0]!=X
 # and tokens[token.i-1] in before_context.values
 
-BL = []
 
 def isDate(span, find_context=False, earliest=0):
     # type: (docs, Bool, int) -> object
