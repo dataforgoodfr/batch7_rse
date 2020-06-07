@@ -260,7 +260,7 @@ class VectorizerComponent(object):
             doc._.scoring_weight = np.sum(weights).item()
         else:
             doc.vector = np.zeros((300,))
-            doc._.weight = 0.0
+            doc._.scoring_weight = 0.0
         return doc
 
     def to_disk(self, path, **kwargs):
