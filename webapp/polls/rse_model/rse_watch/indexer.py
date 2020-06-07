@@ -8,7 +8,7 @@ import fr_core_news_md
 
 # local import
 from rse_watch.scoring import Scoring, VectorizerComponent, spacy
-# NB: This import of spacy has custom extension to Doc object
+# NB: This import of spacy has custom extension to Span and Doc object
 
 
 def empty_directory(path_to_dir):
@@ -46,7 +46,7 @@ def initialize_scorer(config, documents):
     pickle_path.mkdir(parents=True, exist_ok=True)
     with open(config.scorer_pickle_file, "wb") as f:
         pickle.dump(scorer, f)
-
+    print("Saved scorer.")
     return scorer
 
 
@@ -73,6 +73,7 @@ def initialize_weighted_vectorizer(config, documents):
         print("Downloading fr_core_news_md spacy model for pos tagging...")
         spacy.cli.download('fr_core_news_md')
         print("done.")
+    print("Loading fr_core_news_md Spacy model.")
     nlp_wv = fr_core_news_md.load()
     nlp_wv.remove_pipe("ner")  # no need, and it seems not implemented for french model
     vectorizer_component = VectorizerComponent()

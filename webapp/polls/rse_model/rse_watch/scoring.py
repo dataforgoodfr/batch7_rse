@@ -8,8 +8,8 @@ import copy
 import numpy as np
 from collections import Counter
 from sklearn.metrics.pairwise import cosine_similarity
-import spacy
-from spacy.tokens import Doc
+from rse_watch.sententizer import spacy
+# NB: This import of spacy has custom extension to Span and Doc object
 import enum
 from rse_watch.sententizer import IGNORED_POS
 
@@ -217,7 +217,6 @@ class BM25(Scoring):
 
     def score(self, freq, idf, length):
         # Calculate BM25 score
-        # TODO: mabe use sqrt(length) to favorish less small sentences ?
         k = self.k1 * ((1 - self.b) + self.b * length / self.avgdl)
         return idf * (freq * (self.k1 + 1)) / (freq + k)
 
@@ -258,8 +257,10 @@ class VectorizerComponent(object):
         weights = self.data["scorer"].weights(word_tokens)
         if np.sum(weights) != 0:
             doc.vector = np.average(word_vectors, weights=np.array(weights, dtype=np.float32), axis=0)
+            doc._.scoring_weight = np.sum(weights).item()
         else:
             doc.vector = np.zeros((300,))
+            doc._.weight = 0.0
         return doc
 
     def to_disk(self, path, **kwargs):
@@ -277,20 +278,3 @@ class VectorizerComponent(object):
 
 # Add entry point to access the custom component and loading the model.
 spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent()
-
-
-# def similarity_to_vector(doc, vector):
-#     """
-#     Extension method to Doc objects that return the cosine similarity.
-#     :param doc: a doc obtained from a spacy model
-#     :param vector: a vector of same dimension (numpy array).
-#     :return: cosine similarity (float)
-#     """
-#     if vector is None:
-#         raise ValueError("Forgotten 'vector' argument.")
-#     vec1 = doc.vector
-#     vec2 = vector
-#     return cosine_similarity(vec1.reshape(1, -1), vec2.reshape(1, -1))[0][0]
-
-
-# spacy.tokens.Doc.set_extension("similarity_to_vector", method=similarity_to_vector)

@@ -98,7 +98,11 @@ class Sentence(dm.Model):
     context = dm.TextField(verbose_name=_("Contexte"),
                            help_text=_("Paragraphe contenant la phrase. "
                                        "Permet de redonner du contexte à la phrase."))
-    _vector = dm.BinaryField(null=True, blank=True)  # Vector(null=True, blank=True)
+    _embedding_vector = dm.BinaryField(null=True, blank=True)  # Vector(null=True, blank=True)
+
+    scoring_weight = dm.FloatField(verbose_name="Weight",
+                                   help_text="Poids de la phrase, donnée par le poids BM25 de ses constituants.",
+                                   null=True)
 
     def get_tokens(self):
         """Get the tokens stored in text_tokens"""
@@ -106,24 +110,20 @@ class Sentence(dm.Model):
         return tokens
 
     def construct_vector(self, nlp_vectorizer):
-        vec = nlp_vectorizer(self.text).vector  # construct vector from self.text
+        doc = nlp_vectorizer(self.text)
+        self.scoring_weight = doc._.scoring_weight
+        vec = doc.vector  # construct vector from self.text
         np_bytes = pickle.dumps(vec)
         np_base64 = base64.b64encode(np_bytes)
-        self._vector = np_base64
+        self._embedding_vector = np_base64
         self.save()
 
-    # def clean(self):
-    #     super().clean()
-    #     self._construct_vector()
-
     @property
-    def vector(self):
-        np_bytes = base64.b64decode(self._vector)
+    def embedding_vector(self):
+        np_bytes = base64.b64decode(self._embedding_vector)
         vec = pickle.loads(np_bytes)
         return vec
 
-    def similarity(self, sentence):
-        return self.similarity_vector(self.vector, sentence.vector)
 
     @staticmethod
     def similarity_vector(vector1, vector2):

@@ -52,9 +52,9 @@ class BasicSearchForm(forms.Form):
             sentences = Sentence.objects.none()
             return sentences
         sentences = self.gather_sentences()
-        sentences = [(s, Sentence.similarity_vector(s.vector, search_vector)) for s in sentences]
+        sentences = [(s, Sentence.similarity_vector(s.embedding_vector, search_vector)) for s in sentences]
         sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
-        return sentences[:10]
+        return sentences[:15]
 
     def clean_search_bar(self):
         cleaned_search_bar = self.cleaned_data['search_bar'].lower().strip()
