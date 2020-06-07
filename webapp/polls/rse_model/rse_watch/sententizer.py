@@ -1,8 +1,11 @@
 import pandas as pd
 import spacy
+import spacy_filters as sf
 
 # force = True because this function is called twice.
 spacy.tokens.Doc.set_extension("scoring_weight", default=-1, force=True)  # weight based on BM25 weights
+
+
 
 
 def get_nb_words(doc):
@@ -11,6 +14,7 @@ def get_nb_words(doc):
 
 
 spacy.tokens.Span.set_extension("nb_words", setter=get_nb_words, getter=get_nb_words, force=True)
+
 
 # Global parameters
 # Approach: learn that they are common (i.e. keep for scorer), but ignore them in final vectorization.
@@ -47,10 +51,11 @@ def custom_sentence_boundaries(doc):
     return doc
 
 # TODO: should here be not in IGNORED_POS or is this done later ?
-def def_get_sentence_text_and_tokens(sent):
+def get_span_metadata(sent):
     text = sent.text
     text_tokens = "|".join([token.text.lower() for token in sent if token.pos_ not in IGNORED_POS])
-    return pd.Series([text, text_tokens])
+    dates = sf.isDate(sent)
+    return pd.Series([text, text_tokens, dates])
 
 
 def load_nlp_sententizer_object(config):
@@ -83,8 +88,10 @@ def get_sentence_dataframe_from_paragraph_dataframe(df_par, config):
                .drop('level_{}'.format(len(df_sent.columns) - 1), axis=1)
                .rename(columns={0: 'sentence'}))
     df_sent[["sentence",
-             "sentence_tokens"]] = df_sent[["sentence"]]. \
-        apply(lambda row: def_get_sentence_text_and_tokens(row["sentence"]),
+             "sentence_tokens",
+             "dates"]] = df_sent[["sentence"]]. \
+        apply(lambda row: get_span_metadata(row["sentence"]),
               axis=1,
               result_type="expand")
+
     return df_sent
