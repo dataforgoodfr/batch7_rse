@@ -38,6 +38,7 @@ class CompanyForm(forms.Form):
 
 class BasicSearchForm(forms.Form):
     search_bar = forms.CharField(label=_("Rechercher"), max_length="100", required=True)
+    overwrite_search_bar_string = None
 
     def gather_sentences(self):
         """ This gather sentences into a QuerySet. It can be overwritten in child class SearchForm"""
@@ -45,21 +46,26 @@ class BasicSearchForm(forms.Form):
         return sentences
 
     def get_best_matching_sentences(self):
-        try:
-            search_vector = nlp(self.cleaned_data['search_bar'].strip()).vector
-        except AttributeError:
-            # TODO: this should generate some sort of message somewhere to inform user that the query is not known.
-            print("The query word was unknown. Returning empty QuerySet.")
-            sentences = Sentence.objects.none()
-            return sentences
+        if self.overwrite_search_bar_string is not None:
+            search_vector = nlp(self.overwrite_search_bar_string).vector
+        else:
+            try:
+                search_vector = nlp(self.cleaned_data['search_bar'].strip()).vector
+            except AttributeError:
+                # TODO: this should generate some sort of message somewhere to inform user that the query is not known.
+                print("The query word was unknown. Returning empty QuerySet.")
+                sentences = Sentence.objects.none()
+                return sentences
         sentences = self.gather_sentences()
         # V2: keep if similarity > 70% and score > 40 and then combine:
-        #     relevance = similarity * cbrt(score)/ cbrt(seuil score)
+        #     relevance = similarity * cbrt(score)/ cbrt(max seuil score)
         #     The max is set to 150 based on observation -> cubic root create a dampening effect for higher scores.
         sentences = [(s, Sentence.similarity_vector(s.embedding_vector, search_vector), s.scoring_weight) for s in sentences]
-        sentences = [(s[0], s[1] * min(numpy.cbrt(s[2])/numpy.cbrt(150), 1.0)) for s in sentences if (s[1] > 0.70) and (s[2] > 40)]
+        MIN_SIMILARITY = 0.7
+        MIN_SCORING_WEIGHT = 40
+        sentences = [(s[0], s[1] * min(numpy.cbrt(s[2])/numpy.cbrt(150), 1.0)) for s in sentences if (s[1] > MIN_SIMILARITY) and (s[2] > MIN_SCORING_WEIGHT)]
         sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
-        return sentences[:15]
+        return sentences[:10]
 
     def clean_search_bar(self):
         cleaned_search_bar = self.cleaned_data['search_bar'].lower().strip()
@@ -106,3 +112,17 @@ class SearchForm(BasicSearchForm):
 
     def get_response(self):
         companies = None
+
+class CompanyDetailSearchForm(BasicSearchForm):
+    overwrite_search_bar_string = "engagement préservation environnement"
+    company_name = ""
+
+    def gather_sentences(self):
+        """ This gather sentences into a QuerySet. It can be overwritten in child class SearchForm"""
+        if self.company_name:
+            companies = Company.objects.filter(name__contains=self.company_name)
+            dpefs = DPEF.objects.filter(company__in=companies)
+            sentences = Sentence.objects.filter(dpef__in=dpefs).all()
+        else:
+            sentences = Sentence.objects.none()  # TODO: can be set to none later when all works
+        return sentences
