@@ -2,7 +2,7 @@ from django.http import HttpResponseForbidden
 from django.urls import reverse
 from django.views.generic.detail import SingleObjectMixin
 
-from .models import Company, DPEF, ActivitySector, Sentence
+from .models import Company, DPEF, ActivitySector, Sentence, DPEF
 from django.views.generic.edit import View
 from django.views import generic
 from .forms import BasicSearchForm, SearchForm, CompanyForm, CompanyDetailSearchForm
@@ -78,8 +78,8 @@ class CompanyDisplay(generic.DetailView):
         form = CompanyDetailSearchForm()
         # Overwriting to have access to company named
         form.company_name = self.object.name
-        print(self.object.name)
         context['form'] = form
         context["sentences"] = form.get_best_matching_sentences()
-        print(context["sentences"])
+        company = Company.objects.filter(name__contains=self.object.name)
+        context["dpefs"] = DPEF.objects.filter(company__in=company)
         return context

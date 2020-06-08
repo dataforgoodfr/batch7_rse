@@ -14,7 +14,7 @@
         <div class="col-5 p-3 mycol">
             <p class="text-center">
                 <p>
-                    <h3><strong>Secteurs d'activité: </strong> <h3/>
+                    <h5>Secteurs d'activité: <h5/>
                         {% for sector in company.sectors %}
                             <button class="btn btn-info">{{ sector.name }}</button>
                         {% endfor %}
@@ -24,7 +24,10 @@
 
         <div class="col-5 p-3 mycol">
                 <p class="text-center">
-                    <h3>DPEF disponibles: <h3/> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></p>
+                    <h5>DPEF disponibles: <h5/>
+                        {% for dpef in dpefs %}
+                            {{dpef.year}} <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px">
+                        {% endfor %}</p>
                 </p>
         </div>
 
