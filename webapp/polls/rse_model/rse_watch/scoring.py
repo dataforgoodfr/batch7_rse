@@ -8,8 +8,8 @@ import copy
 import numpy as np
 from collections import Counter
 from sklearn.metrics.pairwise import cosine_similarity
-import spacy
-from spacy.tokens import Doc
+from rse_watch.sententizer import spacy
+# NB: This import of spacy has custom extension to Span and Doc object
 import enum
 from rse_watch.sententizer import IGNORED_POS
 
@@ -27,6 +27,7 @@ class Scoring(object):
     """
 
     @staticmethod
+
     def create(method):
         """
         Factory method to construct a Scoring object.
@@ -81,6 +82,7 @@ class Scoring(object):
         # Calculate word frequency, total tokens and total documents
         for tokens in documents:
             # Total number of times token appears, count all tokens
+            tokens = list(map(lambda x: x.lower(), tokens))
             self.wordfreq.update(tokens)
 
             # Total number of documents a token is in, count unique tokens
@@ -123,9 +125,9 @@ class Scoring(object):
         length = len(tokens)
 
         for token in map(lambda x: x.lower(), tokens):
-            # Lookup frequency and idf score - default to averages if not in repository
+            # Lookup frequency and idf score - default to third of averages if not in repository
             freq = self.wordfreq[token] if token in self.wordfreq else self.avgfreq
-            idf = self.idf[token] if token in self.idf else self.avgidf
+            idf = self.idf[token] if token in self.idf else self.avgidf/3  # Reduce the weights of unknown words.
 
             # Calculate score for each token, use as weight
             weights.append(self.score(freq, idf, length))
@@ -199,7 +201,9 @@ class BM25(Scoring):
     BM25 scoring. Scores using Apache Lucene's version of BM25 which adds 1 to prevent
     negative scores.
     """
-
+    # TODO: tweak. Lower b means less diff between short and long sentence, which may reduce the bias toward short sentences.
+    #  cf. https://opensourceconnections.com/blog/2015/10/16/bm25-the-next-generation-of-lucene-relevation/
+    # TODO: k should could be higher to have slower saturation if a word is REALLY common in the EXTRACT!
     def __init__(self, k1=0.1, b=0.75):
         super(BM25, self).__init__()
 
@@ -251,7 +255,12 @@ class VectorizerComponent(object):
         word_tokens = [token.text for token in doc if token.pos_ not in self.IGNORED_POS]
         word_vectors = [token.vector for token in doc if token.pos_ not in self.IGNORED_POS]
         weights = self.data["scorer"].weights(word_tokens)
-        doc.vector = np.average(word_vectors, weights=np.array(weights, dtype=np.float32), axis=0)
+        if np.sum(weights) != 0:
+            doc.vector = np.average(word_vectors, weights=np.array(weights, dtype=np.float32), axis=0)
+            doc._.scoring_weight = np.sum(weights).item()
+        else:
+            doc.vector = np.zeros((300,))
+            doc._.scoring_weight = 0.0
         return doc
 
     def to_disk(self, path, **kwargs):
@@ -269,20 +278,3 @@ class VectorizerComponent(object):
 
 # Add entry point to access the custom component and loading the model.
 spacy.language.Language.factories["vectorizer_component"] = lambda nlp, **cfg: VectorizerComponent()
-
-
-def similarity_to_vector(doc, vector):
-    """
-    Extension method to Doc objects that return the cosine similarity.
-    :param doc: a doc obtained from a spacy model
-    :param vector: a vector of same dimension (numpy array).
-    :return: cosine similarity (float)
-    """
-    if vector is None:
-        raise ValueError("Forgotten 'vector' argument.")
-    vec1 = doc.vector
-    vec2 = vector
-    return cosine_similarity(vec1.reshape(1, -1), vec2.reshape(1, -1))[0][0]
-
-
-spacy.tokens.Doc.set_extension("similarity_to_vector", method=similarity_to_vector)
