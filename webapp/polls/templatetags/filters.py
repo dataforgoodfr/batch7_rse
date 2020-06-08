@@ -1,4 +1,6 @@
 from django.template import Library
+import re
+from django.utils.safestring import mark_safe
 
 register = Library()
 
@@ -20,3 +22,12 @@ def add_attr(field, css):
 @register.filter(name='percentage')
 def percentage(value):
     return format(value, ".2%")
+
+@register.filter
+def highlight(text, search):
+    search = re.split((" "), search)
+    highlighted = text
+    for i in search:
+        highlighted = highlighted.replace(i, '<span class="highlight">{}</span>'.format(i))
+
+    return mark_safe(highlighted)
