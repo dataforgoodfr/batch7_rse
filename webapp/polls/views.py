@@ -71,33 +71,15 @@ class CompanyListView(View):
 class CompanyDisplay(generic.DetailView):
     model = Company
     # template_name = 'polls/company_detail.html'  # TODO: is this optional because the html has a specific name ?
-    form = BasicSearchForm
+    form = CompanyDetailSearchForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form'] = BasicSearchForm()
+        form = CompanyDetailSearchForm()
+        # Overwriting to have access to company named
+        form.company_name = self.object.name
+        print(self.object.name)
+        context['form'] = form
+        context["sentences"] = form.get_best_matching_sentences()
+        print(context["sentences"])
         return context
-
-
-class CompanySentences(SingleObjectMixin, generic.FormView):
-    template_name = 'polls/company_detail.html'
-    form_class = CompanyDetailSearchForm
-    model = Company
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        return super().post(request, *args, **kwargs)
-
-    def get_success_url(self):
-        return reverse('author-detail', kwargs={'pk': self.object.pk})
-
-
-class CompanyDetailView(generic.View):
-
-    def get(self, request, *args, **kwargs):
-        view = CompanyDisplay.as_view()
-        return view(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        view = CompanySentences.as_view()
-        return view(request, *args, **kwargs)
