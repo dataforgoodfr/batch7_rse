@@ -1,7 +1,11 @@
+from django.http import HttpResponseForbidden
+from django.urls import reverse
+from django.views.generic.detail import SingleObjectMixin
+
 from .models import Company, DPEF, ActivitySector, Sentence
 from django.views.generic.edit import View
 from django.views import generic
-from .forms import BasicSearchForm, SearchForm, CompanyForm
+from .forms import BasicSearchForm, SearchForm, CompanyForm, CompanyDetailSearchForm
 from django.shortcuts import render
 # from django.db.models import Count, Sum
 
@@ -64,6 +68,36 @@ class CompanyListView(View):
         return context
 
 
-class CompanyDetailView(generic.DetailView):
+class CompanyDisplay(generic.DetailView):
     model = Company
-    # template_name = 'polls/company_detail.html'
+    # template_name = 'polls/company_detail.html'  # TODO: is this optional because the html has a specific name ?
+    form = BasicSearchForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = BasicSearchForm()
+        return context
+
+
+class CompanySentences(SingleObjectMixin, generic.FormView):
+    template_name = 'polls/company_detail.html'
+    form_class = CompanyDetailSearchForm
+    model = Company
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        return super().post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse('author-detail', kwargs={'pk': self.object.pk})
+
+
+class CompanyDetailView(generic.View):
+
+    def get(self, request, *args, **kwargs):
+        view = CompanyDisplay.as_view()
+        return view(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        view = CompanySentences.as_view()
+        return view(request, *args, **kwargs)

@@ -14,6 +14,12 @@ from rse_watch.indexer import load_weighted_vectorizer
 
 nlp = None
 
+class nlp:
+    vector = np.random.random((300,))
+
+    def __init__(self, query):
+        pass
+
 if 'runserver' in sys.argv:
     config = Config(model_directory)
-    nlp = load_weighted_vectorizer(config, None, create_from_scratch=False)
+    # nlp = load_weighted_vectorizer(config, None, create_from_scratch=False)

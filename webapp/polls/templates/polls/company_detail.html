@@ -46,7 +46,35 @@
          </table>
    </div>
 
+<!--    <form action="{% url 'polls:search' %}" method="post" class="form-rounded">-->
+    {% csrf_token %}
+    <div class="row justify-content-center myrow">
+       <div class="col-12 mycol  p-1"><h3>Thème {{ form.search_bar | add_attr:"class: form-control-lg align-items-center,  placeholder:ex. Transformation des déchets" }} </h3></div>
+    </div>
 
+<div class="container justify-content-center mycontainer p-2">
+        <table class="table">
+            <thead>
+            <tr>
+              <th scope="col">Entreprise</th>
+              <th scope="col">Extrait</th>
+              <th scope="col">Pertinence</th>
+              <th scope="col">Localisation</th>
+              <th scope="col">Document</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for sentence in sentences %}
+            <tr>
+              <td>{{sentence.0.dpef.company.name}}</td>
+              <td><i>{{ sentence.0.text }}</i></td>
+              <td>{{ sentence.1 | percentage }}</td>
+              <td> {{sentence.0.dpef.file_name}}, p.{{sentence.0.page}}</td>
+              <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></td>
+            </tr>
+           {% endfor %}
+         </table>
+    </div>
 
 
 {% endblock content %}
