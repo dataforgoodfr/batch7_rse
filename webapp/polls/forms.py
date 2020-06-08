@@ -114,7 +114,7 @@ class SearchForm(BasicSearchForm):
         companies = None
 
 class CompanyDetailSearchForm(BasicSearchForm):
-    overwrite_search_bar_string = "engagement préservation biodiversité animaux"
+    overwrite_search_bar_string = "engagement préservation environnement"
     company_name = ""
 
     def gather_sentences(self):
