@@ -13,7 +13,8 @@ from rse_watch.conf import Config, DebugConfig
 from rse_watch.indexer import load_weighted_vectorizer
 
 nlp = None
-
+print("avant",nlp)
+print(sys.argv)
 # class nlp:
 #     vector = np.random.random((300,))
 #
