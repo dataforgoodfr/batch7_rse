@@ -20,6 +20,6 @@ nlp = None
 #     def __init__(self, query):
 #         pass
 
-if 'runserver' in sys.argv:
+if any(command in sys.argv for command in ['gunicorn', 'runserver']):
     config = Config(model_directory)
     nlp = load_weighted_vectorizer(config, None, create_from_scratch=False)
