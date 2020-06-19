@@ -2,11 +2,9 @@ from batch7rse.settings.base import *
 import django_heroku
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = 'DEBUG' in os.environ
 
-# ALLOWED_HOSTS = ['dataforgood.renauddha.ovh', 'rse-explorer.herokuapp.com']
-
-# Activate Django-Heroku.
+# Activate Django-Heroku, this will set DATABASES['default'] and ALLOWED_HOSTS
 django_heroku.settings(locals())
 
 # Database
