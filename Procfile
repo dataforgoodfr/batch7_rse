@@ -1,1 +1,1 @@
-web: cd webapp && gunicorn myproject.wsgi
+web: cd webapp && gunicorn batch7rse.wsgi
