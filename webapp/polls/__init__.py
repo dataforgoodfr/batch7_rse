@@ -13,14 +13,13 @@ from rse_watch.conf import Config, DebugConfig
 from rse_watch.indexer import load_weighted_vectorizer
 
 nlp = None
-print("avant",nlp)
-print(sys.argv)
+
 # class nlp:
 #     vector = np.random.random((300,))
 #
 #     def __init__(self, query):
 #         pass
 
-if {'gunicorn', 'runserver'}.intersection(sys.argv):
+if {'batch7rse.wsgi', 'runserver'}.intersection(sys.argv):
     config = Config(model_directory)
     nlp = load_weighted_vectorizer(config, None, create_from_scratch=False)
