@@ -2,7 +2,7 @@ from batch7rse.settings.base import *
 import django_heroku
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # ALLOWED_HOSTS = ['dataforgood.renauddha.ovh', 'rse-explorer.herokuapp.com']
 
