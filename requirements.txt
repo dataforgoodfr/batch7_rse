@@ -11,10 +11,13 @@ cycler==0.10.0
 cymem==2.0.3
 decorator==4.4.2
 defusedxml==0.6.0
+dj-database-url==0.5.0
 Django==3.0.5
+django-heroku==0.3.1
 entrypoints==0.3
 fr-core-news-md @ https://github.com/explosion/spacy-models/releases/download/fr_core_news_md-2.2.5/fr_core_news_md-2.2.5.tar.gz
 fr-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-2.2.5/fr_core_news_sm-2.2.5.tar.gz
+gunicorn==20.0.4
 idna==2.9
 importlib-metadata==1.6.0
 ipykernel==5.2.1
@@ -80,5 +83,6 @@ urllib3==1.25.9
 wasabi==0.6.0
 wcwidth==0.1.9
 webencodings==0.5.1
+whitenoise==5.1.0
 widgetsnbextension==3.5.1
 zipp==3.1.0
