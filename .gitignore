@@ -14,3 +14,5 @@ webapp/data/model/DPEFs/__parsed_dpefs_debug__/
 webapp/data/model/Model/
 webapp/data/polls/models/dpef/
 
+
+webapp/batch7rse/settings/credentials.py

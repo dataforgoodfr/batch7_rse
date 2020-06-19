@@ -1,5 +1,5 @@
 from batch7rse.settings.base import *
-from batch7rse.settings.credentials import DB_PASSWORD
+from batch7rse.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -23,10 +23,10 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'dpef_db',
-        'USER': 'batch7rse',
+        'NAME': DB_NAME,
+        'USER': DB_USERNAME,
         'PASSWORD': DB_PASSWORD,
-        'HOST': 'localhost',
-        'PORT': '',  # default will be selected
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,  # default will be selected
     }
 }

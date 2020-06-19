@@ -4,7 +4,7 @@ import django_heroku
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['dataforgood.renauddha.ovh', 'rse-explorer.herokuapp.com']
+# ALLOWED_HOSTS = ['dataforgood.renauddha.ovh', 'rse-explorer.herokuapp.com']
 
 # Activate Django-Heroku.
 django_heroku.settings(locals())
