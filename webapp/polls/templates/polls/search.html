@@ -53,7 +53,7 @@
           {% for sentence in sentences %}
             <tr>
               <td>{{sentence.0.dpef.company.name}}</td>
-              <td><i>{{ sentence.0.text | highlight:"impact environnemental carbone climat ressources"}}</i></td>
+              <td><i>{{ sentence.0.text | highlight:highlighted_words}}</i></td>
               <td>{{ sentence.1 | percentage }}</td>
               <td> {{sentence.0.dpef.file_name}}, p.{{sentence.0.page}}</td>
               <td> <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px"></td>

@@ -21,6 +21,7 @@ class IndexView(View):
         if form.is_valid() and form.is_bound:
             response = form.get_best_matching_sentences()
         context['sentences'] = response
+        context["highlighted_words"] = [("impact",35),("environnemental",52),("carbone",65),("climat",58),("ressources",8)]
         context['total_companies'] = Company.objects.all().count()
         context['total_docs'] = DPEF.objects.all().count()
         context['total_sectors'] = ActivitySector.objects.all().count()

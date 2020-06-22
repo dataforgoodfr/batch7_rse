@@ -25,9 +25,13 @@ def percentage(value):
 
 @register.filter
 def highlight(text, search):
-    search = re.split((" "), search)
     highlighted = text
     for i in search:
-        highlighted = highlighted.replace(i, '<span class="highlight">{}</span>'.format(i))
+        if i[1]<30:
+            highlighted = highlighted.replace(i[0], '<span style="background-color: #fff9a3;">{}</span>'.format(i[0]))
+        if i[1]<50:
+            highlighted = highlighted.replace(i[0], '<span style="background-color: #fff56b;">{}</span>'.format(i[0]))
+        else:
+            highlighted = highlighted.replace(i[0], '<span style="background-color: ##ffc014;">{}</span>'.format(i[0]))
 
     return mark_safe(highlighted)
