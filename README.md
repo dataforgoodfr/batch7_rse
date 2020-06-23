@@ -34,7 +34,7 @@ If you want to source your virtual env:
 
     workon rse_watch
     
-# FLushing the database
+# Flushing the database
 If you need to empty the database after some tests:
 
 	cd webapp
@@ -78,27 +78,21 @@ The server can then started with:
 
 where noreload avoid double initialization.
 
-___
-### (deprecated) Parsing the pdfs and indexing the sentences with a BM25 model - The CSV way
 
-_Kept for tests of parsing_
+# Deployment to Heroku
 
-This is done by creating a file dpef_sentences.csv, which is then used to train the BM25 scorer and to save a Spacy model that can do weighted vectorization of sentences (therefore called "weighted vectorizer"). You can parse the PDFs and instantiate the model via:
+The site is hosted on Heroku, and the database is hosted in a Postgres-Heroku database.
 
-    cd webapp
-    python main.py
-
-Hack to parse only a subset of the PDFs:
+The parsing of pdfs can be performed locally, and only needs to be performed when new pdfs are added.
+Use:
 
 	cd webapp
-	python main.py --mode debug
+	python manage.py populate_db --settings settings.dev --task parse --mode final
 
-The model is created under (DEBUG)-Model, but can be renamed to "Model" to be used by Django in debug phases.
+The vectorizer model needs to be built directly in Heroku, at each release, and the vectors in the database must be updated in consequence. This is dealt with by the first line of the *Procfile*.
 
+To release changes in the source code, first update the db (see above), commit your changes, and then use:
 
+	heroku git:remote -a rse-explorer # first time only
+	git push heroku current_branch_name:master
 
-if you want to run the server with an other settings file, you can also launch :
-
-    python manage.py runserver  --settings batch7rse.settings.dev
-
-for the dev settings for example.
