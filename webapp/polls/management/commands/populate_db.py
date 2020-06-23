@@ -137,6 +137,7 @@ class Command(BaseCommand):
                       "Try running 'python manage.py populate_db --task parse_and_model'?")
                 raise
             nlp = load_weighted_vectorizer(config, documents, create_from_scratch=True)
+            del documents
             # Update the _vector field of the sentence
             print("Vectorization of all sentences based on word embeddings and BM25.")
             for sentence in tqdm(Sentence.objects.iterator(), total=Sentence.objects.count()):
