@@ -86,7 +86,7 @@ def initialize_weighted_vectorizer(config, documents):
 
 def load_weighted_vectorizer(config,
                              documents,
-                             create_from_scratch=True):
+                             create_from_scratch=False):
     """ Load custom spacy model, which should be created beforehand
     To use the returned 'nlp' model:
         # doc = nlp_wv("Une phrase simple avec des mots")
@@ -113,12 +113,12 @@ def load_weighted_vectorizer(config,
     return nlp
 
 
-def run(config):
-    """ Called from main.py; this load or create the weighted vectorizer via csv files. """
+def run(config, create_from_scratch=False):
+    """ Called from main.py; this loads or create the weighted vectorizer via csv files. """
     # load data
     df = pd.read_csv(config.parsed_sent_file, sep=";")
     documents = df["sentence"].values.tolist()
-    nlp = load_weighted_vectorizer(config, documents)
+    nlp = load_weighted_vectorizer(config, documents, create_from_scratch=create_from_scratch)
     # Usage:
     # doc = nlp_wv("Une phrase simple avec des mots")
     # numpy_vector_of_the_sentence = doc.vector

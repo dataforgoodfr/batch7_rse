@@ -37,7 +37,7 @@ def main():
     if args.task in ["parse", "both"]:
         run_parser(config)
     if args.task in ["model", "both"]:
-        run_indexer(config)
+        run_indexer(config, create_from_scratch=True)
     print("Finished intialization")
     print("Took {} seconds to initialize.".format(int(time()-t)))
 

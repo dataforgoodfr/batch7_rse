@@ -10,7 +10,7 @@ dir_path = Path(os.getcwd())
 sys.path.append(str(dir_path / 'polls/rse_model'))
 model_directory = dir_path / "data/model"
 from rse_watch.conf import Config, DebugConfig
-from rse_watch.indexer import load_weighted_vectorizer
+from rse_watch.indexer import run as run_indexer
 
 nlp = None
 
@@ -21,5 +21,6 @@ nlp = None
 #         pass
 
 if {'batch7rse.wsgi', 'runserver'}.intersection(sys.argv):
+    # Load config, and will load existing vectorizer if already exists, else will create it.
     config = Config(model_directory)
-    nlp = load_weighted_vectorizer(config, None, create_from_scratch=False)
+    nlp = run_indexer(config)
