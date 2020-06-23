@@ -81,6 +81,7 @@ def initialize_weighted_vectorizer(config, documents):
     nlp_wv.add_pipe(vectorizer_component)
     # save
     nlp_wv.to_disk(config.model_dir)
+    print("added to disk (TODO: delete this statement")
     return nlp_wv
 
 
