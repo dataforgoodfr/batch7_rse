@@ -53,13 +53,12 @@ def initialize_scorer(config, documents):
 def load_scorer(conf, documents):
     """ Load it or initialize it if it does not exist"""
     try:
-        f = open(conf.scorer_pickle_file, "rb")
+        with open(conf.scorer_pickle_file, "rb") as f:
+            print("Loading scorer from {}".format(conf.scorer_pickle_file))
+            scorer = pickle.load(f)
     except FileNotFoundError:
         print("Scorer not found and thus created (at address: {})".format(conf.scorer_pickle_file))
         scorer = initialize_scorer(conf, documents)
-    else:
-        print("Loading scorer from {}".format(conf.scorer_pickle_file))
-        scorer = pickle.load(f)
     return scorer
 
 
