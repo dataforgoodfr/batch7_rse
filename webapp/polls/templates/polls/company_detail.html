@@ -26,7 +26,11 @@
                 <p class="text-center">
                     <h5>DPEF disponibles: <h5/>
                         {% for dpef in dpefs %}
-                            {{dpef.year}} <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px">
+                            <a href="{% url 'polls:download' company.id dpef.year%}">
+                            <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px">
+                                &nbsp;&nbsp;
+                                {{dpef.year}}
+                            </a>
                         {% endfor %}</p>
                 </p>
         </div>

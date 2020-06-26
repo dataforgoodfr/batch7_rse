@@ -63,7 +63,6 @@ class DPEF(dm.Model):
                             verbose_name=_("Entreprise"),
                             help_text=_("L'entreprise référencée par le document."))
 
-    # TODO: adding MEDIA_ROOT and MEDIA_URL into the setting file (search for details...)
     file_object = dm.FileField(unique=True,
                                validators=[_validate_file_extension],
                                upload_to='polls/models/dpef/',
