@@ -265,9 +265,10 @@ class VectorizerComponent(object):
 
     def to_disk(self, path, **kwargs):
         data_path = path / "words_scorer.pckl"
-        print("Saving Spacy vectorizer component to folder {}.".format(data_path))
+        print("Saving Spacy vectorizer component.")
         with open(data_path, "wb") as f:
             pickle.dump(self.data["scorer"], f)
+        print("Saved into folder: {}.".format(data_path))
 
     def from_disk(self, path, **kwargs):
         data_path = path / "words_scorer.pckl"

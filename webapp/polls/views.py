@@ -1,14 +1,15 @@
-from django.http import HttpResponseForbidden
+from pathlib import Path
+import os
+from django.http import HttpResponseForbidden, HttpResponse
 from django.urls import reverse
 from django.views.generic.detail import SingleObjectMixin
+from django.db.models import Q
 
 from .models import Company, DPEF, ActivitySector, Sentence, DPEF
 from django.views.generic.edit import View
 from django.views import generic
 from .forms import BasicSearchForm, SearchForm, CompanyForm, CompanyDetailSearchForm
 from django.shortcuts import render
-# from django.db.models import Count, Sum
-
 
 class IndexView(View):
     template_name = 'polls/index.html'
@@ -71,7 +72,6 @@ class CompanyListView(View):
 
 class CompanyDisplay(generic.DetailView):
     model = Company
-    # template_name = 'polls/company_detail.html'  # TODO: is this optional because the html has a specific name ?
     form = CompanyDetailSearchForm
 
     def get_context_data(self, **kwargs):
@@ -84,3 +84,16 @@ class CompanyDisplay(generic.DetailView):
         company = Company.objects.filter(name__contains=self.object.name)
         context["dpefs"] = DPEF.objects.filter(company__in=company)
         return context
+
+
+# todo: remove default values
+def pdf_download_view(request, pk=1, year=2018):
+
+    dpef = DPEF.objects.filter(Q(company__pk=pk) & Q(year=year))  # TODO: add search for latest document if does not exists
+    dpef_name = dpef[0].file_name
+    dpef_path = Path(os.getcwd()) / 'data/polls/models/dpef/' / dpef_name
+
+    with open(dpef_path, 'rb') as pdf:
+        response = HttpResponse(pdf.read(), content_type='application/pdf')
+        response['Content-Disposition'] = 'download;filename={dpef_name}.pdf'.format(dpef_name=dpef_name)
+        return response

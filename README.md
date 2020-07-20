@@ -80,27 +80,15 @@ The server can then started with:
 
 where noreload avoid double initialization.
 
-___
-### (deprecated) Parsing the pdfs and indexing the sentences with a BM25 model - The CSV way
 
-_Kept for tests of parsing_
+# Deployment
 
-This is done by creating a file dpef_sentences.csv, which is then used to train the BM25 scorer and to save a Spacy model that can do weighted vectorization of sentences (therefore called "weighted vectorizer"). You can parse the PDFs and instantiate the model via:
+The database is hosted on AWS.
 
-    cd webapp
-    python main.py
-
-Hack to parse only a subset of the PDFs:
+The parsing of pdfs can be performed locally, and only needs to be performed when new pdfs are added.
+Use:
 
 	cd webapp
-	python main.py --mode debug
+	python manage.py populate_db --settings settings.dev --task parse --mode final
 
-The model is created under (DEBUG)-Model, but can be renamed to "Model" to be used by Django in debug phases.
-
-
-
-if you want to run the server with an other settings file, you can also launch :
-
-    python manage.py runserver  --settings batch7rse.settings.dev
-
-for the dev settings for example.
+The vectorizer model needs to be built directly in the deployment server, at each release, and the vectors in the database are updated in consequence.

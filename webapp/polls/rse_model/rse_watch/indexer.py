@@ -53,13 +53,12 @@ def initialize_scorer(config, documents):
 def load_scorer(conf, documents):
     """ Load it or initialize it if it does not exist"""
     try:
-        f = open(conf.scorer_pickle_file, "rb")
+        with open(conf.scorer_pickle_file, "rb") as f:
+            print("Loading scorer from {}".format(conf.scorer_pickle_file))
+            scorer = pickle.load(f)
     except FileNotFoundError:
         print("Scorer not found and thus created (at address: {})".format(conf.scorer_pickle_file))
         scorer = initialize_scorer(conf, documents)
-    else:
-        print("Loading scorer from {}".format(conf.scorer_pickle_file))
-        scorer = pickle.load(f)
     return scorer
 
 
@@ -81,12 +80,13 @@ def initialize_weighted_vectorizer(config, documents):
     nlp_wv.add_pipe(vectorizer_component)
     # save
     nlp_wv.to_disk(config.model_dir)
+    print("added to disk (TODO: delete this statement")
     return nlp_wv
 
 
 def load_weighted_vectorizer(config,
                              documents,
-                             create_from_scratch=True):
+                             create_from_scratch=False):
     """ Load custom spacy model, which should be created beforehand
     To use the returned 'nlp' model:
         # doc = nlp_wv("Une phrase simple avec des mots")
@@ -113,12 +113,12 @@ def load_weighted_vectorizer(config,
     return nlp
 
 
-def run(config):
-    """ Called from main.py; this load or create the weighted vectorizer via csv files. """
+def run(config, create_from_scratch=False):
+    """ Called from main.py; this loads or create the weighted vectorizer via csv files. """
     # load data
     df = pd.read_csv(config.parsed_sent_file, sep=";")
     documents = df["sentence"].values.tolist()
-    nlp = load_weighted_vectorizer(config, documents)
+    nlp = load_weighted_vectorizer(config, documents, create_from_scratch=create_from_scratch)
     # Usage:
     # doc = nlp_wv("Une phrase simple avec des mots")
     # numpy_vector_of_the_sentence = doc.vector
