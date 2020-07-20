@@ -19,7 +19,7 @@ def filter_company_from_form(my_form):
             companies = Company.objects.filter(_activity_sectors__in=my_form.cleaned_data['sectors'])
         else:
             companies = Company.objects \
-                .filter(name__contains=my_form.cleaned_data['company_name']) \
+                .filter(name__icontains=my_form.cleaned_data['company_name']) \
                 .filter(_activity_sectors__in=my_form.cleaned_data['sectors'])
     except AttributeError:
         print("Error while filtering sectors OR the filled company name is unknown.")

@@ -1,6 +1,6 @@
 import pandas as pd
 import spacy
-import spacy_filters as sf
+import rse_watch.spacy_filters as sf
 
 # force = True because this function is called twice.
 spacy.tokens.Doc.set_extension("scoring_weight", default=-1, force=True)  # weight based on BM25 weights

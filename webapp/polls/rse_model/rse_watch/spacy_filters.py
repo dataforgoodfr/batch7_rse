@@ -1,6 +1,6 @@
 import pandas as pd
 
-white_list_words = pd.read_csv("./white_list_words.csv")['word'].values
+white_list_words = pd.read_csv("polls/rse_model/notebooks/white_list_words.csv")['word'].values
 
 
 def condition(token):

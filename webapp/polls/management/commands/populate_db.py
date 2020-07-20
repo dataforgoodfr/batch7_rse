@@ -112,8 +112,8 @@ class Command(BaseCommand):
             parallel_add_dpef = partial(add_dpef, config)
             start_t = time()
             # TODO: need to change the DB to have real multiprocessing
-            # n_cores = mp.cpu_count() - 1 or 1
-            n_cores = 1
+            n_cores = mp.cpu_count() - 1 or 1
+            # n_cores = 1
             with mp.Pool(n_cores) as pool:
                 print("Multiprocessing with {} cores".format(n_cores))
                 df_sents = list(
