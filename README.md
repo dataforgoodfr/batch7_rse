@@ -2,7 +2,9 @@
 
 We aim to give access to societal and environmental commitments and actions from large French corporations subject to extra-financial performance declaration (_Declaration de Performances Extra-Financières_, or DPEFs), based on public reference documents.
 
-On [link_to_website](link_to_website) (FR), one can have access to: [WORK IN PROGRESS]
+We propose the RSE Explorer tool, of which an in-depth description can be accessed via [data-for-good's projects page](https://dataforgood.fr/projects/).
+
+RSE Explorer is a tool that gives access to:
 - A **PDFs Database** centralizing a collection of about 135 extra-financial performances declaration from large French corporations. It can be downloaded through this [link](https://1drv.ms/u/s!Aj9j6X93cDjbhp0xJCntsQ8lMZsv2A?e=zi2cbS) and until the 21st of July 2021.
 - The underlying **text Database**, downloadable in a structured csv format, enabling re-analyses of the underlying information contained in the PDFs.
 - A smart **search engine** of the PDF's content, to be used as a technology watch tool for societal and environmental innovation.
