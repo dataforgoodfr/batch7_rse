@@ -11,7 +11,6 @@ except:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEBUG' in os.environ
-print(DEBUG)
 DEBUG = True
 
 # Activate Django-Heroku, this will set DATABASES['default'] and ALLOWED_HOSTS

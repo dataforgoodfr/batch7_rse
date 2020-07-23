@@ -1,5 +1,7 @@
 desktop.ini
 .idea
+common/settings/static/
+
 
 **/.ipynb_checkpoints/
 *__pycache*
