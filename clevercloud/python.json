@@ -3,7 +3,7 @@
         "cache_dependancies": true
     },
     "deploy": {
-        "module": "common.wsgi:application",
+        "module": "webapp.batch7rse.wsgi:application",
         "managetasks": [
             "collectstatic --noinput"
         ]
