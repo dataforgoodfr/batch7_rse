@@ -1,5 +1,5 @@
-from batch7rse.settings.base import *
-from batch7rse.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT
+from common.settings.base import *
+from common.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

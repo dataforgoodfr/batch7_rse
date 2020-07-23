@@ -1,6 +1,6 @@
-from batch7rse.settings.base import *
+from common.settings.base import *
 try:
-    from batch7rse.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT
+    from common.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT
 except:
     # env injection from clever cloud
     DB_NAME = os.getenv("DB_NAME")
@@ -11,6 +11,8 @@ except:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEBUG' in os.environ
+print(DEBUG)
+DEBUG = True
 
 # Activate Django-Heroku, this will set DATABASES['default'] and ALLOWED_HOSTS
 # django_heroku.settings(locals())
