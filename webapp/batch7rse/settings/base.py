@@ -25,7 +25,7 @@ SECRET_KEY = 'ky4nwynj3yj9+job20xs%2vooskha#r#ah%vy!3$v^(z)fi_&='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['app_d9fc5062-3970-4058-b038-124505d8d4c5.cleverapps.io', ]
 
 
 # Application definition
