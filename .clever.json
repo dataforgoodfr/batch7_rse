@@ -1,1 +1,11 @@
-{"apps":[{"app_id":"app_d3e5d0b5-9d43-45ca-8eff-3bd9882066f8","org_id":"user_f25d2393-0308-41c0-99cc-7fbe397c5446","deploy_url":"https://push-par-clevercloud-customers.services.clever-cloud.com/app_d3e5d0b5-9d43-45ca-8eff-3bd9882066f8.git","name":"django-cc","alias":"django-cc"}]}
+{
+  "apps": [
+    {
+      "app_id": "app_d9fc5062-3970-4058-b038-124505d8d4c5",
+      "org_id": "user_f25d2393-0308-41c0-99cc-7fbe397c5446",
+      "deploy_url": "https://push-par-clevercloud-customers.services.clever-cloud.com/app_d9fc5062-3970-4058-b038-124505d8d4c5.git",
+      "name": "RSE EXPLORER",
+      "alias": "RSE-EXPLORER"
+    }
+  ]
+}
