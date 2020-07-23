@@ -1,5 +1,13 @@
 from batch7rse.settings.base import *
-from batch7rse.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT
+try:
+    from batch7rse.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT
+except:
+    # env injection from clever cloud
+    DB_NAME = os.getenv("DB_NAME")
+    DB_USERNAME = os.getenv("DB_USERNAME")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = 'DEBUG' in os.environ
