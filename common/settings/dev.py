@@ -4,7 +4,7 @@ from common.settings.credentials import DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HO
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 
 # Database

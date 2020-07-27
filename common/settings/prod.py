@@ -13,9 +13,6 @@ except:
 DEBUG = 'DEBUG' in os.environ
 DEBUG = True
 
-# Activate Django-Heroku, this will set DATABASES['default'] and ALLOWED_HOSTS
-# django_heroku.settings(locals())
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
