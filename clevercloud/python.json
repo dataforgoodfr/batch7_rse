@@ -5,7 +5,8 @@
     "deploy": {
         "module": "common.wsgi:application",
         "managetasks": [
-            "collectstatic --noinput"
+            "collectstatic --noinput",
+            "populate_db --settings common.settings.prod --mode final --task model"
         ]
     }
 }

@@ -140,6 +140,7 @@ class Command(BaseCommand):
             del documents
             # Update the _vector field of the sentence
             print("Vectorization of all sentences based on word embeddings and BM25.")
+            # TODO: parallelize this task
             for sentence in tqdm(Sentence.objects.iterator(), total=Sentence.objects.count()):
                 sentence.construct_vector(nlp)
 

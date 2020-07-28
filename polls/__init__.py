@@ -14,12 +14,12 @@ from rse_watch.indexer import load_weighted_vectorizer
 
 nlp = "a"
 
-if {'wsgi', 'runserver'}.intersection(sys.argv):
+if {'wsgi', 'runserver'}.intersection(sys.argv) or os.getenv("LOAD_THE_MODEL", default=False):
     config = Config(model_directory)
     nlp = load_weighted_vectorizer(config,
-                                 [],  # should be already created at deployment !
+                                 [],  # should be created at deployment
                                  create_from_scratch=False)
-    # # # todo: revert when dev finished
+    # todo: revert when dev finished
     # class nlp:
     #     vector = np.random.random((300,))
     #
