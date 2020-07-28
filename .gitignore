@@ -1,17 +1,19 @@
 desktop.ini
 .idea
+common/settings/static/
+
 
 **/.ipynb_checkpoints/
 *__pycache*
 
 *debug*.ipynb
 (DEBUG)-*.csv
-webapp/data/model/__Model_debug__/
-webapp/batch7rse/db.sqlite3
+data/model/__Model_debug__/
+batch7rse/db.sqlite3
 
-webapp/data/model/DPEFs/__parsed_dpefs__/
-webapp/data/model/DPEFs/__parsed_dpefs_debug__/
-webapp/data/model/Model/
-webapp/data/polls/models/dpef/
+data/model/DPEFs/__parsed_dpefs__/
+data/model/DPEFs/__parsed_dpefs_debug__/
+data/model/Model/
+data/polls/models/dpef/
 
-webapp/batch7rse/settings/credentials.py
+batch7rse/settings/credentials.py
