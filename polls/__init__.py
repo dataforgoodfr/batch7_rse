@@ -13,9 +13,9 @@ from rse_watch.conf import Config, DebugConfig
 from rse_watch.indexer import load_weighted_vectorizer
 
 nlp = "a"
-
+print(sys.argv)
 if not {'populate_db', 'runserver'}.intersection(sys.argv):
-    print(sys.argv)
+    
     config = Config(model_directory)
     nlp = load_weighted_vectorizer(config,
                                  [],  # should be created at deployment
