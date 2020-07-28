@@ -15,7 +15,7 @@ from rse_watch.indexer import load_weighted_vectorizer
 nlp = "a"
 
 print(sys.argv)
-if {'common.wsgi', 'runserver'}.intersection(sys.argv):
+if not {'collectstatic', 'populate_db'}.intersection(sys.argv):
     config = Config(model_directory)
     nlp = load_weighted_vectorizer(config,
                                  [],  # should be created at deployment
