@@ -15,6 +15,7 @@ from rse_watch.indexer import load_weighted_vectorizer
 nlp = "a"
 
 if {'wsgi', "gunicorn", 'runserver'}.intersection(sys.argv):
+    print(sys.argv)
     config = Config(model_directory)
     nlp = load_weighted_vectorizer(config,
                                  [],  # should be created at deployment
