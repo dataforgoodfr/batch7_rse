@@ -46,7 +46,7 @@
     <div class="row justify-content-center myrow">
         <img src="{% static 'img/index_banner_small.png' %}"  alt="banner"  style="width:63%;">
     </div>
-    
+
     <div class="row justify-content-center myrow">
         <div class="col-3 mx-3 mb-3 mt-1 mycol"> <p class="text-center">Une base de données rassemblant toutes les DPEF des grandes entreprises françaises</p></div>
         <div class="col-3 mx-3 mb-3 mt-1 mycol"> <p class="text-center">Contenu analysé par Intelligence Artificielle </p></div>
@@ -60,14 +60,19 @@
           environnementales, sociétales et de gouvernance, contribuant ainsi à une meilleure transparence sur ses activités,
           ses caractéristiques et son organisation.</p>
 
-      <p>Cette déclaration est obligatoire depuis 2012 pour toutes les grandes entreprises françaises, côtée ou non.</p>
-      <p class="lead">
-        <a class="btn btn-outline-dark" href="{% url 'polls:company_list' %}" role="button">Consulter les DPEFs de notre base</a>
+      <p>Cette déclaration est obligatoire depuis 2012 pour toutes les grandes entreprises françaises, côtée ou non.<br>
+          La base de donnée complète de près de 150 DPEFs peut être téléchargée
+          <a href="https://1drv.ms/u/s!Aj9j6X93cDjbhp0xJCntsQ8lMZsv2A?e=zi2cbS">ici</a>.
       </p>
-    </div>
+      <br> <br> <br>
+      <p class="lead">
+          <a class="btn btn-outline-dark" href="{% url 'polls:company_list' %}" role="button">Consulter un sous-ensemble des DPEFs de notre base</a>
+      </p>
 
 
-</<div>
+  </div>
+
+</div>
 
 {% endblock content %}
 
