@@ -2,11 +2,10 @@
 import numpy
 from django.utils.translation import gettext_lazy as _
 from django import forms
-from django.db.models import Q
 from polls.models import ActivitySector as Sectors, Company, Sentence, DPEF
 from datetime import date
 from polls import nlp
-
+from common.settings.base import MIN_SIMILARITY, MIN_SCORING_WEIGHT
 
 def filter_company_from_form(my_form):
     """
@@ -62,8 +61,6 @@ class BasicSearchForm(forms.Form):
         #     relevance = similarity * cbrt(score)/ cbrt(max seuil score)
         #     The max is set to 150 based on observation -> cubic root create a dampening effect for higher scores.
         sentences = [(s, Sentence.similarity_vector(s.embedding_vector, search_vector), s.scoring_weight) for s in sentences]
-        MIN_SIMILARITY = 0.7
-        MIN_SCORING_WEIGHT = 40
         sentences = [(s[0], s[1] * min(numpy.cbrt(s[2])/numpy.cbrt(150), 1.0)) for s in sentences if (s[1] > MIN_SIMILARITY) and (s[2] > MIN_SCORING_WEIGHT)]
         sentences = sorted(sentences, key=lambda s: s[1], reverse=True)
         return sentences[:10]
