@@ -1,6 +1,8 @@
 from django.template import Library
-import re
+import math
 from django.utils.safestring import mark_safe
+from polls import nlp
+from polls.models import Sentence
 
 register = Library()
 
@@ -19,19 +21,26 @@ def add_attr(field, css):
 
     return field.as_widget(attrs=attrs)
 
+
 @register.filter(name='percentage')
 def percentage(value):
     return format(value, ".1%")
 
+
 @register.filter
 def highlight(text, search):
-    highlighted = text
+    search_pairs = [(word, nlp(word).vector) for word, _ in search]
+    text_words = set(text.split())
+    words_scores = []
+    for w in text_words:
+        for search_w, search_v in search_pairs:
+            if search_w != w:
+                sim = Sentence.similarity_vector(search_v, nlp(w).vector)
+                if sim > 0.5:
+                    words_scores.append((w, sim))
+    words_scores = sorted(words_scores, key=lambda x: x[1], reverse=True)[:3]
+    search = search + words_scores
+    print(search)
     for i in search:
-        if i[1]<30:
-            highlighted = highlighted.replace(i[0], '<span style="background-color: #fff9a3;">{}</span>'.format(i[0]))
-        if i[1]<50:
-            highlighted = highlighted.replace(i[0], '<span style="background-color: #fff56b;">{}</span>'.format(i[0]))
-        else:
-            highlighted = highlighted.replace(i[0], '<span style="background-color: ##ffc014;">{}</span>'.format(i[0]))
-
-    return mark_safe(highlighted)
+        text = text.replace(i[0], '<span style="background-color: rgba(255,255,0,{});">{}</span>'.format(i[1], i[0]))
+    return mark_safe(text)

@@ -19,10 +19,10 @@ class IndexView(View):
     def get_context(form):
         context = {'form': form}
         response = []
-        context["highlighted_words"] = [(word, 35) for word in ["engagement", "préservation", "environnement"]]
+        context["highlighted_words"] = [(word, 0.80) for word in ["engagement", "préservation", "environnement"]]
         if form.is_valid() and form.is_bound:
             response = form.get_best_matching_sentences()
-            context["highlighted_words"] = [(word, 35) for word in form.cleaned_data['search_bar'].strip().split()]
+            context["highlighted_words"] = [(word, 0.80) for word in form.cleaned_data['search_bar'].strip().split()]
         context['sentences'] = response
         context['total_companies'] = Company.objects.all().count()
         context['total_docs'] = DPEF.objects.all().count()

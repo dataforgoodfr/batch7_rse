@@ -55,7 +55,8 @@
               <td>{{sentence.0.dpef.company.name}}</td>
               <td><i>{{ sentence.0.text | highlight:highlighted_words}}</i></td>
               <td>{{ sentence.1 | percentage }}</td>
-              <td> {{sentence.0.dpef.file_name}}, p.{{sentence.0.page}}</td>
+              <td> <a href="{% url 'polls:download' sentence.0.dpef.company.id sentence.0.dpef.year%}"><li style="list-style: none">
+                  {{sentence.0.dpef.file_name}}</a> </li> - page {{sentence.0.page}}</td>
               <td> <a href="{% url 'polls:download' sentence.0.dpef.company.id sentence.0.dpef.year%}"><li style="list-style: none">
                   <img src="{% static 'img/download_pdf.png' %}"  alt="dl PDF" style="max-height:30px">
                     </a> </li>
