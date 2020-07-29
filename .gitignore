@@ -16,4 +16,8 @@ data/model/DPEFs/__parsed_dpefs_debug__/
 data/model/Model/
 data/polls/models/dpef/
 
+<<<<<<< HEAD
 common/settings/credentials.py
+=======
+batch7rse/settings/credentials.py
+>>>>>>> a1d443b8f554420421c004b48ec95efc952c670b
