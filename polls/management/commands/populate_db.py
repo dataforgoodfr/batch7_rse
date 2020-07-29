@@ -19,7 +19,7 @@ from rse_watch.pdf_parser import get_companies_metadata_dict, get_list_of_pdfs_f
     get_sentences_dataframe_from_pdf, \
     extract_company_metadata
 from rse_watch.indexer import load_weighted_vectorizer
-
+from common.settings.base import MIN_SCORING_WEIGHT
 
 def add_company_and_sectors(project_denomination: str, company_name: str, sectors_list: list):
     """ If company x sectors does not exist, create it and return the company object"""
@@ -140,8 +140,14 @@ class Command(BaseCommand):
             del documents
             # Update the _vector field of the sentence
             print("Vectorization of all sentences based on word embeddings and BM25.")
-            # TODO: parallelize this task
+            # Cannot be parralelized due to excessive volume needed for nlp.
             for sentence in tqdm(Sentence.objects.iterator(), total=Sentence.objects.count()):
                 sentence.construct_vector(nlp)
+
+            # deleting non-informative extracts
+            print("Number of sentence: {}".format(Sentence.objects.all().count()))
+            Sentence.objects.filter(scoring_weight__lt=MIN_SCORING_WEIGHT).delete()
+            print("Number of sentence after filtering sentences "
+                  "with scoring weight lower than {}: {}".format(MIN_SCORING_WEIGHT, Sentence.objects.all().count()))
 
         print("Over for task {}".format(options["task"]))

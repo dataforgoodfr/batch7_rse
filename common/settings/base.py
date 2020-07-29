@@ -120,3 +120,8 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'static/')
 # STATIC_ROOT = os.path.join(PROJECT_DIR, 'data')
+
+
+# MODEL PARAMETERS
+MIN_SIMILARITY = 0.7
+MIN_SCORING_WEIGHT = 35
