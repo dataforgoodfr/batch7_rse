@@ -65,7 +65,7 @@ class DPEF(dm.Model):
 
     file_object = dm.FileField(unique=True,
                                validators=[_validate_file_extension],
-                               upload_to='polls/models/dpef/',
+                               upload_to='data/polls/models/dpef/',
                                verbose_name=_("Fichier PDF"),
                                help_text=_("Document DPEF ou DDR au format PDF."))
 
