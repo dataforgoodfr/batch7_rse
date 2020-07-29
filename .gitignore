@@ -14,6 +14,5 @@ batch7rse/db.sqlite3
 data/model/DPEFs/__parsed_dpefs__/
 data/model/DPEFs/__parsed_dpefs_debug__/
 data/model/Model/
-data/polls/models/dpef/
 
 common/settings/credentials.py
