@@ -90,7 +90,7 @@ class CompanyDisplay(generic.DetailView):
 # todo: remove default values
 def pdf_download_view(request, pk=1, year=2018):
 
-    dpef = DPEF.objects.filter(Q(company__pk=pk) & Q(year=year))  # TODO: add search for latest document if does not exists
+    dpef = DPEF.objects.filter(Q(company__pk=pk) & Q(year=year))
     dpef_name = dpef[0].file_name
     dpef_path = Path(os.getcwd()) / 'data/polls/models/dpef/' / dpef_name
 

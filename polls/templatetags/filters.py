@@ -21,7 +21,7 @@ def add_attr(field, css):
 
 @register.filter(name='percentage')
 def percentage(value):
-    return format(value, ".2%")
+    return format(value, ".1%")
 
 @register.filter
 def highlight(text, search):
