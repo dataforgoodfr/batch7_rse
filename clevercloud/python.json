@@ -1,0 +1,12 @@
+{
+    "build": {
+        "cache_dependancies": true
+    },
+    "deploy": {
+        "module": "common.wsgi:application",
+        "managetasks": [
+            "collectstatic --noinput",
+            "populate_db --settings common.settings.prod --mode final --task model"
+        ]
+    }
+}
