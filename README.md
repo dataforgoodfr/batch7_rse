@@ -1,3 +1,6 @@
+> This work is now archived and offline. 
+> Please reach out to me by [joining the Data4Good (Paris) community on slack](https://dataforgood.fr/join).
+
 # General Description
 
 We aim to give access to societal and environmental commitments and actions from large French corporations subject to extra-financial performance declaration (_Declaration de Performances Extra-Financières_, or DPEFs), based on public reference documents.
